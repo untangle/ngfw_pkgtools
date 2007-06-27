@@ -12,7 +12,7 @@ PROCESSED = "#{REP}/processed"
 FAILED = "#{PROCESSED}/failed"
 
 DISTRIBUTIONS = Dir.entries(DISTS).delete_if { |f| f =~ /\./ }
-DEFAULT_DISTRIBUTION = "mustang"
+DEFAULT_DISTRIBUTION = "chaos"
 DEFAULT_COMPONENT = "upstream"
 DEFAULT_MAIL_RECIPIENTS = [ "rbscott@untangle.com", "seb@untangle.com" ]
 DEFAULT_SECTION = "utils"

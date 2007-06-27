@@ -7,10 +7,6 @@ rm -f debian/changelog.dch
 
 # CL args
 distribution=${1}
-case $distribution in
-  # FIXME: somehow only codenames work for uploading, right now
-  testing) distribution=mustang ;;
-esac
 
 if [ -f ../VERSION ] ; then
   versionFile=../VERSION
