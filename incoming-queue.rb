@@ -14,9 +14,10 @@ FAILED = "#{PROCESSED}/failed"
 DISTRIBUTIONS = Dir.entries(DISTS).delete_if { |f| f =~ /\./ }
 DEFAULT_DISTRIBUTION = "chaos"
 DEFAULT_COMPONENT = "upstream"
-DEFAULT_MAIL_RECIPIENTS = [ "rbscott@untangle.com", "seb@untangle.com" ]
 DEFAULT_SECTION = "utils"
 DEFAULT_PRIORITY = "normal"
+DEFAULT_MAIL_RECIPIENTS = [ "rbscott@untangle.com", "seb@untangle.com" ]
+MAX_TRIES = 3
 
 # global functions
 def email(recipients, subject, body)
@@ -48,6 +49,8 @@ end
 class UploadFailureNoPriority < UploadFailure
 end
 class UploadFailureAlreadyUploaded < UploadFailure
+end
+class UploadFailureFileMissing < UploadFailure
 end
 
 class DebianUpload # Main base class
@@ -97,7 +100,7 @@ class DebianUpload # Main base class
 
   def addToRepository
     destination = FAILED
-
+    tries = 0
     begin
       # first do a few policy checks
       if @distribution == "testing" and not @uploader =~ /(seb|rbscott)/i
@@ -125,6 +128,8 @@ class DebianUpload # Main base class
           raise UploadFailureNoPriority.new(output)
         elsif output =~ /is already registered with other md5sum/ then
           raise UploadFailureAlreadyUploaded.new(output)
+        elsif output =~ /Cannot find file.*changes'/ then
+          raise UploadFailureFileMissing.new(output)
         else
           raise UploadFailure.new("Something went wrong when adding #{@name}\n\n" + output)
         end
@@ -137,30 +142,32 @@ class DebianUpload # Main base class
             to_s) if @@doEmailSuccess
 
     rescue UploadFailureAlreadyUploaded
-      puts "there: #{DISTRIBUTIONS}"
+      # remove it from all distros, then retry
       DISTRIBUTIONS.each { |d|
         puts d
         @files.each { |f|
           if f =~ /.+\/(.+?)_.+\.deb$/ then
             packageName = $1
-            puts "  #{packageName}"
             removeCommand = "reprepro -V -b #{REP} remove #{d} #{packageName}"
-            puts "  #{removeCommand}"
             output = `#{removeCommand} 2>&1`
-            puts output
           end
         }
       }
       retry
-    rescue UploadFailureNoSection
+    rescue UploadFailureFileMissing # sleep some, then retry
+      sleep(3)
+      tries += 1
+      retry if tries < MAX_TRIES
+    rescue UploadFailureNoSection # force the section, then retry
       @command = @command.gsub!(/\-V/, "-V --section #{DEFAULT_SECTION}")
       retry
-    rescue UploadFailureNoPriority
+    rescue UploadFailureNoPriority # force the priority, then retry
       @command = @command.gsub!(/\-V/, "-V --priority #{DEFAULT_PRIORITY}")
       retry
-    rescue Exception => e
+    rescue Exception => e # give up, and warn on STDOUT + email
       handleFailure(e)
-    ensure
+    ensure # no matter what, remove files at this point
+      tries = 0
       if @move
         @files.each { |file|
           File.rename(file, "#{destination}/#{File.basename(file)}")
