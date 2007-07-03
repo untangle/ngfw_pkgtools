@@ -144,7 +144,6 @@ class DebianUpload # Main base class
     rescue UploadFailureAlreadyUploaded
       # remove it from all distros, then retry
       DISTRIBUTIONS.each { |d|
-        puts d
         @files.each { |f|
           if f =~ /.+\/(.+?)_.+\.deb$/ then
             packageName = $1
