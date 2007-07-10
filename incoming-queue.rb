@@ -12,6 +12,7 @@ PROCESSED = "#{REP}/processed"
 FAILED = "#{PROCESSED}/failed"
 
 DISTRIBUTIONS = Dir.entries(DISTS).delete_if { |f| f =~ /\./ }
+USER_DISTRIBUTIONS = [ "amread", "dmorris", "inieves", "jdi", "rbscott", "seb" ]
 DEFAULT_DISTRIBUTION = "chaos"
 DEFAULT_COMPONENT = "upstream"
 DEFAULT_SECTION = "utils"
@@ -51,6 +52,8 @@ end
 class UploadFailureAlreadyUploaded < UploadFailure
 end
 class UploadFailureFileMissing < UploadFailure
+end
+class UploadFailureNotLocallyModifiedBuild < UploadFailure
 end
 
 class DebianUpload # Main base class
@@ -118,6 +121,11 @@ class DebianUpload # Main base class
         raise UploadFailureByPolicy.new(output)
       end
 
+      if USER_DISTRIBUTIONS.include?(@distribution) and not @version =~ /\+[a-z]+[0-9]+T[0-9]+/i
+        output = "#{@name} was intended for user distribution '#{@distribution}', but was not built from a locally modified SVN tree."
+        raise UploadFailureNotLocallyModifiedBuild.new(output)
+      end
+
       # then try to actually add the package
       output = `#{@command} 2>&1`
       puts output
@@ -145,7 +153,11 @@ class DebianUpload # Main base class
       # remove it from all distros, then retry
       DISTRIBUTIONS.each { |d|
         @files.each { |f|
-          if f =~ /.+\/(.+?)_.+\.deb$/ then
+          if f =~ /.+\/(.+?)_.+\.dsc$/ then
+            sourceName = $1
+            removeCommand = "reprepro -V -b #{REP} remove #{d} #{sourceName}"
+            output = `#{removeCommand} 2>&1`
+          elsif f =~ /.+\/(.+?)_.+\.deb$/ then
             packageName = $1
             removeCommand = "reprepro -V -b #{REP} remove #{d} #{packageName}"
             output = `#{removeCommand} 2>&1`
