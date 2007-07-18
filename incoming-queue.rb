@@ -11,7 +11,10 @@ INCOMING = "#{REP}/incoming"
 PROCESSED = "#{REP}/processed"
 FAILED = "#{PROCESSED}/failed"
 
-DISTRIBUTIONS = Dir.entries(DISTS).delete_if { |f| f =~ /\./ }
+DISTRIBUTIONS = Dir.entries(DISTS).delete_if { |f| f =~ /\./ or File.symlink?(f) }
+TESTING_DISTRIBUTIONS = [ "testing", "mustang-1" ]
+LOCKED_DISTRIBUTIONS = [ "stable", "mustang" ]
+UNLOCKED_DISTRIBUTIONS = DISTRIBUTIONS.delete_if { |d| LOCKED_DISTRIBUTIONS.include?(d) }
 USER_DISTRIBUTIONS = [ "amread", "dmorris", "inieves", "jdi", "rbscott", "seb" ]
 DEFAULT_DISTRIBUTION = "chaos"
 DEFAULT_COMPONENT = "upstream"
@@ -106,8 +109,13 @@ class DebianUpload # Main base class
     tries = 0
     begin
       # first do a few policy checks
-      if @distribution == "testing" and not @uploader =~ /(seb|rbscott)/i
-        output = "#{@name} was intended for testing, but you can't upload there."
+      if TESTING_DISTRIBUTIONS.include?(@distribution) and not @uploader =~ /(seb|rbscott)/i
+        output = "#{@name} was intended for #{@distribution}, but you don't have permission to upload there."
+        raise UploadFailureByPolicy.new(output)
+      end
+
+      if LOCKED_DISTRIBUTIONS.include?(@distribution)
+        output = "#{@name} was intended for #{@distribution}, but this distribution is now locked."
         raise UploadFailureByPolicy.new(output)
       end
 
@@ -151,7 +159,7 @@ class DebianUpload # Main base class
 
     rescue UploadFailureAlreadyUploaded
       # remove it from all distros, then retry
-      DISTRIBUTIONS.each { |d|
+      UNLOCKED_DISTRIBUTIONS.each { |d|
         @files.each { |f|
           if f =~ /.+\/(.+?)_.+\.dsc$/ then
             sourceName = $1
@@ -169,6 +177,7 @@ class DebianUpload # Main base class
       sleep(3)
       tries += 1
       retry if tries < MAX_TRIES
+# This should now be handled by the override file
     rescue UploadFailureNoSection # force the section, then retry
       @command = @command.gsub!(/\-V/, "-V --section #{DEFAULT_SECTION}")
       retry
