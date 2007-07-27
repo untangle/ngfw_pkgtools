@@ -35,7 +35,7 @@ elif grep -q -E "^Suite: ${symbolic_name}\$" $REPREPRO_DISTRIBUTIONS_FILE ; then
 fi
 
 # backup existing conf
-tar czvf /var/www/conf.`date -Iseconds`.tar.gz /var/www/conf
+backup_conf
 
 # remove existing codename; won't do anything if it doesn't exist already
 perl -i npe "s/^Suite: ${symbolic_name}\n//" $REPREPRO_DISTRIBUTIONS_FILE
@@ -49,7 +49,4 @@ perl -npe "s/\+SYMBOLIC_NAME\+/$symbolic_name/ ; s/\+VERSION\+/$version/ ; s/\+C
 $REPREPRO_BASE_COMMAND --delete createsymlinks
 
 ## then we push changes to updates.untangle.com
-# copy files
-scp $REPREPRO_DISTRIBUTIONS_FILE ${REPREPRO_CONF_DIR}/updates ${REMOTE_USER}@${REMOTE_SERVER}:${REPREPRO_CONF_DIR}/
-# create symlinks
-$REPREPRO_REMOTE_COMMAND --delete createsymlinks
+push_new_releases_names
