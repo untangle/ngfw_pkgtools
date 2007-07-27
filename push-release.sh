@@ -21,9 +21,9 @@ fi
 
 # MAIN
 if [ -z "$simulate" ] ; then
-  reprepro_action="update"
+  $REPREPRO_REMOTE_COMMAND update $1
+  # also remove source packages for premium
+  $SSH_COMMAND "$REPREPRO_BASE_COMMAND -T dsc -C premium listfilter $1 Package | awk '{print \$2}' | xargs $REPREPRO_BASE_COMMAND -T dsc -C premium remove $1"
 else
-  reprepro_action="checkupdate"
+  $REPREPRO_REMOTE_COMMAND checkupdate $1
 fi
-
-$REPREPRO_REMOTE_COMMAND $reprepro_action $1
