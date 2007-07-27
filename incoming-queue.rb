@@ -109,8 +109,13 @@ class DebianUpload # Main base class
     tries = 0
     begin
       # first do a few policy checks
-      if TESTING_DISTRIBUTIONS.include?(@distribution) and not @uploader =~ /(seb|rbscott)/i
+      if TESTING_DISTRIBUTIONS.include?(@distribution) and @uploader !~ /(seb|rbscott)/i
         output = "#{@name} was intended for #{@distribution}, but you don't have permission to upload there."
+        raise UploadFailureByPolicy.new(output)
+      end
+
+      if @version !~ /svn/ and @uploader !~ /(seb|rbscott)/i
+        output = "#{@version} doesn't contain 'svn', but you don't have permission to force the version."
         raise UploadFailureByPolicy.new(output)
       end
 
@@ -124,7 +129,7 @@ class DebianUpload # Main base class
         raise UploadFailureByPolicy.new(output)
       end
 
-      if @distribution == "daily-dogfood" and not @uploader =~ /buildbot/i
+      if @distribution == "daily-dogfood" and @uploader !~ /buildbot/i
         output = "#{@name} was intended for daily-dogfood, but was not built by buildbot: not processing."
         raise UploadFailureByPolicy.new(output)
       end
