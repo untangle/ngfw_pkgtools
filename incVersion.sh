@@ -51,6 +51,8 @@ version=${version}-1
 
 echo "Setting version to \"${version}\", distribution to \"$distribution\""
 DEBEMAIL="${DEBEMAIL:-${USER}@untangle.com}" dch -v ${version} -D ${distribution} "auto build"
+# check changelog back in if version was forced
+[ -n "$2" ] && svn commit debian/changelog -m "Forcing version to $version"
 echo " done."
 
 
