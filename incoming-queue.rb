@@ -12,8 +12,10 @@ PROCESSED = "#{REP}/processed"
 FAILED = "#{PROCESSED}/failed"
 
 DISTRIBUTIONS = Dir.entries(DISTS).delete_if { |f| f =~ /\./ or File.symlink?(f) }
-TESTING_DISTRIBUTIONS = [ "testing", "mustang-1" ]
-LOCKED_DISTRIBUTIONS = [ "stable", "mustang" ]
+# FIXME: please extract those dynamically from the distributions file; this
+# hardcoding is so horrendous even rbscott wouldn't settle for it
+TESTING_DISTRIBUTIONS = [ "testing", "mustang-2" ]
+LOCKED_DISTRIBUTIONS = [ "stable", "mustang-1", "oldstable", "mustang" ]
 UNLOCKED_DISTRIBUTIONS = DISTRIBUTIONS.delete_if { |d| LOCKED_DISTRIBUTIONS.include?(d) }
 USER_DISTRIBUTIONS = [ "amread", "dmorris", "inieves", "jdi", "rbscott", "seb" ]
 DEFAULT_DISTRIBUTION = "chaos"
