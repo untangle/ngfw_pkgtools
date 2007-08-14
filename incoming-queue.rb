@@ -116,7 +116,9 @@ class DebianUpload # Main base class
         raise UploadFailureByPolicy.new(output)
       end
 
-      if @version !~ /svn/ and @uploader !~ /(seb|rbscott)/i
+      # FIXME: dir-tay, needs some redesigning with regard to which policy checks apply to
+      # which kind of uploads
+      if is_a?(ChangeFileUpload) and @version !~ /svn/ and @uploader !~ /(seb|rbscott)/i
         output = "#{@version} doesn't contain 'svn', but you don't have permission to force the version."
         raise UploadFailureByPolicy.new(output)
       end
