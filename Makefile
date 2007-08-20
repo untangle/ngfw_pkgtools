@@ -14,7 +14,7 @@ clean: checkroot
 
 version: checkroot
 	svn revert debian/changelog
-	sh $(BUILDTOOLS_DIR)/incVersion.sh $(DISTRIBUTION)
+	sh $(BUILDTOOLS_DIR)/incVersion.sh $(DISTRIBUTION) $(VERSION)
 
 source: checkroot
 	# so we can use that later to find out what to upload if needs be
