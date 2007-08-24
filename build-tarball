@@ -1,0 +1,50 @@
+#!/bin/sh
+
+## This is the path to the root of the subversion tree.
+SVN_BASE=$1
+
+usage() {
+    echo "$0 <svn-base-path> [<release-version>]"
+    echo "  If <release-version> is not specified, then a timestamp is used"
+    exit -1
+}
+
+if [ -z "${SVN_BASE}" ]; then usage ; fi
+
+RELEASE_VERSION=$2
+
+if [ -z "${RELEASE_NAME}" ]; then 
+    RELEASE_VERSION="`date +"snapshot-%y-%m-%d-%H%M"`"
+fi
+
+ARCHIVE="untangle-${RELEASE_VERSION}"
+
+## Checkout to a temp directory
+source_dir=`mktemp -d`
+
+echo "Checking out ${SVN_BASE}/work/src -> ${source_dir}/${ARCHIVE}"
+
+svn export ${SVN_BASE}/work/src ${source_dir}/${ARCHIVE}
+
+cat <<EOF | fakeroot
+chown -R root:root ${source_dir}/${ARCHIVE}
+echo tar -C ${source_dir} -czf ${ARCHIVE}.tar.gz ${ARCHIVE}
+tar -C ${source_dir} -czf ${ARCHIVE}.tar.gz ${ARCHIVE}
+EOF
+
+echo "Removing the source directory: ${source_dir}"
+rm -rf ${source_dir}
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
