@@ -2,6 +2,7 @@
 
 usage() {
   echo "Usage: $0 <version> <name> [<symbolic-name>]"
+  echo "   $0 5.0.8 mustang-8 testing"
   exit 1
 }
 
@@ -20,7 +21,7 @@ fi
 
 version=$1
 name=$2
-symbolic_name=${3:-$1}
+symbolic_name=${3:-testing} # force default symbolic name to testing
 
 # MAIN
 if grep -q "^Version: ${version}\$" $REPREPRO_DISTRIBUTIONS_FILE ; then

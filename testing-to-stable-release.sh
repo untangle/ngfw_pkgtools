@@ -14,9 +14,9 @@ backup_conf
 
 ## first we change things locally
 # shift releases
-perl -i -npe "s/stable/oldstable/" $REPREPRO_DISTRIBUTIONS_FILE
-perl -i -npe "s/testing/stable/" $REPREPRO_DISTRIBUTIONS_FILE
-perl -i -npe "s/alpha/testing/" $REPREPRO_DISTRIBUTIONS_FILE
+perl -i -npe 's/(?<!un)stable/oldstable/' $REPREPRO_DISTRIBUTIONS_FILE
+perl -i -npe 's/testing/stable/' $REPREPRO_DISTRIBUTIONS_FILE
+perl -i -npe 's/alpha/testing/' $REPREPRO_DISTRIBUTIONS_FILE
 # create symlinks
 $REPREPRO_BASE_COMMAND --delete createsymlinks
 
