@@ -1,4 +1,5 @@
 DISTRIBUTION ?= $(USER)
+PACKAGE_SERVER ?= mephisto
 BUILDTOOLS_DIR = $(shell dirname $(MAKEFILE_LIST))
 
 checkroot:
@@ -27,6 +28,7 @@ source: checkroot
 		--exclude="dist" \
 		-f ../`dpkg-parsechangelog | awk '/Source: / { print $$2 }'`_`perl -npe 's/(.+)-.*/$$1/' debian/version`.orig.tar.gz ../`basename $$(pwd)`
 
+# FIXME: duplicate code between pkg and pkg-pbuilder
 pkg: checkroot
 	# so we can use that later to find out what to upload if needs be
 	dpkg-parsechangelog | awk '/Version: / { print $$2 }' >| debian/version
@@ -35,7 +37,15 @@ pkg: checkroot
 	/usr/bin/debuild -e HADES_KEYSTORE -e HADES_KEY_ALIAS -e HADES_KEY_PASS -i -us -uc
 	svn revert debian/changelog
 
+pkg-pbuilder: checkroot
+	# so we can use that later to find out what to upload if needs be
+	dpkg-parsechangelog | awk '/Version: / { print $$2 }' >| debian/version
+	# FIXME: sign packages when we move to apt 0.6
+	# FIXME: don't clean before building !!!
+	pdebuild --pbuilder cowbuilder --use-pdebuild-internal --debuildoptions "-e HADES_KEYSTORE -e HADES_KEY_ALIAS -e HADES_KEY_PASS -i -us -uc"
+	svn revert debian/changelog
+
 release: checkroot
-	dput -c $(BUILDTOOLS_DIR)/dput.cf mephisto ../`dpkg-parsechangelog | awk '/Source: / { print $$2 }'`_`cat debian/version`*.changes
+	dput -c $(BUILDTOOLS_DIR)/dput.cf $(PACKAGE_SERVER) ../`dpkg-parsechangelog | awk '/Source: / { print $$2 }'`_`cat debian/version`*.changes
 
 .PHONY: checkroot clean version source pkg release
