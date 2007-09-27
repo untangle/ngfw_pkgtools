@@ -1,4 +1,5 @@
 DISTRIBUTION ?= $(USER)
+TARGET_DISTRIBUTION ?= sarge
 PACKAGE_SERVER = mephisto
 BUILDTOOLS_DIR = $(shell dirname $(MAKEFILE_LIST))
 
@@ -37,13 +38,13 @@ pkg: checkroot
 	/usr/bin/debuild -e HADES_KEYSTORE -e HADES_KEY_ALIAS -e HADES_KEY_PASS -i -us -uc
 	svn revert debian/changelog
 
-pkg-pbuilder: checkroot
+pkg-chroot: checkroot
 	# so we can use that later to find out what to upload if needs be
 	dpkg-parsechangelog | awk '/Version: / { print $$2 }' >| debian/version
 	# FIXME: sign packages when we move to apt 0.6
 	# FIXME: don't clean before building !!!
 	# FIXME: do we need to preserve HADES_* in this case ?
-	pdebuild --pbuilder cowbuilder --use-pdebuild-internal --debbuildopts "-us -uc"
+	pdebuild --pbuilder cowbuilder --use-pdebuild-internal --debbuildopts "-us -uc" -- --basepath /var/cache/pbuilder/$(TARGET_DISTRIBUTION).cow
 	svn revert debian/changelog
 
 release: checkroot
