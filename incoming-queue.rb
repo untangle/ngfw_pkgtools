@@ -111,14 +111,14 @@ class DebianUpload # Main base class
     tries = 0
     begin
       # first do a few policy checks
-      if TESTING_DISTRIBUTIONS.include?(@distribution) and @uploader !~ /(seb|rbscott)/i
+      if TESTING_DISTRIBUTIONS.include?(@distribution) and @uploader !~ /(seb|rbscott|jdi)/i
         output = "#{@name} was intended for #{@distribution}, but you don't have permission to upload there."
         raise UploadFailureByPolicy.new(output)
       end
 
       # FIXME: dir-tay, needs some redesigning with regard to which policy checks apply to
       # which kind of uploads
-      if is_a?(ChangeFileUpload) and @version !~ /svn/ and @uploader !~ /(seb|rbscott)/i
+      if is_a?(ChangeFileUpload) and @version !~ /svn/ and @uploader !~ /(seb|rbscott|jdi)/i
         output = "#{@version} doesn't contain 'svn', but you don't have permission to force the version."
         raise UploadFailureByPolicy.new(output)
       end
@@ -133,8 +133,13 @@ class DebianUpload # Main base class
         raise UploadFailureByPolicy.new(output)
       end
 
-      if @distribution == "daily-dogfood" and @uploader !~ /buildbot/i
-        output = "#{@name} was intended for daily-dogfood, but was not built by buildbot: not processing."
+      if @distribution =~ /(daily-dogfood|qa)/ and @uploader !~ /buildbot/i
+        output = "#{@name} was intended for #{@distribution}, but was not built by buildbot."
+        raise UploadFailureByPolicy.new(output)
+      end
+
+      if @uploader =~ /buildbot/i and @distribution !~ /(daily-dogfood|qa)/
+        output = "#{@name} was build by buildbot, but was intended for neither daily-dogfood nor qa."
         raise UploadFailureByPolicy.new(output)
       end
 
