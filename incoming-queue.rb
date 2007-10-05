@@ -258,7 +258,12 @@ class ChangeFileUpload < DebianUpload
     @command = "reprepro -Vb #{REP} include #{@distribution} #{@file}"
     @emailRecipientsSuccess = [ @uploader, @maintainer ].uniq
     @emailRecipientsFailure = @emailRecipientsSuccess + DEFAULT_MAIL_RECIPIENTS
+    # FIXME: make that a function
     if @emailRecipientsSuccess.grep(/buildbot/) != [] # no qa@untangle.com
+      @emailRecipientsSuccess.delete_if { |e| e =~ /buildbot/ }
+      @emailRecipientsSuccess += QA_MAIL_RECIPIENTS
+    end
+    if @emailRecipientsFailure.grep(/buildbot/) != [] # no qa@untangle.com
       @emailRecipientsFailure.delete_if { |e| e =~ /buildbot/ }
       @emailRecipientsFailure += QA_MAIL_RECIPIENTS
     end
