@@ -32,7 +32,7 @@ source: checkroot
 # FIXME: duplicate code between pkg and pkg-pbuilder
 pkg: checkroot
 	# so we can use that later to find out what to upload if needs be
-	dpkg-parsechangelog | awk '/Version: / { print $$2 }' >| debian/version
+	dpkg-parsechangelog | awk '/Version: / { gsub(/^.+:/, "", $$2) ; print $$2 }' >| debian/version
 	# FIXME: sign packages when we move to apt 0.6
 	# FIXME: don't clean before building !!!
 	/usr/bin/debuild -e HADES_KEYSTORE -e HADES_KEY_ALIAS -e HADES_KEY_PASS -i -us -uc
@@ -40,7 +40,7 @@ pkg: checkroot
 
 pkg-chroot: checkroot
 	# so we can use that later to find out what to upload if needs be
-	dpkg-parsechangelog | awk '/Version: / { print $$2 }' >| debian/version
+	dpkg-parsechangelog | awk '/Version: / { gsub(/^.+:/, "", $$2) ; print $$2 }' >| debian/version
 	# FIXME: sign packages when we move to apt 0.6
 	# FIXME: don't clean before building !!!
 	# FIXME: do we need to preserve HADES_* in this case ?
