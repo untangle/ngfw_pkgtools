@@ -44,7 +44,7 @@ pkg-chroot: checkroot
 	# FIXME: sign packages when we move to apt 0.6
 	# FIXME: don't clean before building !!!
 	# FIXME: do we need to preserve HADES_* in this case ?
-	pdebuild --pbuilder cowbuilder --use-pdebuild-internal --debbuildopts "-us -uc" -- --basepath /var/cache/pbuilder/$(TARGET_DISTRIBUTION).cow
+	pdebuild --pbuilder cowbuilder --use-pdebuild-internal --debbuildopts "-i -us -uc" -- --basepath /var/cache/pbuilder/$(TARGET_DISTRIBUTION).cow
 	svn revert debian/changelog
 
 release: checkroot
