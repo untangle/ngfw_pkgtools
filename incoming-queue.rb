@@ -17,12 +17,13 @@ DISTRIBUTIONS = Dir.entries(DISTS).delete_if { |f| f =~ /\./ or File.symlink?(f)
 TESTING_DISTRIBUTIONS = [ "testing", "mustang-2" ]
 LOCKED_DISTRIBUTIONS = [ "stable", "mustang-1", "oldstable", "mustang" ]
 UNLOCKED_DISTRIBUTIONS = DISTRIBUTIONS.delete_if { |d| LOCKED_DISTRIBUTIONS.include?(d) }
-USER_DISTRIBUTIONS = [ "amread", "dmorris", "inieves", "jdi", "rbscott", "seb" ]
+USER_DISTRIBUTIONS = [ "amread", "arthur", "dmorris", "jdi", "khilton", "rbscott", "seb" ]
 DEFAULT_DISTRIBUTION = "chaos"
 DEFAULT_COMPONENT = "upstream"
 DEFAULT_SECTION = "utils"
 DEFAULT_PRIORITY = "normal"
 DEFAULT_MAIL_RECIPIENTS = [ "rbscott@untangle.com", "seb@untangle.com" ]
+QA_MAIL_RECIPIENTS = [ "ronni@untangle.com", "ksteele@untangle.com", "fariba@untangle.com" ]
 MAX_TRIES = 3
 
 # global functions
@@ -257,6 +258,10 @@ class ChangeFileUpload < DebianUpload
     @command = "reprepro -Vb #{REP} include #{@distribution} #{@file}"
     @emailRecipientsSuccess = [ @uploader, @maintainer ].uniq
     @emailRecipientsFailure = @emailRecipientsSuccess + DEFAULT_MAIL_RECIPIENTS
+    if @emailRecipientsSuccess.grep(/buildbot/) != [] # no qa@untangle.com
+      @emailRecipientsFailure.delete_if { |e| e =~ /buildbot/ }
+      @emailRecipientsFailure += QA_MAIL_RECIPIENTS
+    end
     @emailRecipientsFailure.uniq!
   end
 end
