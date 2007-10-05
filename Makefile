@@ -20,7 +20,7 @@ version: checkroot
 
 source: checkroot
 	# so we can use that later to find out what to upload if needs be
-	dpkg-parsechangelog | awk '/Version: / { print $$2 }' >| debian/version
+	dpkg-parsechangelog | awk '/Version: / { gsub(/^.+:/, "", $$2) ; print $$2 }' >| debian/version
 	tar cz --exclude="*stamp*" \
 		--exclude=".svn" \
 		--exclude="debian" \
