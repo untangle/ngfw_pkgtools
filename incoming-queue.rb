@@ -173,21 +173,28 @@ class DebianUpload # Main base class
             to_s) if @@doEmailSuccess
 
     rescue UploadFailureAlreadyUploaded
-      # remove it from all distros, then retry
+      # first remove it from all distros that have it...
       UNLOCKED_DISTRIBUTIONS.each { |d|
-        @files.each { |f|
-          if f =~ /.+\/(.+?)_.+\.dsc$/ then
-            sourceName = $1
-            removeCommand = "reprepro -V -b #{REP} remove #{d} #{sourceName}"
-            output = `#{removeCommand} 2>&1`
-          elsif f =~ /.+\/(.+?)_.+\.deb$/ then
-            packageName = $1
-            removeCommand = "reprepro -V -b #{REP} remove #{d} #{packageName}"
-            output = `#{removeCommand} 2>&1`
+        listCommand = "reprepro -V -b #{REP} list #{d} #{@name}"
+        output = `#{removeCommand} 2>&1`
+        if output != "" then # this package is present in this distro...
+          version = output.split(/\s+/)[-1]
+          if version == @version then # ... with the same version -> remove it
+            @files.each { |f|
+              if f =~ /.+\/(.+?)_.+\.dsc$/ then
+                sourceName = $1
+                removeCommand = "reprepro -V -b #{REP} remove #{d} #{sourceName}"
+                output = `#{removeCommand} 2>&1`
+              elsif f =~ /.+\/(.+?)_.+\.deb$/ then
+                packageName = $1
+                removeCommand = "reprepro -V -b #{REP} remove #{d} #{packageName}"
+                output = `#{removeCommand} 2>&1`
+              end
+            }
           end
-        }
+        end
       }
-      retry
+      retry # ... then retry
     rescue UploadFailureFileMissing # sleep some, then retry
       sleep(3)
       tries += 1
