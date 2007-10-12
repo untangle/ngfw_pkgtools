@@ -134,8 +134,8 @@ class DebianUpload # Main base class
         raise UploadFailureByPolicy.new(output)
       end
 
-      if @distribution =~ /(daily-dogfood|qa)/ and @uploader !~ /buildbot/i
-        output = "#{@name} was intended for #{@distribution}, but was not built by buildbot."
+      if @distribution =~ /(daily-dogfood|qa)/ and @uploader !~ /(buildbot|seb|rbscott)/i
+        output = "#{@name} was intended for #{@distribution}, but was not built by buildbot or a release master."
         raise UploadFailureByPolicy.new(output)
       end
 
