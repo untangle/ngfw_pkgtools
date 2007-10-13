@@ -176,7 +176,7 @@ class DebianUpload # Main base class
       # first remove it from all distros that have it...
       UNLOCKED_DISTRIBUTIONS.each { |d|
         listCommand = "reprepro -V -b #{REP} list #{d} #{@name}"
-        output = `#{removeCommand} 2>&1`
+        output = `#{listCommand} 2>&1`
         if output != "" then # this package is present in this distro...
           version = output.split(/\s+/)[-1]
           if version == @version then # ... with the same version -> remove it
@@ -293,8 +293,11 @@ if File.directory?(INCOMING)
   }
 
   Dir["#{INCOMING}/*.deb"].each { |file|
-    pu = PackageUpload.new(file, move)
-    pu.addToRepository
+    if not File.file?(INCOMING + "/" + file.sub(/_.?\.deb/, ".dsc")) then
+      # we're good, this wasn't a source pkg upload taking too long to be uploaded...
+      pu = PackageUpload.new(file, move)
+      pu.addToRepository
+    end
   }
 else
   if INCOMING =~ /\.changes$/
