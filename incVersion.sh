@@ -11,13 +11,9 @@ rm -f debian/changelog.dch
 distribution=${1}
 
 if [ -z "$2" ] ; then
-  if [ -f ../VERSION ] ; then
-    versionFile=../VERSION
-  elif [ -f ./resources/VERSION ] ; then # Hades
-    versionFile=./resources/VERSION
-  else
-    versionFile=../../VERSION
-  fi
+  # not exactly kosher, but I'll contend that incVersion.sh is only
+  # called from the Makefile :>
+  versionFile=`dirname $0`/../VERSION
 
   # get 2 values from SVN: last changed revision & timestamp for the
   # current directory
