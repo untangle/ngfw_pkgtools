@@ -177,8 +177,10 @@ class DebianUpload # Main base class
       UNLOCKED_DISTRIBUTIONS.each { |d|
         listCommand = "reprepro -V -b #{REP} list #{d} #{@name}"
         output = `#{listCommand} 2>&1`
-        if output != "" then # this package is present in this distro...
+#        puts d, output
+        if $? == 0 and output != "" then # this package is present in this distro...
           version = output.split(/\s+/)[-1]
+#          puts "version: #{version}, matched: #{@version}"
           if version == @version then # ... with the same version -> remove it
             @files.each { |f|
               if f =~ /.+\/(.+?)_.+\.dsc$/ then
@@ -208,7 +210,7 @@ class DebianUpload # Main base class
       retry
     rescue Exception => e # give up, and warn on STDOUT + email
       handleFailure(e)
-    ensure # no matter what, remove files at this point
+    ensure # no matter what, try to remove files at this point
       tries = 0
       if @move
         @files.each { |file|
