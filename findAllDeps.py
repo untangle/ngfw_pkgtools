@@ -54,11 +54,12 @@ Pin: origin debian.domainmail.org
 Pin-Priority: 680
 Package: *
 Pin: origin www.backports.org
-Pin-Priority: 650
+Pin-Priority: 999
 Package: *
 Pin: origin linux.csua.berkeley.edu
-Pin-Priority: 600\n''')
-
+Pin-Priority: 600
+Pin: origin debian.org
+Pin-Priority: 550\n''')
 
 def initializeChrootedApt():
   apt_pkg.InitConfig()
@@ -306,7 +307,7 @@ def parseCommandLineArgs(args):
 
 # main
 pkgs, options = parseCommandLineArgs(sys.argv[1:])
-us = UntangleStore(os.path.join(sys.path[0], '../other'))
+us = UntangleStore(os.path.join(sys.path[0], '../pkgs/upstream'))
 
 for arg in pkgs:
   pkg = VersionedPackage(arg)
