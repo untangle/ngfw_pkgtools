@@ -25,5 +25,5 @@ if [ -z "$simulate" ] ; then
   # also remove source packages for premium
   $SSH_COMMAND "$REPREPRO_BASE_COMMAND -T dsc -C premium listfilter $1 Package | awk '{print \$2}' | xargs $REPREPRO_BASE_COMMAND -T dsc -C premium remove $1"
 else
-  $REPREPRO_REMOTE_COMMAND checkupdate $1
+  $REPREPRO_REMOTE_COMMAND checkupdate $1 | grep upgraded
 fi
