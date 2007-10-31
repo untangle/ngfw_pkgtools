@@ -43,13 +43,12 @@ pkg-chroot: checkroot
 	dpkg-parsechangelog | awk '/Version: / { print $$2 }' >| debian/version
 	# FIXME: sign packages when we move to apt 0.6
 	# FIXME: don't clean before building !!!
-	# FIXME: do we need to preserve HADES_* in this case ?
 	CHROOT_ORIG=$(CHROOT_DIR)/$(REPOSITORY)+untangle.cow ; \
 	CHROOT_WORK=$(CHROOT_DIR)/$(REPOSITORY)+untangle_`date -Iseconds`.cow ; \
-	sudo cp -al $${CHROOT_ORIG} $${CHROOT_WORK} ; \
-	sudo cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
-	pdebuild --pbuilder cowbuilder --use-pdebuild-internal --debbuildopts "-i -us -uc -sa" -- --basepath $${CHROOT_WORK} ; \
-	sudo rm -fr $${CHROOT_WORK}
+	cp -al $${CHROOT_ORIG} $${CHROOT_WORK} ; \
+	cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
+	pdebuild --pbuilder cowbuilder --use-pdebuild-internal --debbuildopts "-i -us -uc -sa -e HADES_KEYSTORE -e HADES_KEY_ALIAS -e HADES_KEY_PASS" -- --basepath $${CHROOT_WORK} ; \
+	rm -fr $${CHROOT_WORK}
 	svn revert debian/changelog
 
 release: checkroot
