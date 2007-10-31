@@ -1,6 +1,8 @@
 DISTRIBUTION ?= $(USER)
 PACKAGE_SERVER = mephisto
 BUILDTOOLS_DIR = $(shell dirname $(MAKEFILE_LIST))
+CHROOT_DIR = /var/cache/pbuilder
+CHROOT_UPDATE_SCRIPT = $(BUILDTOOLS_DIR)/chroot-update.sh
 
 checkroot:
 	@if [ "$$UID" = "0" ]; then \
@@ -25,7 +27,6 @@ source: checkroot
 		--exclude="debian" \
 		--exclude="todo" \
 		--exclude="staging" \
-		--exclude="dist" \
 		-f ../`dpkg-parsechangelog | awk '/Source: / { print $$2 }'`_`perl -npe 's/(.+)-.*/$$1/ ; s/^.+://' debian/version`.orig.tar.gz ../`basename $$(pwd)`
 
 # FIXME: duplicate code between pkg and pkg-pbuilder
@@ -43,7 +44,12 @@ pkg-chroot: checkroot
 	# FIXME: sign packages when we move to apt 0.6
 	# FIXME: don't clean before building !!!
 	# FIXME: do we need to preserve HADES_* in this case ?
-	pdebuild --pbuilder cowbuilder --use-pdebuild-internal --debbuildopts "-i -us -uc -sa" -- --basepath /var/cache/pbuilder/$(REPOSITORY)+untangle.cow
+	CHROOT_ORIG=$(CHROOT_DIR)/$(REPOSITORY)+untangle.cow ; \
+	CHROOT_WORK=$(CHROOT_DIR)/$(REPOSITORY)+untangle_`date -Iseconds`.cow ; \
+	sudo cp -al $${CHROOT_ORIG} $${CHROOT_WORK} ; \
+	sudo cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
+	pdebuild --pbuilder cowbuilder --use-pdebuild-internal --debbuildopts "-i -us -uc -sa" -- --basepath $${CHROOT_WORK} ; \
+	sudo rm -fr $${CHROOT_WORK}
 	svn revert debian/changelog
 
 release: checkroot
