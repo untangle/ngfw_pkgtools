@@ -1,5 +1,4 @@
 DISTRIBUTION ?= $(USER)
-TARGET_DISTRIBUTION ?= sarge
 PACKAGE_SERVER = mephisto
 BUILDTOOLS_DIR = $(shell dirname $(MAKEFILE_LIST))
 
@@ -16,7 +15,7 @@ clean: checkroot
 
 version: checkroot
 	svn revert debian/changelog
-	sh $(BUILDTOOLS_DIR)/incVersion.sh $(DISTRIBUTION) $(VERSION)
+	sh $(BUILDTOOLS_DIR)/incVersion.sh $(DISTRIBUTION) VERSION=$(VERSION) REPOSITORY=$(REPOSITORY)
 
 source: checkroot
 	# so we can use that later to find out what to upload if needs be
@@ -35,7 +34,7 @@ pkg: checkroot
 	dpkg-parsechangelog | awk '/Version: / { print $$2 }' >| debian/version
 	# FIXME: sign packages when we move to apt 0.6
 	# FIXME: don't clean before building !!!
-	/usr/bin/debuild -e HADES_KEYSTORE -e HADES_KEY_ALIAS -e HADES_KEY_PASS -i -us -uc
+	/usr/bin/debuild -e HADES_KEYSTORE -e HADES_KEY_ALIAS -e HADES_KEY_PASS -i -us -uc -sa
 	svn revert debian/changelog
 
 pkg-chroot: checkroot
@@ -44,7 +43,7 @@ pkg-chroot: checkroot
 	# FIXME: sign packages when we move to apt 0.6
 	# FIXME: don't clean before building !!!
 	# FIXME: do we need to preserve HADES_* in this case ?
-	pdebuild --pbuilder cowbuilder --use-pdebuild-internal --debbuildopts "-i -us -uc" -- --basepath /var/cache/pbuilder/$(TARGET_DISTRIBUTION)+untangle.cow
+	pdebuild --pbuilder cowbuilder --use-pdebuild-internal --debbuildopts "-i -us -uc -sa" -- --basepath /var/cache/pbuilder/$(REPOSITORY)+untangle.cow
 	svn revert debian/changelog
 
 release: checkroot

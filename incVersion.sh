@@ -1,16 +1,19 @@
 #!/bin/sh
 
 # usage...
-if [ $# -lt 1 ] || [ $# -gt 2 ] ; then 
-  echo "Usage: $0 distribution [version ]" && exit 1
+if [ ! $# -eq 3 ] ; then 
+  echo "Usage: $0 distribution VERSION=[version] REPOSITORY=[repository]" && exit 1
 fi
 
 rm -f debian/changelog.dch
 
 # CL args
 distribution=${1}
+version=${2/VERSION=}
+versionGiven=$version
+repository=${3/REPOSITORY=}
 
-if [ -z "$2" ] ; then
+if [ -z "$version" ] ; then
   # not exactly kosher, but I'll contend that incVersion.sh is only
   # called from the Makefile :>
   versionFile=`dirname $0`/../VERSION
@@ -40,15 +43,27 @@ if [ -z "$2" ] ; then
     distribution=$USER
   fi
 else # force version
-  version=$2
+  version=$version
 fi
 
-version=${version}-1
+if [ -z "${repository}" ] ; then
+  # figure out what platform we're on
+  grep Debian /etc/issue && i=3 || i=2
+  case `head -1 /etc/issue | awk "{ print \\$$i }"` in
+    lenny/sid) repository=sid ;;
+    4.0) repository=etch ;; 
+    3.1) repository=sarge ;;
+    7.04*) repository=feisty ;;
+    7.10*) repository=gutsy ;;
+    8.04*) repository=gutsy ;;
+    *) echo "Couldn't guess your platform, giving up" ; exit 1 ;;
+  esac
+fi
+
+version=${version}-1${repository}
 
 echo "Setting version to \"${version}\", distribution to \"$distribution\""
 DEBEMAIL="${DEBEMAIL:-${USER}@untangle.com}" dch -v ${version} -D ${distribution} "auto build"
 # check changelog back in if version was forced
-[ -n "$2" ] && svn commit debian/changelog -m "Forcing version to $version"
+[ -n "$versionGiven" ] && svn commit debian/changelog -m "Forcing version to $version"
 echo " done."
-
-
