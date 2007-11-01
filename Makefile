@@ -45,10 +45,10 @@ pkg-chroot: checkroot
 	# FIXME: don't clean before building !!!
 	CHROOT_ORIG=$(CHROOT_DIR)/$(REPOSITORY)+untangle.cow ; \
 	CHROOT_WORK=$(CHROOT_DIR)/$(REPOSITORY)+untangle_`date -Iseconds`.cow ; \
-	cp -al $${CHROOT_ORIG} $${CHROOT_WORK} ; \
-	cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
-	pdebuild --pbuilder cowbuilder --use-pdebuild-internal --debbuildopts "-i -us -uc -sa -e HADES_KEYSTORE -e HADES_KEY_ALIAS -e HADES_KEY_PASS" -- --basepath $${CHROOT_WORK} ; \
-	rm -fr $${CHROOT_WORK}
+	sudo cp -al $${CHROOT_ORIG} $${CHROOT_WORK} ; \
+	sudo cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
+	pdebuild --pbuilder cowbuilder --use-pdebuild-internal --buildresult .. --debbuildopts "-i -us -uc -sa" -- --basepath $${CHROOT_WORK} ; \
+	sudo rm -fr $${CHROOT_WORK}
 	svn revert debian/changelog
 
 release: checkroot
