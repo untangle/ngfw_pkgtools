@@ -56,9 +56,9 @@ release: checkroot
 
 release-deb: checkroot
 	for p in *deb ; do \
-	  touch $${p/deb/_$(REPOSITORY)_$(DISTRIBUTION).manifest} ; \
+	  touch $${p/.deb/_$(REPOSITORY)_$(DISTRIBUTION).manifest} ; \
 	done
- 	lftp -e "cd incoming ; put *deb *manifest`; exit" mephisto
-	rm -f *manifest
+# 	lftp -e "cd incoming ; put *manifest *deb`; exit" mephisto
+#	rm -f *manifest
 	
 .PHONY: checkroot clean version source pkg release
