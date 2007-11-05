@@ -54,4 +54,11 @@ pkg-chroot: checkroot
 release: checkroot
 	dput -c $(BUILDTOOLS_DIR)/dput.cf $(PACKAGE_SERVER) ../`dpkg-parsechangelog | awk '/Source: / { print $$2 }'`_`perl -npe 's/^.+://' debian/version`*.changes
 
+release-deb: checkroot
+	for p in *deb ; do \
+	  touch $${p/deb/_$(REPOSITORY)_$(DISTRIBUTION).manifest} ; \
+	done
+ 	lftp -e "cd incoming ; put *deb *manifest`; exit" mephisto
+	rm -f *manifest
+	
 .PHONY: checkroot clean version source pkg release
