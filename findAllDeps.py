@@ -34,7 +34,7 @@ def initializeChrootedAptFiles():
   
   # create sources.list file
   open(SOURCES, 'w').write('''
-#deb http://linux.csua.berkeley.edu/debian sarge main contrib non-free
+#deb http://linux.csua.berkeley.edu/debian oldstable main contrib non-free
 #deb http://security.debian.org/ sarge/updates main contrib non-free
 #php5
 #deb http://people.debian.org/~dexter php5 woody
@@ -42,24 +42,25 @@ def initializeChrootedAptFiles():
 deb http://www.backports.org/debian sarge-backports main contrib non-free
 # volatile
 #deb http://debian.domainmail.org/debian-volatile sarge/volatile main contrib non-free
-#deb http://10.0.0.105/untangle mustang main premium upstream\n''')
+deb http://10.0.0.105/untangle mustang main premium upstream\n''')
 
   # create preferences files
   open(PREFS, 'w').write('''
-Package: *
-Pin: origin 10.0.0.105
-Pin-Priority: 700
-Package: *
-Pin: origin debian.domainmail.org
-Pin-Priority: 680
+#Package: *
+#Pin: release l=Untangle
+#Pin-Priority: 700
+#Package: *
+#Pin: origin debian.domainmail.org
+#Pin-Priority: 680
 Package: *
 Pin: release a=sarge-backports
 Pin-Priority: 999
-Package: *
-Pin: origin linux.csua.berkeley.edu
-Pin-Priority: 600
-Pin: origin debian.org
-Pin-Priority: 550\n''')
+#Package: *
+#Pin: release o=Debian,a=oldstable
+#Pin-Priority: 600
+#Package: *
+#Pin: origin debian.org
+#Pin-Priority: 550\n''')
 
 def initializeChrootedApt():
   apt_pkg.InitConfig()
