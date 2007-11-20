@@ -1,4 +1,6 @@
 DISTRIBUTION ?= $(USER)
+SHELL = /bin/bash
+shell = /bin/bash
 PACKAGE_SERVER = mephisto
 BUILDTOOLS_DIR = $(shell dirname $(MAKEFILE_LIST))
 CHROOT_DIR = /var/cache/pbuilder
