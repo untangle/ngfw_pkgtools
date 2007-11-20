@@ -47,24 +47,29 @@ else # force version
   version=$version
 fi
 
+osdist=unknown
 if [ -z "${repository}" ] ; then
   # figure out what platform we're on
   grep Debian /etc/issue && i=3 || i=2
   case `head -1 /etc/issue | awk "{ print \\$$i }"` in
     lenny/sid) repository=sid ;;
-    4.0) repository=etch ;; 
-    3.1) repository=sarge ;;
-    7.04*) repository=feisty ;;
-    7.10*) repository=gutsy ;;
-    8.04*) repository=gutsy ;;
+    4.0) repository=etch osdist=debian;; 
+    3.1) repository=sarge osdist=debian;;
+    7.04*) repository=feisty osdist=ubuntu;;
+    7.10*) repository=gutsy osdist=ubuntu;;
+    8.04*) repository=gutsy osdist=ubuntu;;
     *) echo "Couldn't guess your platform, giving up" ; exit 1 ;;
   esac
 fi
 
 version=${version}-1${repository}
+dchargs="-v ${version} -D ${distribution}"
+if [ "$osdist" = ubuntu ]; then
+    dchargs="$dchargs --distributor Untangle"
+fi
 
 echo "Setting version to \"${version}\", distribution to \"$distribution\""
-DEBEMAIL="${DEBEMAIL:-${USER}@untangle.com}" dch -v ${version} -D ${distribution} "auto build"
+DEBEMAIL="${DEBEMAIL:-${USER}@untangle.com}" dch $dchargs "auto build"
 # check changelog back in if version was forced
 [ -n "$versionGiven" ] && svn commit debian/changelog -m "Forcing version to $version"
 echo " done."
