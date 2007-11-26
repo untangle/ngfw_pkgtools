@@ -10,4 +10,4 @@ echo deb http://mephisto/public/$1 $2 main >> ${SOURCES}
 echo deb http://mephisto/public/sarge testing upstream >> ${SOURCES}
 echo deb http://mephisto/public/$1 testing upstream >> ${SOURCES}
 echo deb http://mephisto/public/$1 alpha upstream >> ${SOURCES}
-apt-get update
+apt-get -q update
