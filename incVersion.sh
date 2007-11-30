@@ -16,7 +16,7 @@ repository=${3/REPOSITORY=}
 if [ -z "$version" ] ; then
   # not exactly kosher, but I'll contend that incVersion.sh is only
   # called from the Makefile :>
-  versionFile=`dirname $0`/../VERSION
+  versionFile=`dirname $0`/VERSION
 
   # get 2 values from SVN: last changed revision & timestamp for the
   # current directory
