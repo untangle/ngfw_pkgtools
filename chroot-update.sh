@@ -8,6 +8,5 @@ SOURCES=/etc/apt/sources.list
 
 echo deb http://mephisto/public/$1 $2 main >> ${SOURCES}
 echo deb http://mephisto/public/sarge testing upstream >> ${SOURCES}
-echo deb http://mephisto/public/$1 testing upstream >> ${SOURCES}
-echo deb http://mephisto/public/$1 alpha upstream >> ${SOURCES}
+echo deb http://mephisto/public/sarge alpha upstream >> ${SOURCES}
 apt-get -q update
