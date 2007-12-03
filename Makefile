@@ -46,7 +46,7 @@ pkg-chroot: checkroot
 	# FIXME: sign packages when we move to apt 0.6
 	# FIXME: don't clean before building !!!
 	CHROOT_ORIG=$(CHROOT_DIR)/$(REPOSITORY)+untangle.cow ; \
-	CHROOT_WORK=$(CHROOT_DIR)/$(REPOSITORY)+untangle_`date -Iseconds`.cow ; \
+	CHROOT_WORK=$(CHROOT_DIR)/$(REPOSITORY)+untangle_`date "+%Y-%m-%dT%H%M%S_%N"`.cow ; \
 	sudo cp -al $${CHROOT_ORIG} $${CHROOT_WORK} ; \
 	sudo cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal --buildresult .. --debbuildopts "-i -us -uc -sa" -- --basepath $${CHROOT_WORK} ; \
