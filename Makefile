@@ -59,7 +59,6 @@ pkg-chroot: checkroot
 	sudo cp -al $${CHROOT_ORIG} $${CHROOT_WORK} ; \
         sudo cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
-	         --othermirror "deb http://mephisto/public/$(REPOSITORY) $(DISTRIBUTION) main upstream" \
 		 --buildresult .. --debbuildopts "-i -us -uc -sa" -- --basepath $${CHROOT_WORK} ; \
 	sudo rm -fr $${CHROOT_WORK}
 	svn revert debian/changelog
