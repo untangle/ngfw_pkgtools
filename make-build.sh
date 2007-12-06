@@ -10,7 +10,6 @@ while getopts r:b:d:ue option ; do
     e) CHECK_EXISTENCE="check-existence" ;;
   esac
 done
-shift $OPTIND-1
 
 ### a few variables
 FILE_IN="build-order.txt"
@@ -38,9 +37,9 @@ for directory in "${build_dirs[@]}" ; do
 
       # cd into it, and attempt to build
       pushd "$directory"
-      make -f $pkgtools_home/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP version ${CHECK_EXISTENCE}
+      make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP version ${CHECK_EXISTENCE}
       [ $? = 4 ] && continue
-      make -f $pkgtools_home/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP source pkg-chroot ${RELEASE}
+      make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP source pkg-chroot ${RELEASE}
       result=$?
 
       # process result
