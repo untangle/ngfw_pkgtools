@@ -12,5 +12,4 @@ echo deb http://mephisto/public/$1 $2 main upstream >> ${SOURCES}
 #echo deb http://mephisto/public/sarge testing upstream >> ${SOURCES}
 #echo deb http://mephisto/public/sarge alpha upstream >> ${SOURCES}
 
-# Handled by cowbuilder
-#apt-get -q update
+apt-get -q update
