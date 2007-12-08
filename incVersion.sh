@@ -57,7 +57,7 @@ if [ -z "${repository}" ] ; then
     3.1) repository=sarge osdist=debian;;
     7.04*) repository=feisty osdist=ubuntu;;
     7.10*) repository=gutsy osdist=ubuntu;;
-    8.04*) repository=gutsy osdist=ubuntu;;
+    8.04*) repository=hardy osdist=ubuntu;;
     *) echo "Couldn't guess your platform, giving up" ; exit 1 ;;
   esac
 fi
