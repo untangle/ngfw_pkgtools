@@ -13,12 +13,12 @@ done
 
 ### a few variables
 FILE_IN="build-order.txt"
-PKGTOOLS_HOME="/localhome/qabuildbot/beasts/${DISTRIBUTION}_${TARGET_REP}/build/pkgtools"
+PKGTOOLS_HOME=`dirname $(readlink -f $0)`
 results=0
 
 ### main
 # cd into the main trunk
-cd "/localhome/qabuildbot/beasts/${DISTRIBUTION}_${TARGET_REP}/build/${BUILD_DIR}"
+cd "${BUILD_DIR}"
 
 # first grab the content of the build-order.txt file
 build_dirs=()
