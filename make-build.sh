@@ -11,6 +11,16 @@ while getopts r:b:d:ue option ; do
   esac
 done
 
+processResult() {
+  result=$1
+  [ $result = 0 ] && resultString="SUCCESS" || resultString="ERROR"
+  echo "**** ${resultString}: make in $directory exited with return code $result"
+  echo
+  echo "# ======================="
+  let results=results+result
+  popd
+}
+
 ### a few variables
 FILE_IN="build-order.txt"
 PKGTOOLS_HOME=`dirname $(readlink -f $0)`
@@ -38,17 +48,11 @@ for directory in "${build_dirs[@]}" ; do
       # cd into it, and attempt to build
       pushd "$directory"
       make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP version ${CHECK_EXISTENCE}
-      [ $? = 2 ] && continue
+      result=$?      
+      [ $result = 2 ] && processResult($result) && continue
       make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP source pkg-chroot ${RELEASE}
       result=$?
-
-      # process result
-      [ $result = 0 ] && resultString="SUCCESS" || resultString="ERROR"
-      echo "**** ${resultString}: make in $directory exited with return code $result"
-      echo
-      echo "# ======================="
-      let results=results+result
-      popd ;;
+      processResult($result) ;;
   esac
 done
 
