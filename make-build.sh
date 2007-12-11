@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 ### CLI args
 while getopts r:b:d:ue option ; do
@@ -38,7 +38,7 @@ for directory in "${build_dirs[@]}" ; do
       # cd into it, and attempt to build
       pushd "$directory"
       make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP version ${CHECK_EXISTENCE}
-      [ $? = 4 ] && continue
+      [ $? = 2 ] && continue
       make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP source pkg-chroot ${RELEASE}
       result=$?
 

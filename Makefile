@@ -30,7 +30,7 @@ check-existence:
         sudo cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
 	sudo cowbuilder --execute \
 		        --basepath $${CHROOT_WORK} \
-		        -- /bin/bash -c "apt-get update -q ; apt-cache show $(PACKAGE_NAME) | awk '/Version: $(shell cat debian/version)/ {exit 123}'" || [ $$? = 123 ] && echo "Version $(shell cat debian/version) of $(PACKAGE_NAME) is already available in $(REPOSITORY) $(DISTRIBUTION)" && exit 4
+		        -- /bin/bash -c "apt-get update -q ; apt-cache show $(PACKAGE_NAME) | awk '/Version: $(shell cat debian/version)/ {exit 123}'" || [ $$? = 123 ] && echo "Version $(shell cat debian/version) of $(PACKAGE_NAME) is already available in $(REPOSITORY) $(DISTRIBUTION)" && exit 2
 
 source: checkroot
 	# so we can use that later to find out what to upload if needs be
