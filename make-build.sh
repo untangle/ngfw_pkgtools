@@ -49,7 +49,7 @@ for directory in "${build_dirs[@]}" ; do
       pushd "$directory"
       make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP version ${CHECK_EXISTENCE}
       result=$?      
-      [ $result = 2 ] && processResult($result) && continue
+      [ $result = 2 ] && processResult(0) && continue
       make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP source pkg-chroot ${RELEASE}
       result=$?
       processResult($result) ;;
