@@ -7,7 +7,7 @@ BUILDTOOLS_DIR = $(shell dirname $(MAKEFILE_LIST))
 CHROOT_DIR = /var/cache/pbuilder
 CHROOT_UPDATE_SCRIPT = $(BUILDTOOLS_DIR)/chroot-update.sh
 CHROOT_CHECK_PACKAGE_VERSION_SCRIPT = $(BUILDTOOLS_DIR)/chroot-check-for-package-version.sh
-AVAILABILITY_MARKER = __ALREADY-AVAILABLE__
+AVAILABILITY_MARKER = __NOT-AVAILABLE__
 
 .PHONY: checkroot clean version check-existence source pkg pkg-chroot release release-deb
 
@@ -33,7 +33,7 @@ check-existence: checkroot
 	sudo cp -al $${CHROOT_ORIG} $${CHROOT_WORK} ; \
         sudo cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
 	output=`sudo cowbuilder --execute --basepath $${CHROOT_WORK} -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(PACKAGE_NAME) $(shell cat debian/version) $(AVAILABILITY_MARKER)` ; \
-	echo $$output | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat debian/version) of $(PACKAGE_NAME) is already available in $(REPOSITORY) $(DISTRIBUTION)" && exit 2
+	echo "$${output}" | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat debian/version) of $(PACKAGE_NAME) is not available in $(REPOSITORY) $(DISTRIBUTION)"
 
 source: checkroot
 	# so we can use that later to find out what to upload if needs be
