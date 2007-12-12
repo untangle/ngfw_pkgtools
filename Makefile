@@ -32,8 +32,8 @@ check-existence: checkroot
 	CHROOT_WORK=$(CHROOT_DIR)/$(REPOSITORY)+untangle_`date "+%Y-%m-%dT%H%M%S_%N"`.cow ; \
 	sudo cp -al $${CHROOT_ORIG} $${CHROOT_WORK} ; \
         sudo cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
-	sudo cowbuilder --execute --basepath $${CHROOT_WORK} \
-		        -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(PACKAGE_NAME) $(shell cat debian/version) $(AVAILABILITY_MARKER) | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat debian/version) of $(PACKAGE_NAME) is already available in $(REPOSITORY) $(DISTRIBUTION)" && exit 2
+	output=`sudo cowbuilder --execute --basepath $${CHROOT_WORK} -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(PACKAGE_NAME) $(shell cat debian/version) $(AVAILABILITY_MARKER)` ; \
+	echo $$output | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat debian/version) of $(PACKAGE_NAME) is already available in $(REPOSITORY) $(DISTRIBUTION)" && exit 2
 
 source: checkroot
 	# so we can use that later to find out what to upload if needs be
