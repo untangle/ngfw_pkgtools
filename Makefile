@@ -6,8 +6,11 @@ PACKAGE_NAME = $(shell basename `pwd`)
 BUILDTOOLS_DIR = $(shell dirname $(MAKEFILE_LIST))
 CHROOT_DIR = /var/cache/pbuilder
 CHROOT_UPDATE_SCRIPT = $(BUILDTOOLS_DIR)/chroot-update.sh
+CHROOT_CHECK_PACKAGE_VERSION_SCRIPT = $(BUILDTOOLS_DIR)/chroot-check-for-package-version.sh
+AVAILABILITY_MARKER = __ALREADY-AVAILABLE__
 
-AVAILABILITY_MARKER=__ALREADY-AVAILABLE__
+.PHONY: checkroot clean version check-existence source pkg pkg-chroot release release-deb
+
 checkroot:
 	@if [ "$$UID" = "0" ]; then \
 	  echo "You can't be root to build packages"; \
@@ -24,14 +27,13 @@ version: checkroot
 	bash $(BUILDTOOLS_DIR)/incVersion.sh $(DISTRIBUTION) VERSION=$(VERSION) REPOSITORY=$(REPOSITORY)
 	dpkg-parsechangelog | awk '/Version: / { print $$2 }' >| debian/version
 
-check-existence:
+check-existence: checkroot
 	CHROOT_ORIG=$(CHROOT_DIR)/$(REPOSITORY)+untangle.cow ; \
 	CHROOT_WORK=$(CHROOT_DIR)/$(REPOSITORY)+untangle_`date "+%Y-%m-%dT%H%M%S_%N"`.cow ; \
 	sudo cp -al $${CHROOT_ORIG} $${CHROOT_WORK} ; \
         sudo cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
-	sudo cowbuilder --execute \
-		        --basepath $${CHROOT_WORK} \
-		        -- /bin/bash -c "apt-get update -q ; apt-cache show $(PACKAGE_NAME) | awk '/Version: $(shell cat debian/version)/ {print \"$(AVAILABILITY_MARKER)\"}'" | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat debian/version) of $(PACKAGE_NAME) is already available in $(REPOSITORY) $(DISTRIBUTION)" && exit 2
+	sudo cowbuilder --execute --basepath $${CHROOT_WORK} \
+		        -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(PACKAGE_NAME) $(shell cat debian/version) $(AVAILABILITY_MARKER) | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat debian/version) of $(PACKAGE_NAME) is already available in $(REPOSITORY) $(DISTRIBUTION)" && exit 2
 
 source: checkroot
 	# so we can use that later to find out what to upload if needs be
@@ -74,4 +76,3 @@ release-deb: checkroot
 	lftp -e "set net:max-retries 1 ; cd incoming ; put `ls ./*.deb ./*manifest | xargs` ; exit" mephisto
 	rm -f *manifest
 
-.PHONY: checkroot clean version source pkg release
