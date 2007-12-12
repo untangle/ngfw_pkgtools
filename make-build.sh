@@ -27,8 +27,8 @@ PKGTOOLS_HOME=`dirname $(readlink -f $0)`
 results=0
 
 ### main
-# cd into the main trunk
-cd "${BUILD_DIR}"
+# cd into the main trunk (the buildbot is already in there)
+cd "${BUILD_DIR}" 2> /dev/null
 
 # first grab the content of the build-order.txt file
 build_dirs=()
