@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 ### CLI args
 while getopts r:b:d:ue option ; do
