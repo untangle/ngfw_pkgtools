@@ -33,6 +33,7 @@ check-existence: checkroot
 	sudo cp -al $${CHROOT_ORIG} $${CHROOT_WORK} ; \
         sudo cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
 	output=`sudo cowbuilder --execute --basepath $${CHROOT_WORK} -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(shell awk '/^Package: / {print $$2 ; exit}' debian/control) $(shell cat debian/version) $(AVAILABILITY_MARKER)` ; \
+	sudo rm -fr $${CHROOT_WORK} ; \
 	echo "$${output}" | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat debian/version) of $(PACKAGE_NAME) is not available in $(REPOSITORY) $(DISTRIBUTION)"
 
 source: checkroot
