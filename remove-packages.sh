@@ -28,6 +28,8 @@ shift $(($OPTIND - 1))
 
 list=`${REPREPRO_BASE_COMMAND} listfilter ${DISTRIBUTION} Package | awk '{print $2}' | grep $REGEX $NREGEX | sort -u`
 
-for i in $list ; do echo $i ; done
-
-[ -z "$SIMULATE" ] && [ -n "$list" ] && ${REPREPRO_BASE_COMMAND} remove ${DISTRIBUTION} $list
+if [ -n "$SIMULATE" ] ; then
+  for i in $list ; do echo $i ; done
+else
+  [ -n "$list" ] && ${REPREPRO_BASE_COMMAND} remove ${DISTRIBUTION} $list
+fi
