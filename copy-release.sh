@@ -1,12 +1,15 @@
 #! /bin/bash
 
 usage() {
-  echo "Usage: $0 <version> <fromName> <toName>"
+  echo "Usage: $0 [-c <component>] [-t (dsc|deb)] -r <repository> <distributionFrom> <distributionTo>"
   exit 1
 }
 
-while getopts "h" opt ; do
+while getopts "hr:c:t:" opt ; do
   case "$opt" in
+    r) REPOSITORY=$OPTARG
+    c) [ -n "$OPTARG" ] && COMPONENT="-C $OPTARG" ;;
+    t) [ -n "$OPTARG" ] && TYPE="-T $OPTARG" ;;
     h) usage ;;
     \?) usage ;;
   esac
@@ -16,10 +19,11 @@ if [ ! $# -eq 2 ]; then
   usage
 fi
 
+DISTRIBUTION_FROM=$1
+DISTRIBUTION_TO=$2
+
+[ -z "$REPOSITORY" -o -z "$DISTRIBUTION_FROM" -o -z "DISTRIBUTION_TO" ] && usage && exit 1
 . release-constants.sh
 
-fromName=$1
-toName=$2
-
 # MAIN
-$REPREPRO_BASE_COMMAND listfilter $fromName 'Package' | awk '{print $2}' | xargs $REPREPRO_BASE_COMMAND copy $toName $fromName
+$REPREPRO_BASE_COMMAND listfilter ${DISTRIBUTION_FROM} 'Package' | awk '{print $2}' | xargs $REPREPRO_BASE_COMMAND copy ${DISTRIBUTION_TO} ${DISTRIBUTION_TO}

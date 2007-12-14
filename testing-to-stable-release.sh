@@ -1,9 +1,21 @@
 #! /bin/bash
 
 usage() {
-  echo "Usage: $0"
+  echo "Usage: $0 -r <repository>"
   exit 1
 }
+
+while getopts "r:" opt ; do
+  case "$opt" in
+    r) REPOSITORY=$OPTARG ;;
+    h) usage ;;
+    \?) usage ;;
+  esac
+done
+shift $(($OPTIND - 1))
+
+
+[ -z "$REPOSITORY" ] && usage && exit 1
 
 . release-constants.sh
 
