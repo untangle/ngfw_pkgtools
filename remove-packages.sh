@@ -22,7 +22,7 @@ shift $(($OPTIND - 1))
 
 [ -z "$REPOSITORY" -o -z "$DISTRIBUTION" ] && usage && exit 1
 [ -n "$REGEX" -a -n "$NREGEX" ] && usage && exit 1
-[ -z "$REGEX" -a -z "$NREGEX" ] && REGEX=""
+[ -z "$REGEX" -a -z "$NREGEX" ] && REGEX='""'
 
 . release-constants.sh
 
