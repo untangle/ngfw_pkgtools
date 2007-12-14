@@ -9,8 +9,8 @@ while getopts "r:d:c:e:n:t:hs" opt ; do
   case "$opt" in
     r) REPOSITORY=$OPTARG ;;
     d) DISTRIBUTION=$OPTARG ;;
-    e) REGEX="-E '"$OPTARG"'" ;;
-    n) NREGEX="-v -E '"$OPTARG"'" ;;
+    e) REGEX="-E $OPTARG" ;;
+    n) NREGEX="-v -E $OPTARG" ;;
     s) SIMULATE=true ;;
     c) COMPONENT="-C $OPTARG" ;;
     t) TYPE="-T $OPTARG" ;;
@@ -22,14 +22,14 @@ shift $(($OPTIND - 1))
 
 [ -z "$REPOSITORY" -o -z "$DISTRIBUTION" ] && usage && exit 1
 [ -n "$REGEX" -a -n "$NREGEX" ] && usage && exit 1
-[ -z "$REGEX" -a -z "$NREGEX" ] && REGEX='""'
+[ -z "$REGEX" -a -z "$NREGEX" ] && REGEX="-E ."
 
 . release-constants.sh
 
-list=`${REPREPRO_BASE_COMMAND} listfilter ${DISTRIBUTION} Package | awk '{print $2}' | grep $REGEX $NREGEX`
+list=`${REPREPRO_BASE_COMMAND} listfilter ${DISTRIBUTION} Package | awk '{print $2}' | grep $REGEX $NREGEX | sort -u`
 
 if [ -n "$SIMULATE" ] ; then
-  echo $list
+  for i in $list ; do echo $i ; done
 else
-  [ -n "$list" ] && echo "$list" | xargs ${REPREPRO_BASE_COMMAND} remove ${DISTRIBUTION}
+  [ -n "$list" ] && ${REPREPRO_BASE_COMMAND} remove ${DISTRIBUTION} $list
 fi
