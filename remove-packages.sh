@@ -21,4 +21,5 @@ shift $(($OPTIND - 1))
 
 . release-constants.sh
 
-${REPREPRO_BASE_COMMAND} listfilter ${DISTRIBUTION} Package | awk '{print $2}' | xargs ${REPREPRO_BASE_COMMAND} remove ${DISTRIBUTION}
+list=`${REPREPRO_BASE_COMMAND} listfilter ${DISTRIBUTION} Package | awk '{print $2}'`
+[ -n "$list" ] && echo "$list" | xargs ${REPREPRO_BASE_COMMAND} remove ${DISTRIBUTION}
