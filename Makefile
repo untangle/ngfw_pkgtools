@@ -71,9 +71,8 @@ release: checkroot
 	dput -c $(BUILDTOOLS_DIR)/dput.cf $(PACKAGE_SERVER) ../`dpkg-parsechangelog | awk '/Source: / { print $$2 }'`_`perl -npe 's/^.+://' debian/version`*.changes
 
 release-deb: checkroot
-	for p in *.deb ; do \
+	for p in `find . -name "*.deb"` ; do \
 	  touch $${p/.deb/.$(REPOSITORY)_$(DISTRIBUTION).manifest} ; \
 	done
 	lftp -e "set net:max-retries 1 ; cd incoming ; put `ls ./*.deb ./*manifest | xargs` ; exit" mephisto
 	rm -f *manifest
-
