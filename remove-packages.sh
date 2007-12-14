@@ -11,7 +11,7 @@ while getopts "r:d:c:e:n:t:hs" opt ; do
     d) DISTRIBUTION=$OPTARG ;;
     e) REGEX="-E '"$OPTARG"'" ;;
     n) NREGEX="-v -E '"$OPTARG"'" ;;
-    n) SIMULATE=true ;;
+    s) SIMULATE=true ;;
     c) COMPONENT="-C $OPTARG" ;;
     t) TYPE="-T $OPTARG" ;;
     h) usage ;;
