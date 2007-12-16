@@ -33,6 +33,9 @@ cd "${BUILD_DIR}" 2> /dev/null
 # first grab the content of the build-order.txt file
 build_dirs=()
 while read line ; do
+  # FIXME: Do this better later
+  [ "$TARGET_REP" = "sarge" -a "$line" = "pkgs/untangle-fakekdm" ] && continue
+  [ "$TARGET_REP" = "sarge" -a "$line" = "pkgs/untangle-hardware-support" ] && continue
   build_dirs[${#build_dirs[*]}]="$line"
 done < $FILE_IN
 
