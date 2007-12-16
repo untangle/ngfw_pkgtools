@@ -13,3 +13,7 @@ echo deb http://mephisto/public/$1 $2 main premium upstream >> ${SOURCES}
 #echo deb http://mephisto/public/sarge alpha upstream >> ${SOURCES}
 
 apt-get -q update
+
+umount /proc
+
+exit 0
