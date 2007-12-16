@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash +x
 
 # Use the current distro to pull main, but use upstream from stage/testing+$1/testing+$1/alpha
 # (not everyone has upstream in his target distro)
@@ -14,6 +14,10 @@ echo deb http://mephisto/public/$1 $2 main premium upstream >> ${SOURCES}
 
 apt-get -q update
 
-umount /proc
+umount -f /proc
+sleep 1
+ps aux
+umount -f /proc
+ps aux
 
 exit 0
