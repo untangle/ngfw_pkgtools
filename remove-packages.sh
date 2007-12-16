@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash -x
 
 usage() {
   echo "Usage: $0 -r <repository> -d <distribution> [-s] [-e <regex>|-n <negate_regex>] [-c <component>] [-t (dsc|deb)]"
@@ -29,7 +29,7 @@ shift $(($OPTIND - 1))
 list=`${REPREPRO_BASE_COMMAND} listfilter ${DISTRIBUTION} Package | awk '{print $2}' | grep $REGEX $NREGEX | sort -u`
 
 if [ -n "$SIMULATE" ] ; then
-  for i in $list ; do echo $i ; done
+  echo "$list"
 else
   [ -n "$list" ] && ${REPREPRO_BASE_COMMAND} remove ${DISTRIBUTION} $list
 fi
