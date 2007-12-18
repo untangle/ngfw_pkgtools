@@ -1,13 +1,20 @@
 #!/bin/bash
 
+usage() {
+  echo "$0 -r <repository> -d <distribution> -b <builddir> [-u] [-e]"
+  exit 1
+}
+
 ### CLI args
-while getopts r:b:d:ue option ; do
+while getopts r:b:d:ueh option ; do
   case "$option" in
     r) TARGET_REP="$OPTARG" ;;
     b) BUILD_DIR="$OPTARG" ;;
     d) DISTRIBUTION="$OPTARG" ;;
     u) RELEASE="release" ;;
     e) CHECK_EXISTENCE="check-existence" ;;
+    h) usage ;;
+    \?) usage ;;
   esac
 done
 
@@ -32,31 +39,31 @@ cd "${BUILD_DIR}" 2> /dev/null
 
 # first grab the content of the build-order.txt file
 build_dirs=()
-while read line ; do
-  # FIXME: Do this better later
-  [ "$TARGET_REP" != "sarge" -a "$line" = "pkgs/untangle-fakekdm" ] && continue
-  [ "$TARGET_REP" != "sarge" -a "$line" = "pkgs/untangle-hardware-support" ] && continue
-  build_dirs[${#build_dirs[*]}]="$line"
+while read package distros ; do
+  case $package in
+    \#*) continue ;; # comment
+    "") continue ;; # empty line
+    *) # yes
+      case $distros in
+	*${DISTRIBUTION}*) build_dirs[${#build_dirs[*]}]="$package" ;;
+	*) continue ;; # don't build this one for this distribution
+      esac ;;
+  esac
 done < $FILE_IN
 
 # now cd into each dir in build_dirs and make
 for directory in "${build_dirs[@]}" ; do
-  case "$directory" in
-    \#*) ;; # comment
-    "") ;; # empty line
-    *) # yes
-      echo 
-      echo "# $directory"
-
-      # cd into it, and attempt to build
-      pushd "$directory"
-      make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP version ${CHECK_EXISTENCE}
-      result=$?      
-      [ $result = 2 ] && processResult 0 && continue
-      make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP source pkg-chroot ${RELEASE}
-      result=$?
-      processResult $result ;;
-  esac
+  echo 
+  echo "# $directory"
+  continue
+  # cd into it, and attempt to build
+  pushd "$directory"
+  make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP version ${CHECK_EXISTENCE}
+  result=$?      
+  [ $result = 2 ] && processResult 0 && continue
+  make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP source pkg-chroot ${RELEASE}
+  result=$?
+  processResult $result
 done
 
 exit $results
