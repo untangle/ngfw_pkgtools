@@ -39,14 +39,14 @@ cd "${BUILD_DIR}" 2> /dev/null
 
 # first grab the content of the build-order.txt file
 build_dirs=()
-while read package distros ; do
+while read package repositories ; do
   case $package in
     \#*) continue ;; # comment
     "") continue ;; # empty line
     *) # yes
-      case $distros in
-	*${DISTRIBUTION}*) build_dirs[${#build_dirs[*]}]="$package" ;;
-	*) continue ;; # don't build this one for this distribution
+      case $repositories in
+	*${REPOSITORY}*) build_dirs[${#build_dirs[*]}]="$package" ;;
+	*) continue ;; # don't build this one for this repository
       esac ;;
   esac
 done < $FILE_IN
