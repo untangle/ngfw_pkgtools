@@ -58,13 +58,15 @@ pkg-chroot: checkroot
 	# so we can use that later to find out what to upload if needs be
 	dpkg-parsechangelog | awk '/Version: / { print $$2 }' >| debian/version
 	# FIXME: sign packages themselves ?
+	export HADES_KEY_PASS=Boo4fiuzaiph7ah ; \
+	export HADES_KEY_ALIAS=key ; \
 	CHROOT_ORIG=$(CHROOT_DIR)/$(REPOSITORY)+untangle.cow ; \
 	CHROOT_WORK=$(CHROOT_DIR)/$(REPOSITORY)+untangle_`date "+%Y-%m-%dT%H%M%S_%N"`.cow ; \
 	sudo rm -fr $${CHROOT_WORK} ; \
 	sudo cp -al $${CHROOT_ORIG} $${CHROOT_WORK} ; \
         sudo cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
-				 --buildresult .. --debbuildopts "-i -us -uc -sa" -- --basepath $${CHROOT_WORK} ; \
+				 --buildresult .. --debbuildopts "-i -us -uc -sa" -- --basepath $${CHROOT_WORK} --debug ; \
 	sudo rm -fr $${CHROOT_WORK}
 	svn revert debian/changelog
 
