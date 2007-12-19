@@ -58,6 +58,8 @@ pkg-chroot: checkroot
 	# so we can use that later to find out what to upload if needs be
 	dpkg-parsechangelog | awk '/Version: / { print $$2 }' >| debian/version
 	# FIXME: sign packages themselves ?
+	export HADES_KEY_PASS ; \
+	export HADES_KEY_ALIAS ; \
 	CHROOT_ORIG=$(CHROOT_DIR)/$(REPOSITORY)+untangle.cow ; \
 	CHROOT_WORK=$(CHROOT_DIR)/$(REPOSITORY)+untangle_`date "+%Y-%m-%dT%H%M%S_%N"`.cow ; \
 	sudo rm -fr $${CHROOT_WORK} ; \
