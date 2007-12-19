@@ -64,7 +64,7 @@ pkg-chroot: checkroot
 	sudo cp -al $${CHROOT_ORIG} $${CHROOT_WORK} ; \
         sudo cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
-				 --buildresult .. --debbuildopts "-i -us -uc -sa" -- --basepath $${CHROOT_WORK} --debug ; \
+				 --buildresult .. --debbuildopts "-i -us -uc -sa" -- --basepath $${CHROOT_WORK} ; \
 	sudo rm -fr $${CHROOT_WORK}
 	svn revert debian/changelog
 
