@@ -32,6 +32,7 @@ processResult() {
 FILE_IN="build-order.txt"
 PKGTOOLS_HOME=`dirname $(readlink -f $0)`
 results=0
+export HADES_KEY_ALIAS HADES_KEY_PASS
 
 ### main
 # cd into the main trunk (the buildbot is already in there)
