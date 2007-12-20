@@ -60,6 +60,7 @@ pkg-chroot: checkroot
 	# FIXME: sign packages themselves ?
 	export HADES_KEY_PASS ; \
 	export HADES_KEY_ALIAS ; \
+	echo "alias: " $$HADES_KEY_ALIAS "pass: " $$HADES_KEY_PASS ; \
 	CHROOT_ORIG=$(CHROOT_DIR)/$(REPOSITORY)+untangle.cow ; \
 	CHROOT_WORK=$(CHROOT_DIR)/$(REPOSITORY)+untangle_`date "+%Y-%m-%dT%H%M%S_%N"`.cow ; \
 	sudo rm -fr $${CHROOT_WORK} ; \

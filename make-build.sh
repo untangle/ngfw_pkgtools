@@ -5,6 +5,10 @@ usage() {
   exit 1
 }
 
+debug() {
+  echo "pass: " $HADES_KEY_PASS "alias: " $HADES_KEY_ALIAS
+}
+
 ### CLI args
 while getopts r:b:d:ueh option ; do
   case "$option" in
@@ -33,6 +37,7 @@ FILE_IN="build-order.txt"
 PKGTOOLS_HOME=`dirname $(readlink -f $0)`
 results=0
 export HADES_KEY_ALIAS HADES_KEY_PASS
+debug
 
 ### main
 # cd into the main trunk (the buildbot is already in there)
@@ -58,6 +63,7 @@ for directory in "${build_dirs[@]}" ; do
   echo "# $directory"
   # cd into it, and attempt to build
   pushd "$directory"
+  debug
   make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP version ${CHECK_EXISTENCE}
   result=$?      
   [ $result = 2 ] && processResult 0 && continue
