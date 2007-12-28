@@ -77,3 +77,10 @@ release-deb: checkroot
 	done
 	lftp -e "set net:max-retries 1 ; cd incoming ; put `find . -name "*.deb" -o -name "*.manifest" | xargs` ; exit" mephisto
 	find . -name "*manifest" | xargs rm -f
+
+release-jdi: checkroot
+	for p in *.deb ; do \
+	  touch $${p/.deb/.$(REPOSITORY)_$(DISTRIBUTION).manifest} ; \
+	done
+	lftp -e "cd incoming ; put `ls ./*.deb ./*manifest | xargs` ; exit" mephisto
+	rm -f *manifest
