@@ -1,7 +1,7 @@
-#! /bin/bash -x
+#! /bin/bash
 
 usage() {
-  echo "Usage: $0 -r <repository> -d <distribution> [-s] [-e <regex>|-n <negate_regex>] [-c <component>] [-t (dsc|deb)]"
+  echo "Usage: $0 -r <repository> [-s] [-e <regex>|-n <negate_regex>] [-c <component>] [-t (dsc|deb)] <fromDistribution> <toDistribution>"
   exit 1
 }
 
@@ -20,16 +20,19 @@ while getopts "r:d:c:e:n:t:hs" opt ; do
 done
 shift $(($OPTIND - 1))
 
-[ -z "$REPOSITORY" -o -z "$DISTRIBUTION" ] && usage && exit 1
+FROM_DISTRIBUTION=$1
+TO_DISTRIBUTION=$2
+
+[ -z "$REPOSITORY" -o -z "$FROM_DISTRIBUTION" -o -z "$TO_DISTRIBUTION" ] && usage && exit 1
 [ -n "$REGEX" -a -n "$NREGEX" ] && usage && exit 1
 [ -z "$REGEX" -a -z "$NREGEX" ] && REGEX="-E ."
 
 . release-constants.sh
 
-list=`${REPREPRO_BASE_COMMAND} listfilter ${DISTRIBUTION} Package | grep $REGEX $NREGEX | sort -u`
+list=`${REPREPRO_BASE_COMMAND} listfilter ${FROM_DISTRIBUTION} Package | grep $REGEX $NREGEX | sort -u`
 
 if [ -n "$SIMULATE" ] ; then
   echo "$list"
 else
-  [ -n "$list" ] && echo "$list" | awk '{print $2}' | xargs ${REPREPRO_BASE_COMMAND} remove ${DISTRIBUTION}
+  [ -n "$list" ] && echo "$list" | awk '{print $2}' | xargs echo ${REPREPRO_BASE_COMMAND} copy ${DISTRIBUTION_TO} ${DISTRIBUTION_FROM}
 fi
