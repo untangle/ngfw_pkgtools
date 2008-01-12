@@ -34,5 +34,5 @@ list=`${REPREPRO_BASE_COMMAND} listfilter ${FROM_DISTRIBUTION} Package | grep $R
 if [ -n "$SIMULATE" ] ; then
   echo "$list"
 else
-  [ -n "$list" ] && echo "$list" | awk '{print $2}' | xargs ${REPREPRO_BASE_COMMAND} copy ${DISTRIBUTION_TO} ${DISTRIBUTION_FROM}
+  [ -n "$list" ] && echo "$list" | awk '{print $2}' | xargs ${REPREPRO_BASE_COMMAND} copy ${TO_DISTRIBUTION} ${FROM_DISTRIBUTION}
 fi
