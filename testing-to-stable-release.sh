@@ -17,7 +17,7 @@ shift $(($OPTIND - 1))
 
 [ -z "$REPOSITORY" ] && usage && exit 1
 
-. release-constants.sh
+. `dirname $0`/release-constants.sh
 
 ### MAIN
 

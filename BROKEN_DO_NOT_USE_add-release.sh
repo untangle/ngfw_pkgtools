@@ -17,7 +17,7 @@ if [ $# -lt 2 ] || [ $# -gt 3 ]; then
   usage
 fi
 
-. release-constants.sh
+. `dirname $0`/release-constants.sh
 
 version=$1
 name=$2

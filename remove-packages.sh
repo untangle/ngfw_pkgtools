@@ -24,7 +24,7 @@ shift $(($OPTIND - 1))
 [ -n "$REGEX" -a -n "$NREGEX" ] && usage && exit 1
 [ -z "$REGEX" -a -z "$NREGEX" ] && REGEX="-E ."
 
-. release-constants.sh
+. `dirname $0`/release-constants.sh
 
 list=`${REPREPRO_BASE_COMMAND} listfilter ${DISTRIBUTION} Package | grep $REGEX $NREGEX | sort -u`
 

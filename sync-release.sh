@@ -21,7 +21,7 @@ fi
 
 [ -z "$REPOSITORY" -o -z "$DISTRIBUTION" ] && usage && exit 1
 
-. release-constants.sh
+. `dirname $0`/release-constants.sh
 
 # MAIN
 if [ -z "$simulate" ] ; then
