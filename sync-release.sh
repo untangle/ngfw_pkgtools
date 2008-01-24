@@ -15,7 +15,7 @@ while getopts "shr:d:" opt ; do
   esac
 done
 shift $(($OPTIND - 1))
-if [ ! $# = 1 ] ; then
+if [ ! $# = 0 ] ; then
   usage
 fi
 
@@ -25,10 +25,12 @@ fi
 
 # MAIN
 if [ -z "$simulate" ] ; then
-  $REPREPRO_REMOTE_COMMAND update ${DISTRIBUTION}
+  $SSH_COMMAND /etc/init.d/untangle-gpg-agent start
+  $REPREPRO_REMOTE_COMMAND --noskipold update ${DISTRIBUTION}
   # also remove source packages for premium
-  # FIXME: a bit of redundancy with remove-packages.sh
-  $SSH_COMMAND "$REPREPRO_BASE_COMMAND -T dsc -C premium listfilter ${DISTRIBUTION} Package | awk '{print $2}' | xargs $REPREPRO_BASE_COMMAND -T dsc -C premium remove ${DISTRIBUTION}"
+  $SSH_COMMAND ./remove-packages.sh -r ${REPOSITORY} -d ${DISTRIBUTION} -t dsc -c premium
+  $SSH_COMMAND /etc/init.d/untangle-gpg-agent stop
 else
   $REPREPRO_REMOTE_COMMAND checkupdate $DISTRIBUTION | grep upgraded
+  $SSH_COMMAND ./remove-packages.sh -r ${REPOSITORY} -d ${DISTRIBUTION} -t dsc -c premium -s
 fi
