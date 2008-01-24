@@ -15,9 +15,5 @@ echo deb http://mephisto/public/$1 $2 main premium upstream internal >> ${SOURCE
 apt-get -q update
 
 umount -f /proc
-sleep 1
-ps aux
-umount -f /proc
-ps aux
 
 exit 0
