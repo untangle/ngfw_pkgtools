@@ -34,8 +34,8 @@ def initializeChrootedAptFiles():
   
   # create sources.list file
   open(SOURCES, 'w').write('''
-#deb http://linux.csua.berkeley.edu/debian oldstable main contrib non-free
-#deb http://security.debian.org/ sarge/updates main contrib non-free
+deb http://http.us.debian.org/debian oldstable main contrib non-free
+deb http://security.debian.org/ sarge/updates main contrib non-free
 #php5
 #deb http://people.debian.org/~dexter php5 woody
 # backports
@@ -46,21 +46,21 @@ deb http://10.0.0.105/untangle mustang main premium upstream\n''')
 
   # create preferences files
   open(PREFS, 'w').write('''
-#Package: *
-#Pin: release l=Untangle
-#Pin-Priority: 700
-#Package: *
-#Pin: origin debian.domainmail.org
-#Pin-Priority: 680
+Package: *
+Pin: release l=Untangle
+Pin-Priority: 700
+Package: *
+Pin: origin debian.domainmail.org
+Pin-Priority: 680
 Package: *
 Pin: release a=sarge-backports
 Pin-Priority: 999
-#Package: *
-#Pin: release o=Debian,a=oldstable
-#Pin-Priority: 600
-#Package: *
-#Pin: origin debian.org
-#Pin-Priority: 550\n''')
+Package: *
+Pin: release a=oldstable
+Pin-Priority: 600
+Package: *
+Pin: origin debian.org
+Pin-Priority: 550\n''')
 
 def initializeChrootedApt():
   apt_pkg.InitConfig()
@@ -308,7 +308,7 @@ def parseCommandLineArgs(args):
 
 # main
 pkgs, options = parseCommandLineArgs(sys.argv[1:])
-us = UntangleStore(os.path.join(sys.path[0], '../pkgs/upstream'))
+us = UntangleStore(os.path.join(sys.path[0], '../upstream_pkgs'))
 
 for arg in pkgs:
   pkg = VersionedPackage(arg)
