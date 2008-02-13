@@ -1,7 +1,8 @@
 #! /bin/bash
 
 usage() {
-  echo "Usage: $0 [-s|--simulate] -r <repository> -d <distribution>"
+  echo "Usage: $0 [-s] -r <repository> -d <distribution>"
+  echo "-s : simulate"
   exit 1
 }
 

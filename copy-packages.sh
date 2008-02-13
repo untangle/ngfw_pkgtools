@@ -2,6 +2,11 @@
 
 usage() {
   echo "Usage: $0 -r <repository> [-s] [-e <regex>|-n <negate_regex>] [-c <component>] [-t (dsc|deb)] <fromDistribution> <toDistribution>"
+  echo "-s             : simulate"
+  echo "-e <regex>     : only act on packages matching <regexp>"
+  echo "-n <regex>     : exclude packages matching <regexp>"
+  echo "-c <component> : only act on <component>"
+  echo "-t (dsc,deb)   : only act on source or binary packages"
   exit 1
 }
 
