@@ -8,6 +8,7 @@ SOURCES=/etc/apt/sources.list
 
 # for our own build-deps
 echo deb http://mephisto/public/$1 $2 main premium upstream internal >> ${SOURCES}
+echo deb http://mephisto/public/$1 nightly main premium upstream internal >> ${SOURCES}
 
 #echo deb http://mephisto/public/sarge testing upstream >> ${SOURCES}
 #echo deb http://mephisto/public/sarge alpha upstream >> ${SOURCES}
