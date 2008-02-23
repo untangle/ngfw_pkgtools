@@ -10,7 +10,7 @@ SOURCES=/etc/apt/sources.list
 echo deb http://mephisto/public/$1 $2 main premium upstream internal >> ${SOURCES}
 
 # also search in nightly
-[ $1 != nightly ] && echo deb http://mephisto/public/$1 nightly main premium upstream internal >> ${SOURCES}
+[ $2 != nightly ] && echo deb http://mephisto/public/$1 nightly main premium upstream internal >> ${SOURCES}
 
 #echo deb http://mephisto/public/sarge testing upstream >> ${SOURCES}
 #echo deb http://mephisto/public/sarge alpha upstream >> ${SOURCES}
