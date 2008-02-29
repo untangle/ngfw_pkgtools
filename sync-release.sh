@@ -30,6 +30,7 @@ if [ -z "$simulate" ] ; then
   $REPREPRO_REMOTE_COMMAND --noskipold update ${DISTRIBUTION}
   # also remove source packages for premium
   $SSH_COMMAND ./remove-packages.sh -r ${REPOSITORY} -d ${DISTRIBUTION} -t dsc -c premium
+  $REPREPRO_REMOTE_COMMAND export ${DISTRIBUTION}
   $SSH_COMMAND /etc/init.d/untangle-gpg-agent stop
 else
   $REPREPRO_REMOTE_COMMAND checkupdate $DISTRIBUTION | grep upgraded
