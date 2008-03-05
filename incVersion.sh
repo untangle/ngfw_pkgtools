@@ -74,5 +74,5 @@ fi
 echo "Setting version to \"${version}\", distribution to \"$distribution\""
 DEBEMAIL="${DEBEMAIL:-${USER}@untangle.com}" dch $dchargs "auto build"
 # check changelog back in if version was forced
-[ -n "$versionGiven" ] && svn commit debian/changelog -m "Forcing version to $version"
+[ -n "$versionGiven" ] && [ ! -f UNTANGLE-KEEP-UPSTREAM-VERSION ] && svn commit debian/changelog -m "Forcing version to $version"
 echo " done."

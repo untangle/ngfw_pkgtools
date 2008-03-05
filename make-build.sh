@@ -11,7 +11,7 @@ while getopts r:b:d:v:ueh option ; do
     r) TARGET_REP="$OPTARG" ;;
     b) BUILD_DIR="$OPTARG" ;;
     d) DISTRIBUTION="$OPTARG" ;;
-    d) VERSION="$OPTARG" ;;
+    v) VERSION="$OPTARG" ;;
     u) RELEASE="release" ;;
     e) CHECK_EXISTENCE="check-existence" ;;
     h) usage ;;
