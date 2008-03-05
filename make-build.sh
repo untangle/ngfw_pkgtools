@@ -1,16 +1,17 @@
 #!/bin/bash
 
 usage() {
-  echo "$0 -r <repository> -d <distribution> -b <builddir> [-u] [-e]"
+  echo "$0 -r <repository> -d <distribution> -b <builddir> [-v <version>] [-u] [-e]"
   exit 1
 }
 
 ### CLI args
-while getopts r:b:d:ueh option ; do
+while getopts r:b:d:v:ueh option ; do
   case "$option" in
     r) TARGET_REP="$OPTARG" ;;
     b) BUILD_DIR="$OPTARG" ;;
     d) DISTRIBUTION="$OPTARG" ;;
+    d) VERSION="$OPTARG" ;;
     u) RELEASE="release" ;;
     e) CHECK_EXISTENCE="check-existence" ;;
     h) usage ;;
@@ -60,7 +61,7 @@ for directory in "${build_dirs[@]}" ; do
   make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP version ${CHECK_EXISTENCE}
   result=$?      
   [ $result = 2 ] && processResult 0 && continue
-  make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP source pkg-chroot ${RELEASE}
+  make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP VERSION="$VERSION" source pkg-chroot ${RELEASE}
   result=$?
   processResult $result
 done

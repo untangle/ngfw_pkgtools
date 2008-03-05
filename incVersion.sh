@@ -44,7 +44,10 @@ if [ -z "$version" ] ; then
     distribution=$USER
   fi
 else # force version
-  version=$version
+  if [ -f UNTANGLE-KEEP-UPSTREAM-VERSION ] ; then
+    previousUpstreamVersion=`dpkg-parsechangelog | awk '/Version: / { gsub(/-.*/, "", $2) ; print $2 }'`
+    version=${previousUpstreamVersion}+${version}
+  fi
 fi
 
 osdist=unknown
