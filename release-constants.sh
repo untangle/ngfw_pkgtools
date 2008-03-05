@@ -5,6 +5,7 @@
 REMOTE_USER="root"
 REMOTE_SERVER="updates.untangle.com"
 REPREPRO_BASE_DIR="/var/www/public/$REPOSITORY"
+REPREPRO_DIST_DIR="${REPREPRO_BASE_DIR}/dists"
 REPREPRO_CONF_DIR="${REPREPRO_BASE_DIR}/conf"
 REPREPRO_DISTRIBUTIONS_FILE="${REPREPRO_CONF_DIR}/distributions"
 REPREPRO_BASE_COMMAND="`dirname $0`/reprepro-untangle.sh -V -b ${REPREPRO_BASE_DIR} ${COMPONENT} ${TYPE}"
@@ -13,7 +14,7 @@ REPREPRO_REMOTE_COMMAND="${SSH_COMMAND} ${REPREPRO_BASE_COMMAND}"
 
 # FUNCTIONS
 backup_conf() {
-  tar czvf /var/www/untangle/conf.`date -Iseconds`.tar.gz /var/www/untangle/conf
+  tar czvf /var/www/public/$1/conf.`date -Iseconds`.tar.gz /var/www/public/$1/conf
 }
 
 push_new_releases_names() {

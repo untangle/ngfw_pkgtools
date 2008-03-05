@@ -22,16 +22,18 @@ shift $(($OPTIND - 1))
 ### MAIN
 
 # backup existing conf
-backup_conf
+backup_conf $REPOSITORY
 
-## first we change things locally
-# shift releases
-perl -i -npe 's/(?<!un)stable/oldstable/' $REPREPRO_DISTRIBUTIONS_FILE
-perl -i -npe 's/testing/stable/' $REPREPRO_DISTRIBUTIONS_FILE
-#perl -i -npe 's/alpha/testing/' $REPREPRO_DISTRIBUTIONS_FILE
+# first we change things locally
+if [ -L $REPREPRO_DIST_DIR/testing ] && grep -q testing $REPREPRO_DISTRIBUTIONS_FILE ; then
+  # shift releases
+  perl -i -npe 's/(?<!un)stable/oldstable/' $REPREPRO_DISTRIBUTIONS_FILE
+  perl -i -npe 's/testing/stable/' $REPREPRO_DISTRIBUTIONS_FILE
+  #perl -i -npe 's/alpha/testing/' $REPREPRO_DISTRIBUTIONS_FILE
+fi
 
 # create symlinks
 $REPREPRO_BASE_COMMAND --delete createsymlinks
 
-## then we push changes to updates.untangle.com
-push_new_releases_names
+# then we push changes to updates.untangle.com
+#push_new_releases_names
