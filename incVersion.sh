@@ -13,6 +13,21 @@ version=${2/VERSION=}
 versionGiven=$version
 repository=${3/REPOSITORY=}
 
+osdist=unknown
+if [ -z "${repository}" ] ; then
+  # figure out what platform we're on
+  grep Debian /etc/issue && i=3 || i=2
+  case `head -1 /etc/issue | awk "{ print \\$$i }"` in
+    lenny/sid) repository=sid ;;
+    4.0) repository=etch osdist=debian;; 
+    3.1) repository=sarge osdist=debian;;
+    7.04*) repository=feisty osdist=ubuntu;;
+    7.10*) repository=gutsy osdist=ubuntu;;
+    8.04*) repository=hardy osdist=ubuntu;;
+    *) echo "Couldn't guess your platform, giving up" ; exit 1 ;;
+  esac
+fi
+
 if [ -z "$version" ] ; then
   # not exactly kosher, but I'll contend that incVersion.sh is only
   # called from the Makefile :>
@@ -43,29 +58,19 @@ if [ -z "$version" ] ; then
     version=${baseVersion}+$USER`date +"%Y%m%dT%H%M%S"`
     distribution=$USER
   fi
+  version=${version}-1${repository}
 else # force version
   if [ -f UNTANGLE-KEEP-UPSTREAM-VERSION ] ; then
     previousUpstreamVersion=`dpkg-parsechangelog | awk '/Version: / { gsub(/-.*/, "", $2) ; print $2 }'`
     version=${previousUpstreamVersion}+${version}
   fi
-fi
-
-osdist=unknown
-if [ -z "${repository}" ] ; then
-  # figure out what platform we're on
-  grep Debian /etc/issue && i=3 || i=2
-  case `head -1 /etc/issue | awk "{ print \\$$i }"` in
-    lenny/sid) repository=sid ;;
-    4.0) repository=etch osdist=debian;; 
-    3.1) repository=sarge osdist=debian;;
-    7.04*) repository=feisty osdist=ubuntu;;
-    7.10*) repository=gutsy osdist=ubuntu;;
-    8.04*) repository=hardy osdist=ubuntu;;
-    *) echo "Couldn't guess your platform, giving up" ; exit 1 ;;
+  case "$version" in
+    *-*) ;;
+    *)   version=${version}-1 ;;
   esac
+  version=${version}${repository}
 fi
 
-version=${version}-1${repository}
 dchargs="-v ${version} -D ${distribution}"
 if [ "$osdist" = ubuntu ]; then
     dchargs="$dchargs --distributor Untangle"
