@@ -1,89 +1,101 @@
+# overridables
 DISTRIBUTION ?= $(USER)
-SHELL = /bin/bash
-shell = /bin/bash
-PACKAGE_SERVER = mephisto
-PACKAGE_NAME = $(shell basename `pwd`)
-BUILDTOOLS_DIR = $(shell dirname $(MAKEFILE_LIST))
-CHROOT_DIR = /var/cache/pbuilder
-CHROOT_UPDATE_SCRIPT = $(BUILDTOOLS_DIR)/chroot-update.sh
-CHROOT_CHECK_PACKAGE_VERSION_SCRIPT = $(BUILDTOOLS_DIR)/chroot-check-for-package-version.sh
-AVAILABILITY_MARKER = __NOT-AVAILABLE__
+PACKAGE_SERVER ?= mephisto
 
-.PHONY: checkroot clean version check-existence source pkg pkg-chroot release release-deb
+# pwd of this Makefile
+PKGTOOLS_DIR := $(shell dirname $(MAKEFILE_LIST))
+
+# default shell
+SHELL := /bin/bash
+shell := /bin/bash
+
+# debuild/dpkg-buildpackage options
+DEBUILD_OPTIONS := -e HADES_KEYSTORE -e HADES_KEY_ALIAS -e HADES_KEY_PASS
+DPKGBUILDPACKAGE_OPTIONS := -i -us -uc
+ifeq ($(origin BINARY_UPLOAD), undefined)
+  DPKGBUILDPACKAGE_OPTIONS += -sa
+else
+  DPKGBUILDPACKAGE_OPTIONS += -b
+endif
+
+# destination dir for the debian files (dsc, changes, etc)
+DEST_DIR := /tmp
+
+# current package to build
+PACKAGE_NAME := $(shell basename `pwd`)
+VERSION_FILE := debian/version
+
+# chroot stuff
+CHROOT_DIR := /var/cache/pbuilder
+CHROOT_UPDATE_SCRIPT := $(PKGTOOLS_DIR)/chroot-update.sh
+CHROOT_CHECK_PACKAGE_VERSION_SCRIPT := $(PKGTOOLS_DIR)/chroot-check-for-package-version.sh
+CHROOT_ORIG := $(CHROOT_DIR)/$(REPOSITORY)+untangle.cow
+CHROOT_WORK := $(CHROOT_DIR)/$(REPOSITORY)+untangle_$(shell date "+%Y-%m-%dT%H%M%S_%N").cow
+
+# used for checking existence of a package on the package server
+AVAILABILITY_MARKER := __NOT-AVAILABLE__
+
+########################################################################
+# Rules
+.PHONY: checkroot revert-changelog parse-changelog move-debian-files clean version-real version check-existence source pkg-real pkg pkg-chroot-real pkg-chroot release release-deb
 
 checkroot:
-	@if [ "$$UID" = "0" ]; then \
+	@if [ "$$UID" = "0" ] ; then \
 	  echo "You can't be root to build packages"; \
 	  exit 1; \
 	fi
 
-clean: checkroot
+revert-changelog: # do not leave it locally modified
 	svn revert debian/changelog
-	fakeroot debian/rules clean
-	rm -f debian/version
 
-version: checkroot
-	svn revert debian/changelog
-	bash $(BUILDTOOLS_DIR)/incVersion.sh $(DISTRIBUTION) VERSION=$(VERSION) REPOSITORY=$(REPOSITORY)
-	dpkg-parsechangelog | awk '/Version: / { print $$2 }' >| debian/version
+parse-changelog: # store version so we can use that later for uploading
+	dpkg-parsechangelog | awk '/Version:/{print $$2}' >| $(VERSION_FILE)
+
+move-debian-files:
+	find .. -maxdepth 1 -name "$(PACKAGE_NAME)*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec mv "{}" $(DEST_DIR) \;
+	find .. -maxdepth 1 -name "$(PACKAGE_NAME)*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec mv "{}" $(DEST_DIR) \;
+
+clean: checkroot revert-changelog
+	fakeroot debian/rules clean
+	find $(DEST_DIR) -maxdepth 1 -name "$(PACKAGE_NAME)*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec rm -f "{}" \;
+	find $(DEST_DIR) -maxdepth 1 -name "$(PACKAGE_NAME)*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec rm -f "{}" \;
+	rm -f $(VERSION_FILE)
+
+version-real: checkroot
+	bash $(PKGTOOLS_DIR)/incVersion.sh $(DISTRIBUTION) VERSION=$(VERSION) REPOSITORY=$(REPOSITORY)
+version: version-real parse-changelog
 
 check-existence: checkroot
-	CHROOT_ORIG=$(CHROOT_DIR)/$(REPOSITORY)+untangle.cow ; \
-	CHROOT_WORK=$(CHROOT_DIR)/$(REPOSITORY)+untangle_`date "+%Y-%m-%dT%H%M%S_%N"`.cow ; \
-	sudo cp -al $${CHROOT_ORIG} $${CHROOT_WORK} ; \
-        sudo cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
-	output=`sudo cowbuilder --execute --basepath $${CHROOT_WORK} -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(shell awk '/^Package: / {print $$2 ; exit}' debian/control) $(shell cat debian/version) $(AVAILABILITY_MARKER)` ; \
-	sudo rm -fr $${CHROOT_WORK} ; \
-	echo "$${output}" | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat debian/version) of $(PACKAGE_NAME) is not available in $(REPOSITORY) $(DISTRIBUTION)"
+	sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK)
+	sudo cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION)
+	output=`sudo cowbuilder --execute --basepath $(CHROOT_WORK) -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(PACKAGE_NAME) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
+	sudo rm -fr $(CHROOT_WORK) ; \
+	echo "$${output}" | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat $(VERSION_FILE)) of $(PACKAGE_NAME) is not available in $(REPOSITORY)/$(DISTRIBUTION)"
 
-source: checkroot
-	# so we can use that later to find out what to upload if needs be
-	dpkg-parsechangelog | awk '/Version: / { print $$2 }' >| debian/version
-	tar cz --exclude="*stamp*" \
-		--exclude=".svn" \
-		--exclude="debian" \
-		--exclude="todo" \
-		--exclude="staging" \
-		-f ../`dpkg-parsechangelog | awk '/Source: / { print $$2 }'`_`perl -npe 's/(.+)-.*/$$1/ ; s/^.+://' debian/version`.orig.tar.gz ../`basename $$(pwd)`
+source: checkroot parse-changelog
+	tar cz --exclude="*stamp*" --exclude=".svn" --exclude="debian" \
+	       --exclude="todo" --exclude="staging" \
+	       -f ../`dpkg-parsechangelog | awk '/^Source:/{printf "%s_", $$2} /^Version:/{gsub(/(^.+:|-.*)/, "", $$2) ; print $$2}'`.orig.tar.gz ../$(PACKAGE_NAME)
 
-# FIXME: duplicate code between pkg and pkg-chroot
-pkg: checkroot
-	# so we can use that later to find out what to upload if needs be
-	dpkg-parsechangelog | awk '/Version: / { print $$2 }' >| debian/version
-	# FIXME: sign packages when we move to apt 0.6
-	/usr/bin/debuild -e HADES_KEYSTORE -e HADES_KEY_ALIAS -e HADES_KEY_PASS -i -us -uc -sa
-	svn revert debian/changelog
+pkg-real: checkroot parse-changelog
+	# FIXME: sign packages themselves when we move to apt 0.6
+	/usr/bin/debuild $(DEBUILD_OPTIONS) $(DPKGBUILDPACKAGE_OPTIONS)
+pkg: pkg-real move-debian-files revert-changelog
 
-pkg-chroot: checkroot
-	# so we can use that later to find out what to upload if needs be
-	dpkg-parsechangelog | awk '/Version: / { print $$2 }' >| debian/version
-	# FIXME: sign packages themselves ?
-	CHROOT_ORIG=$(CHROOT_DIR)/$(REPOSITORY)+untangle.cow ; \
-	CHROOT_WORK=$(CHROOT_DIR)/$(REPOSITORY)+untangle_`date "+%Y-%m-%dT%H%M%S_%N"`.cow ; \
-	sudo rm -fr $${CHROOT_WORK} ; \
-	sudo cp -al $${CHROOT_ORIG} $${CHROOT_WORK} ; \
-        sudo cowbuilder --execute --basepath $${CHROOT_WORK} --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
+pkg-chroot-real: checkroot parse-changelog
+	# FIXME: sign packages themselves when we move to apt 0.6
+	sudo rm -fr $(CHROOT_WORK)
+	sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK)
+	sudo cowbuilder --execute --basepath $(CHROOT_WORK) --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION)
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
-				 --buildresult .. --debbuildopts "-i -us -uc -sa" -- --basepath $${CHROOT_WORK} ; \
-	sudo rm -fr $${CHROOT_WORK}
-	svn revert debian/changelog
+	         --buildresult $(DEST_DIR) \
+	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
+	         --basepath $(CHROOT_WORK)
+	sudo rm -fr $(CHROOT_WORK)
+pkg-chroot: pkg-chroot-real move-debian-files revert-changelog
 
 release: checkroot
-	dput -c $(BUILDTOOLS_DIR)/dput.cf $(PACKAGE_SERVER) ../`dpkg-parsechangelog | awk '/Source: / { print $$2 }'`_`perl -npe 's/^.+://' debian/version`*.changes
+	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER) $(DEST_DIR)/$(PACKAGE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
 
 release-deb: checkroot
-	for p in `find . -name "*.deb"` ; do \
-	  touch $${p/.deb/.$(REPOSITORY)_$(DISTRIBUTION).manifest} ; \
-	done
-	lftp -e "set net:max-retries 1 ; cd incoming ; put `find . -name "*.deb" -o -name "*.manifest" | xargs` ; exit" mephisto
-	find . -name "*manifest" | xargs rm -f
-
-release-jdi: checkroot
-	for p in *.deb ; do \
-	  touch $${p/.deb/.$(REPOSITORY)_$(DISTRIBUTION).manifest} ; \
-	done
-	lftp -e "set net:max-retries 1 ; cd incoming ; put `echo *.deb *.manifest | xargs` ; exit" mephisto
-	rm -f *manifest
-
-
-
+	release-binary-packages.sh -r $(REPOSITORY) -d $(DISTRIBUTION) $(RECURSIVE)
