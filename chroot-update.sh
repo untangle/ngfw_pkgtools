@@ -7,11 +7,18 @@
 SOURCES=/etc/apt/sources.list
 
 # for our own build-deps
-echo deb http://mephisto/public/$1 $2 main premium upstream internal >> ${SOURCES}
+echo deb http://mephisto/public/$1 $2 main premium upstream >> ${SOURCES}
+case "$USER" in
+  *buildbot*) echo deb http://mephisto/public/$1 $2 internal >> ${SOURCES}
+esac
 
 # also search in nightly
-[ $2 != nightly ] && echo deb http://mephisto/public/$1 nightly main premium upstream internal >> ${SOURCES}
-
+if [ $2 != nightly ] ; then
+  echo deb http://mephisto/public/$1 nightly main premium upstream >> ${SOURCES}
+  case "$USER" in
+    *buildbot*) echo deb http://mephisto/public/$1 nightly internal >> ${SOURCES}
+  esac
+fi
 #echo deb http://mephisto/public/sarge testing upstream >> ${SOURCES}
 #echo deb http://mephisto/public/sarge alpha upstream >> ${SOURCES}
 
