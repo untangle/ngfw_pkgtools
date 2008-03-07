@@ -33,8 +33,13 @@ if [ -z "$version" ] ; then
   # called from the Makefile :>
   versionFile=`dirname $0`/resources/VERSION
 
-  # get 2 values from SVN: last changed revision & timestamp for the
+  # get some values from SVN: branch, last changed revision, timestamp for the
   # current directory
+  url=`svn info . | awk '/^URL:/{print $2}'`
+  case $url in
+    *branch/prod/*) branch=`echo $url | perl -pe 's|.*/branch/prod/(.*?)/.*|\1|'` ;;
+    *) branch=trunk ;;
+  esac
   revision=`svn info --recursive . | awk '/Last Changed Rev: / { print $4 }' | sort -n | tail -1`
   timestamp=`svn info --recursive . | awk '/Last Changed Date:/ { gsub(/-/, "", $4) ; print $4 }' | sort -n | tail -1`
 
@@ -44,7 +49,7 @@ if [ -z "$version" ] ; then
   # this is the base version; it will be tweaked a bit oif need be:
   # - append a local modification marker is we're not up to date
   # - prepend the upstream version if UNTANGLE-KEEP-UPSTREAM-VERSION exists
-  baseVersion=`cat $versionFile`~svn${timestamp}r${revision}
+  baseVersion=`cat $versionFile`~svn${timestamp}r${revision}${branch}
 
   if [ -f UNTANGLE-KEEP-UPSTREAM-VERSION ] ; then
     previousUpstreamVersion=`dpkg-parsechangelog | awk '/Version: / { gsub(/-.*/, "", $2) ; print $2 }'`
@@ -58,18 +63,19 @@ if [ -z "$version" ] ; then
     version=${baseVersion}+$USER`date +"%Y%m%dT%H%M%S"`
     distribution=$USER
   fi
-  version=${version}-1${repository}
+  version=${version}-1
 else # force version
   if [ -f UNTANGLE-KEEP-UPSTREAM-VERSION ] ; then
     previousUpstreamVersion=`dpkg-parsechangelog | awk '/Version: / { gsub(/-.*/, "", $2) ; print $2 }'`
     version=${previousUpstreamVersion}+${version}
   fi
   case "$version" in
-    *-*) ;;
+    *-*) ;; # the user did supply a Debian revision
     *)   version=${version}-1 ;;
   esac
-  version=${version}${repository}
 fi
+
+version=${version}${repository}
 
 dchargs="-v ${version} -D ${distribution}"
 if [ "$osdist" = ubuntu ]; then
