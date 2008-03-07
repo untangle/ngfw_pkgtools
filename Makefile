@@ -19,7 +19,7 @@ else
 endif
 
 ifneq ($(origin RECURSIVE), undefined)
-  RECURSIVE := -a
+  REC := -a
 endif
 
 # destination dir for the debian files (dsc, changes, etc)
@@ -102,4 +102,4 @@ release: checkroot
 	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER) $(DEST_DIR)/$(PACKAGE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
 
 release-deb: checkroot
-	$(PKGTOOLS_DIR)/release-binary-packages.sh -r $(REPOSITORY) -d $(DISTRIBUTION) $(RECURSIVE)
+	$(PKGTOOLS_DIR)/release-binary-packages.sh -r $(REPOSITORY) -d $(DISTRIBUTION) $(REC)
