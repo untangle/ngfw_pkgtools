@@ -23,7 +23,7 @@ DEBS=$(find . $MAX_DEPTH -name "*.deb" | xargs)
 
 if [ -n "$DEBS" ] ; then
   for p in $DEBS ; do
-    touch ${p/.deb/.$REPOSITORY_$DISTRIBUTION.manifest}
+    touch ${p/.deb/.${REPOSITORY}_${DISTRIBUTION}.manifest}
   done
 
   MANIFESTS=$(find . $MAXDEPTH -name "*.manifest" | xargs)
