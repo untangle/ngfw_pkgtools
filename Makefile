@@ -18,6 +18,10 @@ else
   DPKGBUILDPACKAGE_OPTIONS += -b
 endif
 
+ifneq ($(origin RECURSIVE), undefined)
+  RECURSIVE := -a
+endif
+
 # destination dir for the debian files (dsc, changes, etc)
 DEST_DIR := /tmp
 
