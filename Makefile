@@ -61,9 +61,11 @@ move-debian-files:
 
 clean: checkroot revert-changelog
 	fakeroot debian/rules clean
+	rm -f $(VERSION_FILE)
+clean-debian-files: 
 	find $(DEST_DIR) -maxdepth 1 -name "$(PACKAGE_NAME)*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec rm -f "{}" \;
 	find $(DEST_DIR) -maxdepth 1 -name "$(PACKAGE_NAME)*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec rm -f "{}" \;
-	rm -f $(VERSION_FILE)
+clean-all: clean clean-debian-files
 
 version-real: checkroot
 	bash $(PKGTOOLS_DIR)/incVersion.sh $(DISTRIBUTION) VERSION=$(VERSION) REPOSITORY=$(REPOSITORY)
