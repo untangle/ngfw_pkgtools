@@ -56,7 +56,7 @@ parse-changelog: # store version so we can use that later for uploading
 	dpkg-parsechangelog | awk '/Version:/{print $$2}' >| $(VERSION_FILE)
 
 move-debian-files:
-	find .. -maxdepth 1 -name "$(PACKAGE_NAME)*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec mv "{}" $(DEST_DIR) \;
+	find .. -maxdepth 1 -name "$(PACKAGE_NAME)*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(upload\|changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec mv "{}" $(DEST_DIR) \;
 	find .. -maxdepth 1 -name "$(PACKAGE_NAME)*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec mv "{}" $(DEST_DIR) \;
 
 clean: checkroot revert-changelog
