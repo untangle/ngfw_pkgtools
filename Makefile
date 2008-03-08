@@ -30,6 +30,7 @@ DEST_DIR := /tmp
 
 # current package to build
 SOURCE_NAME := $(shell dpkg-parsechangelog | awk '/^Source:/{print $$2}')
+FIRST_BINARY_PACKAGE := $(shell awk '/^Package: / {print $$2 ; exit}' debian/control)
 VERSION_FILE := debian/version
 
 # chroot stuff
@@ -77,7 +78,7 @@ version: version-real parse-changelog
 check-existence: checkroot
 	sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK)
 	sudo cowbuilder --execute --basepath $(CHROOT_WORK) --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION)
-	output=`sudo cowbuilder --execute --basepath $(CHROOT_WORK) -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(SOURCE_NAME) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
+	output=`sudo cowbuilder --execute --basepath $(CHROOT_WORK) -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(FIRST_BINARY_PACKAGE) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
 	sudo rm -fr $(CHROOT_WORK) ; \
 	echo "$${output}" | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat $(VERSION_FILE)) of $(SOURCE_NAME) is not available in $(REPOSITORY)/$(DISTRIBUTION)"
 
