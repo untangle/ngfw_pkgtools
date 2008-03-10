@@ -10,7 +10,6 @@ ops = { '<=' : lambda x: x <= 0,
         '>'  : lambda x: x > 0,
         '>=' : lambda x: x >= 0 }
 
-# functions
 TMP_DIR    = '/tmp/foo'
 SOURCES    = TMP_DIR + '/sources.list'
 PREFS      = TMP_DIR + '/preferences'
@@ -20,7 +19,28 @@ LISTS      = STATE + '/lists'
 STATUS_DIR = TMP_DIR + '/varlibdpkg'
 STATUS     = STATUS_DIR + '/status'
 
-def initializeChrootedAptFiles():
+# functions
+def parseCommandLineArgs(args):
+  usage = "usage: %prog [options] <package> [<package>,...]"
+
+  parser = optparse.OptionParser(usage=usage)
+  parser.add_option("-f", "--force-download", dest="forceDownload",
+                    action="store_true", default=False,
+                    help="Force download of all dependencies" )
+  parser.add_option("-d", "--distribution", dest="distribution",
+                    action="store", default="sarge",
+                    help="Set target distribution" )
+  
+  options, args = parser.parse_args(args)
+  
+  if len(args) == 0:
+    parser.error("Wrong number of arguments")
+  else:
+    pkgs = args
+    
+  return pkgs, options
+
+def initializeChrootedAptFiles(distribution):
   os.system('rm -fr ' + TMP_DIR)
 
   os.makedirs(TMP_DIR)
@@ -34,15 +54,15 @@ def initializeChrootedAptFiles():
   
   # create sources.list file
   open(SOURCES, 'w').write('''
-deb http://http.us.debian.org/debian oldstable main contrib non-free
-deb http://security.debian.org/ sarge/updates main contrib non-free
+deb http://http.us.debian.org/debian %s main contrib non-free
+deb http://security.debian.org/ %s/updates main contrib non-free
 #php5
 #deb http://people.debian.org/~dexter php5 woody
 # backports
-deb http://www.backports.org/debian sarge-backports main contrib non-free
+deb http://www.backports.org/debian %s-backports main contrib non-free
 # volatile
 #deb http://debian.domainmail.org/debian-volatile sarge/volatile main contrib non-free
-deb http://10.0.0.105/untangle mustang main premium upstream\n''')
+deb http://10.0.0.105/public/%s stable main premium upstream\n''' % (distribution, distribution, distribution, distribution))
 
   # create preferences files
   open(PREFS, 'w').write('''
@@ -56,11 +76,11 @@ Package: *
 Pin: release a=sarge-backports
 Pin-Priority: 999
 Package: *
-Pin: release a=oldstable
+Pin: release a=%s
 Pin-Priority: 600
 Package: *
 Pin: origin debian.org
-Pin-Priority: 550\n''')
+Pin-Priority: 550\n''' % (distribution,))
 
 def initializeChrootedApt():
   apt_pkg.InitConfig()
@@ -75,14 +95,14 @@ def initializeChrootedApt():
 # this needs to be called before the classes are declared, since the static
 # variables in them are initialized right away
 
+pkgs, options = parseCommandLineArgs(sys.argv[1:])
 print "Initializing chrooted apt"
-initializeChrootedAptFiles()
+initializeChrootedAptFiles(options.distribution)
 initializeChrootedApt()
 
 # classes
 class Package:
-
-  cache      = apt.Cache()
+  cache = apt.Cache()
 
   print "Updating cache..."
   cache.update()
@@ -98,7 +118,7 @@ class Package:
   basePackages  = ()
   
 #  basePackages = ( 'libc6', 'debconf', 'libx11-6', 'xfree86-common',
-#                   'debianutils', 'zlib1g' )
+#                   'debianutils', 'zlib1g', 'perl' )
 
   def __init__(self, name, version = None, fileName = None):
     self.name     = name
@@ -135,6 +155,7 @@ class VersionedPackage(Package):
         self.version           = self._section['Version']
         self.isRequired        = self._section['Priority'] == 'required'
         self.isImportant       = self._section['Priority'] == 'important'
+        self.isStandard        = self._section['Priority'] == 'standard'
         self.fileName          = self._sanitizeName(self._section["Filename"])
         
         self._versionedPackage = Package.depcache.GetCandidateVer(\
@@ -160,7 +181,7 @@ class VersionedPackage(Package):
     if self.foundDeps:
       return self.deps
     
-    if self.isVirtual or self.isRequired or self.isImportant:
+    if self.isVirtual or self.isRequired or self.isImportant or self.isStandard:
       return []
     deps = self._versionedPackage.DependsList
     if Package.dependsKey in deps:
@@ -288,27 +309,8 @@ class UntangleStore:
       s += "%s\n" % p
     return s[:-1]
 
-
-def parseCommandLineArgs(args):
-  usage = "usage: %prog [options] <package> [<package>,...]"
-
-  parser = optparse.OptionParser(usage=usage)
-  parser.add_option("-f", "--force-download", dest="forceDownload",
-                    action="store_true", default=False,
-                    help="Force download of all dependencies" )
-  
-  options, args = parser.parse_args(args)
-  
-  if len(args) == 0:
-    parser.error("Wrong number of arguments")
-  else:
-    pkgs = args
-    
-  return pkgs, options
-
 # main
-pkgs, options = parseCommandLineArgs(sys.argv[1:])
-us = UntangleStore(os.path.join(sys.path[0], '../upstream_pkgs'))
+us = UntangleStore(os.path.join(sys.path[0], '../upstream_pkgs_%s' % (options.distribution)))
 
 for arg in pkgs:
   pkg = VersionedPackage(arg)
@@ -318,7 +320,7 @@ for arg in pkgs:
 #      print p.name
       versionedPackage = VersionedPackage(p.name)
 
-      if (versionedPackage.isVirtual or versionedPackage.isRequired or versionedPackage.isImportant) and not options.forceDownload:
+      if (versionedPackage.isVirtual or versionedPackage.isRequired or versionedPackage.isImportant or versionedPackage.isStandard) and not options.forceDownload:
         print "%s won't be downloaded since --force-download wasn't used." % p.name
         continue
 
