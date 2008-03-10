@@ -46,8 +46,10 @@ while read package repositories ; do
     "") continue ;; # empty line
     *) # yes
       case $repositories in
-	*${REPOSITORY}*) build_dirs[${#build_dirs[*]}]="$package" ;;
-	*) continue ;; # don't build this one for this repository
+	*${TARGET_REP}*) build_dirs[${#build_dirs[*]}]="$package" ;;
+	*)
+	  echo $package
+	  continue ;; # don't build this one for this repository
       esac ;;
   esac
 done < $FILE_IN
