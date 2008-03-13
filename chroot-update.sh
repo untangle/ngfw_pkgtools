@@ -1,4 +1,4 @@
-#! /bin/bash +x
+#! /bin/bash
 
 # Use the current distro to pull main, but use upstream from stage/testing+$1/testing+$1/alpha
 # (not everyone has upstream in his target distro)
@@ -8,7 +8,7 @@ SOURCES=/etc/apt/sources.list
 
 # for our own build-deps
 echo deb http://mephisto/public/$1 $2 main premium upstream >> ${SOURCES}
-case "$USER" in
+case "$HOME" in
   *buildbot*) echo deb http://mephisto/public/$1 $2 internal >> ${SOURCES}
 esac
 
@@ -24,6 +24,6 @@ fi
 
 apt-get -q update
 
-umount -f /proc
+#umount -f /proc 2> /dev/null
 
 exit 0
