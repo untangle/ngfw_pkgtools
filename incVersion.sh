@@ -37,7 +37,7 @@ if [ -z "$version" ] ; then
   # current directory
   url=`svn info . | awk '/^URL:/{print $2}'`
   case $url in
-    *branch/prod/*) branch=`echo $url | perl -pe 's|.*/branch/prod/(.*?)/.*|\1|'` ;;
+    *branch/prod/*) branch=`echo $url | perl -pe 's|.*/branch/prod/(.*?)/.*|\1| ; s/-//g'` ;;
     *) branch=trunk ;;
   esac
   revision=`svn info --recursive . | awk '/Last Changed Rev: / { print $4 }' | sort -n | tail -1`
