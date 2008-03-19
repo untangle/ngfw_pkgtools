@@ -61,8 +61,9 @@ deb http://security.debian.org/ %s/updates main contrib non-free
 # backports
 deb http://www.backports.org/debian %s-backports main contrib non-free
 # volatile
-#deb http://debian.domainmail.org/debian-volatile sarge/volatile main contrib non-free
-deb http://10.0.0.105/public/%s stable main premium upstream\n''' % (distribution, distribution, distribution, distribution))
+deb http://volatile.debian.org/debian-volatile %s/volatile main contrib non-free
+# mephisto
+deb http://10.0.0.105/public/%s stable main premium upstream\n''' % (distribution, distribution, distribution, distribution, distribution))
 
   # create preferences files
   open(PREFS, 'w').write('''
@@ -70,17 +71,17 @@ Package: *
 Pin: release l=Untangle
 Pin-Priority: 700
 Package: *
-Pin: origin debian.domainmail.org
-Pin-Priority: 680
+Pin: origin volatile.debian.org
+Pin-Priority: 695
 Package: *
-Pin: release a=sarge-backports
-Pin-Priority: 999
+Pin: release a=%s-backports
+Pin-Priority: 690
 Package: *
 Pin: release a=%s
 Pin-Priority: 600
 Package: *
 Pin: origin debian.org
-Pin-Priority: 550\n''' % (distribution,))
+Pin-Priority: 550\n''' % (distribution, distribution))
 
 def initializeChrootedApt():
   apt_pkg.InitConfig()
@@ -160,7 +161,7 @@ class VersionedPackage(Package):
         
         self._versionedPackage = Package.depcache.GetCandidateVer(\
           Package.pkgCache[self.name])
-
+            
         packageFile = self._versionedPackage.FileList[0][0]
         indexFile = Package.cache._list.FindIndex(packageFile)
         self.url = indexFile.ArchiveURI(self.fileName)
@@ -226,6 +227,10 @@ class VersionedPackage(Package):
       # FIXME: make this a CL option
       self.allDeps = self._getAllDeps(extra = None)
       self.allDeps.add(DepPackage(self.name))
+#      print self.name
+#      print DepPackage(self.name)
+#      for p in self.allDeps:
+#        print p.name
       self.foundAllDeps = True
     return self.allDeps
 
@@ -315,10 +320,12 @@ us = UntangleStore(os.path.join(sys.path[0], '../upstream_pkgs_%s' % (options.di
 for arg in pkgs:
   pkg = VersionedPackage(arg)
 
-  for p in pkg.getAllDeps():
+  deps = pkg.getAllDeps()
+  
+  for p in deps:
     try:
-#      print p.name
       versionedPackage = VersionedPackage(p.name)
+#      print "*** ", versionedPackage.name, versionedPackage.version
 
       if (versionedPackage.isVirtual or versionedPackage.isRequired or versionedPackage.isImportant or versionedPackage.isStandard) and not options.forceDownload:
         print "%s won't be downloaded since --force-download wasn't used." % p.name
@@ -326,17 +333,21 @@ for arg in pkgs:
 
       if not us.has(versionedPackage):
         print "Package %s is missing" % p.name
-      elif us.has(versionedPackage) and not us.get(versionedPackage).satisfies(p):
-        print "Version of %s doesn't satisfy dependency (%s)" % (us.get(versionedPackage), p)
-        print "Downloading new one, but you probably want to remove the older one (%s)" % us.getByName(p.name)
+      elif us.has(versionedPackage):
+        if versionedPackage.name in pkgs:
+          print "Download explicitely requested"
+        elif not us.get(versionedPackage).satisfies(p):
+          print "Version of %s doesn't satisfy dependency (%s)" % (us.get(versionedPackage), p)
+          print "Downloading new one, but you probably want to remove the older one (%s)" % us.getByName(p.name)
       else:
         continue
       
       versionedPackage.download()
       us.add(versionedPackage)
 
-    except:
+    except Exception,e:
       print p, type(p), p.name, dir(p)
+      raise
 #      sys.exit(1)
   #  else:
   #    print "%s is in the store and satisfies the dependency" % us.get(versionedPackage)
