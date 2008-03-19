@@ -29,8 +29,8 @@ CUR_DIR := $(shell basename `pwd`)
 DEST_DIR := /tmp
 
 # current package to build
-SOURCE_NAME := $(shell dpkg-parsechangelog | awk '/^Source:/{print $$2}')
-FIRST_BINARY_PACKAGE := $(shell awk '/^Package: / {print $$2 ; exit}' debian/control)
+SOURCE_NAME := $(shell dpkg-parsechangelog 2> /dev/null | awk '/^Source:/{print $$2}')
+FIRST_BINARY_PACKAGE := $(shell awk '/^Package: / {print $$2 ; exit}' debian/control 2> /dev/null)
 VERSION_FILE := debian/version
 
 # chroot stuff
@@ -104,8 +104,8 @@ pkg-chroot-real: checkroot parse-changelog
 	sudo rm -fr $(CHROOT_WORK)
 pkg-chroot: pkg-chroot-real move-debian-files revert-changelog
 
-release: checkroot
+release:
 	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER) $(DEST_DIR)/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
 
-release-deb: checkroot
+release-deb:
 	$(PKGTOOLS_DIR)/release-binary-packages.sh -r $(REPOSITORY) -d $(DISTRIBUTION) $(REC)
