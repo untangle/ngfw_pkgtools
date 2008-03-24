@@ -59,7 +59,7 @@ if [ -z "$version" ] ; then
   if [ -z "$hasLocalChanges" ] ; then
     version=$baseVersion
   else
-    echo "The changes were: $hasLocalChanges"
+    echo -e "The changes were:\n$hasLocalChanges"
     version=${baseVersion}+$USER`date +"%Y%m%dT%H%M%S"`
     distribution=$USER
   fi
