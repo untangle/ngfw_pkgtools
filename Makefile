@@ -1,9 +1,10 @@
+# pwd of this Makefile
+PKGTOOLS_DIR := $(shell dirname $(MAKEFILE_LIST))
+
 # overridables
 DISTRIBUTION ?= $(USER)
 PACKAGE_SERVER ?= mephisto
-
-# pwd of this Makefile
-PKGTOOLS_DIR := $(shell dirname $(MAKEFILE_LIST))
+REPOSITORY ?= $(shell $(PKGTOOLS_DIR)/getPlatform.sh)
 
 # default shell
 SHELL := /bin/bash
@@ -32,7 +33,7 @@ DEST_DIR := /tmp
 SOURCE_NAME := $(shell dpkg-parsechangelog 2> /dev/null | awk '/^Source:/{print $$2}')
 FIRST_BINARY_PACKAGE := $(shell awk '/^Package: / {print $$2 ; exit}' debian/control 2> /dev/null)
 VERSION_FILE := debian/version
-REPOSITORY := $(shell $(PKGTOOLS_DIR)/getPlatform.sh)
+
 
 # chroot stuff
 CHROOT_DIR := /var/cache/pbuilder
