@@ -32,6 +32,7 @@ DEST_DIR := /tmp
 SOURCE_NAME := $(shell dpkg-parsechangelog 2> /dev/null | awk '/^Source:/{print $$2}')
 FIRST_BINARY_PACKAGE := $(shell awk '/^Package: / {print $$2 ; exit}' debian/control 2> /dev/null)
 VERSION_FILE := debian/version
+REPOSITORY := $(shell $(PKGTOOLS_DIR)/getPlatform.sh)
 
 # chroot stuff
 CHROOT_DIR := /var/cache/pbuilder
@@ -105,7 +106,7 @@ pkg-chroot-real: checkroot parse-changelog
 pkg-chroot: pkg-chroot-real move-debian-files revert-changelog
 
 release:
-	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER) $(DEST_DIR)/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
+	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER)_$(REPOSITORY) $(DEST_DIR)/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
 
 release-deb:
 	$(PKGTOOLS_DIR)/release-binary-packages.sh -r $(REPOSITORY) -d $(DISTRIBUTION) $(REC)
