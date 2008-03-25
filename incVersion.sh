@@ -13,9 +13,9 @@ version=${2/VERSION=}
 versionGiven=$version
 repository=${3/REPOSITORY=}
 
-osdist=unknown
 [ -z "${repository}" ] && repository=`$0/getPlatform.sh`
 
+osdist=unknown
 case $repository in
   sarge|etch|sid) osdist=debian ;;
   feisty|gutsy|hardy) osdist=ubuntu ;;
@@ -71,9 +71,10 @@ fi
 version=${version}${repository}
 
 dchargs="-v ${version} -D ${distribution}"
-if [ "$osdist" = ubuntu ]; then
-    dchargs="$dchargs --distributor Untangle"
-fi
+## dch is called outside the chroot...
+#if [ "$osdist" = ubuntu ]; then
+#    dchargs="$dchargs --distributor Untangle"
+#fi
 
 echo "Setting version to \"${version}\", distribution to \"$distribution\""
 DEBEMAIL="${DEBEMAIL:-${USER}@untangle.com}" dch $dchargs "auto build"
