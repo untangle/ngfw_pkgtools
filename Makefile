@@ -108,11 +108,10 @@ pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK)
 	sudo cowbuilder --execute --basepath $(CHROOT_WORK) --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION)
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
-	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" \
-		 --buildresult `cat $(DESTDIR_FILE)` -- \
+	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
 	         --basepath $(CHROOT_WORK)
 	sudo rm -fr $(CHROOT_WORK)
-pkg-chroot: pkg-chroot-real create-dest-dir revert-changelog
+pkg-chroot: create-dest-dir pkg-chroot-real move-debian-files revert-changelog
 
 release:
 	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER)_$(REPOSITORY) `cat $(DESTDIR_FILE)`/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
