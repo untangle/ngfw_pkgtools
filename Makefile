@@ -1,3 +1,7 @@
+# default shell
+SHELL := /bin/bash
+shell := /bin/bash
+
 # pwd of this Makefile
 PKGTOOLS_DIR := $(shell dirname $(MAKEFILE_LIST))
 
@@ -6,9 +10,10 @@ DISTRIBUTION ?= $(USER)
 PACKAGE_SERVER ?= mephisto
 REPOSITORY ?= $(shell $(PKGTOOLS_DIR)/getPlatform.sh)
 
-# default shell
-SHELL := /bin/bash
-shell := /bin/bash
+# binary upload
+ifneq ($(origin RECURSIVE), undefined)
+  REC := -a
+endif
 
 # debuild/dpkg-buildpackage options
 DEBUILD_OPTIONS := -e HADES_KEYSTORE -e HADES_KEY_ALIAS -e HADES_KEY_PASS
@@ -19,21 +24,16 @@ else
   DPKGBUILDPACKAGE_OPTIONS += -b
 endif
 
-ifneq ($(origin RECURSIVE), undefined)
-  REC := -a
-endif
-
 # cwd
 CUR_DIR := $(shell basename `pwd`)
 
 # destination dir for the debian files (dsc, changes, etc)
-DEST_DIR := /tmp
+DEST_DIR := $(shell echo /tmp/$(REPOSITORY)-$${PPID})
 
 # current package to build
 SOURCE_NAME := $(shell dpkg-parsechangelog 2> /dev/null | awk '/^Source:/{print $$2}')
 FIRST_BINARY_PACKAGE := $(shell awk '/^Package: / {print $$2 ; exit}' debian/control 2> /dev/null)
 VERSION_FILE := debian/version
-
 
 # chroot stuff
 CHROOT_DIR := /var/cache/pbuilder
@@ -55,6 +55,9 @@ checkroot:
 	  exit 1; \
 	fi
 
+create-dest-dir:
+	mkdir -p $(DEST_DIR)
+
 revert-changelog: # do not leave it locally modified
 	svn revert debian/changelog
 
@@ -65,13 +68,16 @@ move-debian-files:
 	find .. -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(upload\|changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec mv "{}" $(DEST_DIR) \;
 	find .. -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec mv "{}" $(DEST_DIR) \;
 
-clean-build: checkroot revert-changelog
+clean-build: checkroot
 	fakeroot debian/rules clean
 	rm -f $(VERSION_FILE)
-clean-debian-files: 
-	find $(DEST_DIR) -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec rm -f "{}" \;
-	find $(DEST_DIR) -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec rm -f "{}" \;
-clean: clean-debian-files clean-build
+	rm -fr $(DEST_DIR)
+clean-debian-files:
+	if [ -d $(DEST_DIR) ] ; then \
+	  find $(DEST_DIR) -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec rm -f "{}" \; ; \
+ 	  find $(DEST_DIR) -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec rm -f "{}" \; ; \
+	fi
+clean: clean-debian-files clean-build revert-changelog
 
 version-real: checkroot
 	bash $(PKGTOOLS_DIR)/incVersion.sh $(DISTRIBUTION) VERSION=$(VERSION) REPOSITORY=$(REPOSITORY)
@@ -92,9 +98,9 @@ source: checkroot parse-changelog
 pkg-real: checkroot parse-changelog
 	# FIXME: sign packages themselves when we move to apt 0.6
 	/usr/bin/debuild $(DEBUILD_OPTIONS) $(DPKGBUILDPACKAGE_OPTIONS)
-pkg: pkg-real move-debian-files revert-changelog
+pkg: pkg-real create-dest-dir move-debian-files revert-changelog
 
-pkg-chroot-real: checkroot parse-changelog
+pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	# FIXME: sign packages themselves when we move to apt 0.6
 	sudo rm -fr $(CHROOT_WORK)
 	sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK)
@@ -104,7 +110,7 @@ pkg-chroot-real: checkroot parse-changelog
 	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
 	         --basepath $(CHROOT_WORK)
 	sudo rm -fr $(CHROOT_WORK)
-pkg-chroot: pkg-chroot-real move-debian-files revert-changelog
+pkg-chroot: pkg-chroot-real revert-changelog
 
 release:
 	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER)_$(REPOSITORY) $(DEST_DIR)/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
