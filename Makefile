@@ -34,6 +34,7 @@ DEST_DIR := $(shell echo /tmp/$(REPOSITORY)-$${PPID})
 SOURCE_NAME := $(shell dpkg-parsechangelog 2> /dev/null | awk '/^Source:/{print $$2}')
 FIRST_BINARY_PACKAGE := $(shell awk '/^Package: / {print $$2 ; exit}' debian/control 2> /dev/null)
 VERSION_FILE := debian/version
+DESTDIR_FILE := debian/destdir
 
 # chroot stuff
 CHROOT_DIR := /var/cache/pbuilder
@@ -47,7 +48,7 @@ AVAILABILITY_MARKER := __NOT-AVAILABLE__
 
 ########################################################################
 # Rules
-.PHONY: checkroot revert-changelog parse-changelog move-debian-files clean-debian-files clean-build clean version-real version check-existence source pkg-real pkg pkg-chroot-real pkg-chroot release release-deb
+.PHONY: checkroot create-dest-dir revert-changelog parse-changelog move-debian-files clean-debian-files clean-build clean version-real version check-existence source pkg-real pkg pkg-chroot-real pkg-chroot release release-deb
 
 checkroot:
 	@if [ "$$UID" = "0" ] ; then \
@@ -57,6 +58,7 @@ checkroot:
 
 create-dest-dir:
 	mkdir -p $(DEST_DIR)
+	echo $(DEST_DIR) >| $(DESTDIR_FILE)
 
 revert-changelog: # do not leave it locally modified
 	svn revert debian/changelog
@@ -65,17 +67,17 @@ parse-changelog: # store version so we can use that later for uploading
 	dpkg-parsechangelog | awk '/Version:/{print $$2}' >| $(VERSION_FILE)
 
 move-debian-files:
-	find .. -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(upload\|changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec mv "{}" $(DEST_DIR) \;
-	find .. -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec mv "{}" $(DEST_DIR) \;
+	find .. -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(upload\|changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec mv "{}" `cat $(DESTDIR_FILE)` \;
+	find .. -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec mv "{}" `cat $(DESTDIR_FILE)` \;
 
 clean-build: checkroot
 	fakeroot debian/rules clean
-	rm -f $(VERSION_FILE)
-	rm -fr $(DEST_DIR)
+	rm -fr `cat $(DESTDIR_FILE)`
+	rm -f $(VERSION_FILE) $(DESTDIR_FILE)
 clean-debian-files:
-	if [ -d $(DEST_DIR) ] ; then \
-	  find $(DEST_DIR) -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec rm -f "{}" \; ; \
- 	  find $(DEST_DIR) -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec rm -f "{}" \; ; \
+	if [ -f $(DESTDIR_FILE) ] && [ -d `cat $(DESTDIR_FILE)` ] ; then \
+	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec rm -f "{}" \; ; \
+ 	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec rm -f "{}" \; ; \
 	fi
 clean: clean-debian-files clean-build revert-changelog
 
@@ -106,14 +108,14 @@ pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK)
 	sudo cowbuilder --execute --basepath $(CHROOT_WORK) --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION)
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
-	         --buildresult $(DEST_DIR) \
-	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
+	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" \
+		 --buildresult `cat $(DESTDIR_FILE)` -- \
 	         --basepath $(CHROOT_WORK)
 	sudo rm -fr $(CHROOT_WORK)
-pkg-chroot: pkg-chroot-real revert-changelog
+pkg-chroot: pkg-chroot-real create-dest-dir revert-changelog
 
 release:
-	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER)_$(REPOSITORY) $(DEST_DIR)/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
+	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER)_$(REPOSITORY) `cat $(DESTDIR_FILE)`/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
 
 release-deb:
 	$(PKGTOOLS_DIR)/release-binary-packages.sh -r $(REPOSITORY) -d $(DISTRIBUTION) $(REC)
