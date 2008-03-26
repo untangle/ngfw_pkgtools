@@ -58,6 +58,7 @@ checkroot:
 
 create-dest-dir:
 	mkdir -p $(DEST_DIR)
+	rm -fr $(DEST_DIR)/*
 	echo $(DEST_DIR) >| $(DESTDIR_FILE)
 
 revert-changelog: # do not leave it locally modified
