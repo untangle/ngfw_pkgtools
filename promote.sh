@@ -42,3 +42,4 @@ $pkgtools/copy-packages.sh $EXTRA_ARGS -r $REPOSITORY $FROM_DISTRIBUTION $TO_DIS
 # remove the sources for hades 
 #$pkgtools/remove-packages.sh $EXTRA_ARGS -r $REPOSITORY -d $TO_DISTRIBUTION -c premium -t dsc
 
+echo -e "Effective `date`\n\n--ReleaseMaster ($USER@`hostname`)" | mailx -s "[$REPOSITORY] *$FROM_DISTRIBUTION* promoted to *$TO_DISTRIBUTION*" seb@untangle.com
