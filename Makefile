@@ -87,10 +87,7 @@ version-real: checkroot
 version: version-real parse-changelog
 
 check-existence: checkroot
-	sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK)
-	sudo cowbuilder --execute --basepath $(CHROOT_WORK) --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION)
-	output=`sudo cowbuilder --execute --basepath $(CHROOT_WORK) -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(FIRST_BINARY_PACKAGE) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
-	sudo rm -fr $(CHROOT_WORK) ; \
+	output=`sudo cowbuilder --execute --basepath $(CHROOT_ORIG) -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(FIRST_BINARY_PACKAGE) $(REPOSITORY) $(DISTRIBUTION) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
 	echo "$${output}" | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat $(VERSION_FILE)) of $(SOURCE_NAME) is not available in $(REPOSITORY)/$(DISTRIBUTION)"
 
 source: checkroot parse-changelog
