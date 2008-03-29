@@ -16,6 +16,10 @@ reExtract = re.compile(r'^r(\d+) \| (.*?) .*?closes:\s*(?:bug)?\s*\#\s*(\d+)(?:,
 reRevision = re.compile('.+svn.+r(\d+).+')
 
 # functions
+def usage():
+  print "compare-sources.py host1,repository1,distribution1 host2,repository2,distribution2 filebase"
+  sys.exit(1)
+  
 def getVersion(name):
   return aptchroot.VersionedPackage(name).version
 
