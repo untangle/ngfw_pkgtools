@@ -22,10 +22,11 @@ done
 processResult() {
   result=$1
   [ $result = 0 ] && resultString="SUCCESS" || resultString="ERROR"
+  let results=results+result
+  make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP clean-debian-files
   echo "**** ${resultString}: make in $directory exited with return code $result"
   echo
   echo "# ======================="
-  let results=results+result
   popd
 }
 
@@ -66,7 +67,6 @@ for directory in "${build_dirs[@]}" ; do
   make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP source pkg-chroot ${RELEASE}
   result=$?
   processResult $result
-  make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP clean-debian-files
 done
 
 exit $results
