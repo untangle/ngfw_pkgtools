@@ -23,7 +23,7 @@ processResult() {
   result=$1
   [ $result = 0 ] && resultString="SUCCESS" || resultString="ERROR"
   let results=results+result
-  make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP clean-debian-files
+  make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP clean-debian-files clean-untangle-files
   echo "**** ${resultString}: make in $directory exited with return code $result"
   echo
   echo "# ======================="

@@ -73,6 +73,7 @@ move-debian-files:
 
 clean-build: checkroot
 	fakeroot debian/rules clean
+clean-untangle-files: revert-changelog
 	rm -fr `cat $(DESTDIR_FILE)`
 	rm -f $(VERSION_FILE) $(DESTDIR_FILE)
 clean-debian-files:
@@ -80,7 +81,7 @@ clean-debian-files:
 	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec rm -f "{}" \; ; \
  	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec rm -f "{}" \; ; \
 	fi
-clean: clean-debian-files clean-build revert-changelog
+clean: clean-debian-files clean-build clean-untangle-files
 
 version-real: checkroot
 	bash $(PKGTOOLS_DIR)/incVersion.sh $(DISTRIBUTION) VERSION=$(VERSION) REPOSITORY=$(REPOSITORY)
@@ -98,19 +99,19 @@ source: checkroot parse-changelog
 pkg-real: checkroot parse-changelog
 	# FIXME: sign packages themselves when we move to apt 0.6
 	/usr/bin/debuild $(DEBUILD_OPTIONS) $(DPKGBUILDPACKAGE_OPTIONS)
-pkg: pkg-real create-dest-dir move-debian-files revert-changelog
+pkg: pkg-real create-dest-dir move-debian-files
 
 pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	# FIXME: sign packages themselves when we move to apt 0.6
 	sudo rm -fr $(CHROOT_WORK)
 	sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK)
 	sudo cowbuilder --execute --basepath $(CHROOT_WORK) --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION)
-	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
+	pdebuild --pbuilder cowbuilder \
 		 --buildresult `cat $(DESTDIR_FILE)` \
 	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
 	         --basepath $(CHROOT_WORK)
 	sudo rm -fr $(CHROOT_WORK)
-pkg-chroot: create-dest-dir pkg-chroot-real move-debian-files revert-changelog
+pkg-chroot: create-dest-dir pkg-chroot-real move-debian-files
 
 release:
 	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER)_$(REPOSITORY) `cat $(DESTDIR_FILE)`/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
