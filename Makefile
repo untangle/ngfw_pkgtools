@@ -107,7 +107,7 @@ pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	sudo rm -fr $(CHROOT_WORK)
 	sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK)
 	sudo cowbuilder --execute --basepath $(CHROOT_WORK) --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION)
-	pdebuild --pbuilder cowbuilder \
+	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
 		 --buildresult `cat $(DESTDIR_FILE)` \
 	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
 	         --basepath $(CHROOT_WORK)
