@@ -6,24 +6,25 @@
 
 SOURCES=/etc/apt/sources.list
 
-# for our own build-deps
-echo deb http://mephisto/public/$1 $2 main premium upstream >> ${SOURCES}
-case "$HOME" in
-  *buildbot*) echo deb http://mephisto/public/$1 $2 internal >> ${SOURCES}
+REPOSITORY=$1
+DISTRIBUTION=$2
+
+case DISTRIBUTION in
+  *-*) branch="`echo $DISTRIBUTION | perl -pe 's/.*?-/-/'`"
+    *) branch=""
 esac
 
-# also search in nightly
-if [ $2 != nightly ] ; then
-  echo deb http://mephisto/public/$1 nightly main premium upstream >> ${SOURCES}
-  case "$USER" in
-    *buildbot*) echo deb http://mephisto/public/$1 nightly internal >> ${SOURCES}
-  esac
+# for our own build-deps
+echo deb http://mephisto/public/$REPOSITORY $DISTRIBUTION main premium upstream >> ${SOURCES}
+case "$HOME" in
+  *buildbot|seb*) echo deb http://mephisto/public/$REPOSITORY $DISTRIBUTION internal >> ${SOURCES}
+esac
+
+# also search in nightly-$branch if not buildbot
+if [ $DISTRIBUTION != nightly ] && [ "$USER" != "buildbot" ]; then
+  echo deb http://mephisto/public/$REPOSITORY nightly${branch} main premium upstream >> ${SOURCES}
 fi
-#echo deb http://mephisto/public/sarge testing upstream >> ${SOURCES}
-#echo deb http://mephisto/public/sarge alpha upstream >> ${SOURCES}
 
 apt-get -q update
-
-#umount -f /proc 2> /dev/null
 
 exit 0
