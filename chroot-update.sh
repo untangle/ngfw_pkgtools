@@ -10,8 +10,8 @@ REPOSITORY=$1
 DISTRIBUTION=$2
 
 case DISTRIBUTION in
-  *-*) branch="`echo $DISTRIBUTION | perl -pe 's/.*?-/-/'`"
-    *) branch=""
+  *-*) branch="`echo $DISTRIBUTION | perl -pe 's/.*?-/-/'`" ;;
+  *) branch="" ;;
 esac
 
 # for our own build-deps
