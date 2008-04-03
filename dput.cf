@@ -44,11 +44,47 @@ run_dinstall = 0
 run_lintian = 0
 check_version = 0
 
-[faust]
+[faust_sarge]
 fqdn = 172.16.16.89
 method = ftp
 login = anonymous
-incoming = /incoming
+incoming = /sarge/incoming
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+[faust_sid]
+fqdn = 172.16.16.89
+method = ftp
+login = anonymous
+incoming = /sid/incoming
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+[faust_etch]
+fqdn = 172.16.16.89
+method = ftp
+login = anonymous
+incoming = /etch/incoming
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+[faust_gutsy]
+fqdn = 172.16.16.89
+method = ftp
+login = anonymous
+incoming = /gutsy/incoming
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+[faust_hardy]
+fqdn = 172.16.16.89
+method = ftp
+login = anonymous
+incoming = /hardy/incoming
 allow_unsigned_uploads = 1
 run_dinstall = 0
 run_lintian = 0
