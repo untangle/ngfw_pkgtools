@@ -2,14 +2,19 @@
 
 [ -z "$REPOSITORY" ] && echo "REPOSITORY has to be set" && exit 1
 
+PKGTOOLS=`dirname $0`
+
+MUTT_OPTIONS="-F /dev/null -e 'set from=\"Release Master <release@untangle.com>\";set use_from=yes'"
+RECIPIENT="tech-internal@untangle.com"
+
 REMOTE_USER="root"
 REMOTE_SERVER="updates.untangle.com"
 REPREPRO_BASE_DIR="/var/www/public/$REPOSITORY"
 REPREPRO_DIST_DIR="${REPREPRO_BASE_DIR}/dists"
 REPREPRO_CONF_DIR="${REPREPRO_BASE_DIR}/conf"
 REPREPRO_DISTRIBUTIONS_FILE="${REPREPRO_CONF_DIR}/distributions"
-REPREPRO_BASE_COMMAND="`dirname $0`/reprepro-untangle.sh -V -b ${REPREPRO_BASE_DIR} ${COMPONENT} ${TYPE}"
-SSH_COMMAND="ssh -t ${REMOTE_USER}@${REMOTE_SERVER} cd /localhome/pkgtools &&"
+REPREPRO_BASE_COMMAND="$PKGTOOLS/reprepro-untangle.sh -V -b ${REPREPRO_BASE_DIR} ${COMPONENT} ${TYPE}"
+SSH_COMMAND="ssh -t ${REMOTE_USER}@${REMOTE_SERVER} cd $PKGTOOLS &&"
 REPREPRO_REMOTE_COMMAND="${SSH_COMMAND} ${REPREPRO_BASE_COMMAND}"
 
 # FUNCTIONS
