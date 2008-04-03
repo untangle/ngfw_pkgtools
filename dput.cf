@@ -1,5 +1,5 @@
 [mephisto_sarge]
-fqdn = 10.0.0.105
+fqdn = mephisto
 method = ftp
 login = anonymous
 incoming = /sarge/incoming
@@ -8,7 +8,7 @@ run_dinstall = 0
 run_lintian = 0
 check_version = 0
 [mephisto_etch]
-fqdn = 10.0.0.105
+fqdn = mephisto
 method = ftp
 login = anonymous
 incoming = /etch/incoming
@@ -17,7 +17,7 @@ run_dinstall = 0
 run_lintian = 0
 check_version = 0
 [mephisto_sid]
-fqdn = 10.0.0.105
+fqdn = mephisto
 method = ftp
 login = anonymous
 incoming = /sid/incoming
@@ -26,7 +26,7 @@ run_dinstall = 0
 run_lintian = 0
 check_version = 0
 [mephisto_gutsy]
-fqdn = 10.0.0.105
+fqdn = mephisto
 method = ftp
 login = anonymous
 incoming = /gutsy/incoming
@@ -35,7 +35,7 @@ run_dinstall = 0
 run_lintian = 0
 check_version = 0
 [mephisto_hardy]
-fqdn = 10.0.0.105
+fqdn = mephisto
 method = ftp
 login = anonymous
 incoming = /hardy/incoming
@@ -45,7 +45,7 @@ run_lintian = 0
 check_version = 0
 
 [faust_sarge]
-fqdn = 172.16.16.89
+fqdn = faust
 method = ftp
 login = anonymous
 incoming = /sarge/incoming
@@ -54,7 +54,7 @@ run_dinstall = 0
 run_lintian = 0
 check_version = 0
 [faust_sid]
-fqdn = 172.16.16.89
+fqdn = faust
 method = ftp
 login = anonymous
 incoming = /sid/incoming
@@ -63,7 +63,7 @@ run_dinstall = 0
 run_lintian = 0
 check_version = 0
 [faust_etch]
-fqdn = 172.16.16.89
+fqdn = faust
 method = ftp
 login = anonymous
 incoming = /etch/incoming
@@ -72,7 +72,7 @@ run_dinstall = 0
 run_lintian = 0
 check_version = 0
 [faust_gutsy]
-fqdn = 172.16.16.89
+fqdn = faust
 method = ftp
 login = anonymous
 incoming = /gutsy/incoming
@@ -81,7 +81,7 @@ run_dinstall = 0
 run_lintian = 0
 check_version = 0
 [faust_hardy]
-fqdn = 172.16.16.89
+fqdn = faust
 method = ftp
 login = anonymous
 incoming = /hardy/incoming
