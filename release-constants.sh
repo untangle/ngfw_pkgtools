@@ -4,7 +4,7 @@
 
 PKGTOOLS=`dirname $0`
 
-MUTT_OPTIONS="-F /dev/null -e 'set from=\"Release Master <release@untangle.com>\"\;set use_from=yes'"
+MUTT_CONF_FILE=$PKGTOOLS/mutt.conf
 RECIPIENT="tech-internal@untangle.com"
 
 REMOTE_USER="root"
