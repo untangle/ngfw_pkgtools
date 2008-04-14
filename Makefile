@@ -82,6 +82,8 @@ clean-debian-files:
  	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec rm -f "{}" \; ; \
 	fi
 clean-chroot: clean-debian-files clean-untangle-files
+	sudo rm -fr $(CHROOT_WORK)
+
 clean: clean-chroot clean-build
 
 version-real: checkroot
