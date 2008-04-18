@@ -1,23 +1,25 @@
 #!/bin/bash
 
 usage() {
-  echo "$0 -r <repository> -d <distribution> -b <builddir> [-v <version>] [-u] [-e]"
+  echo "$0 -r <repository> -d <distribution> -b <builddir> [-a <arch>] [-v <version>] [-u] [-e]"
   exit 1
 }
 
 ### CLI args
-while getopts r:b:d:v:ueh option ; do
+while getopts r:b:d:v:a:ueh option ; do
   case "$option" in
     r) TARGET_REP="$OPTARG" ;;
     b) BUILD_DIR="$OPTARG" ;;
     d) DISTRIBUTION="$OPTARG" ;;
     v) VERSION="$OPTARG" ;;
     u) RELEASE="release" ;;
+    a) ARCH="$OPTARG" ;;
     e) CHECK_EXISTENCE="check-existence" ;;
     h) usage ;;
     \?) usage ;;
   esac
 done
+[ -z "$ARCH" ] && ARCH=all
 
 processResult() {
   result=$1
@@ -46,12 +48,11 @@ while read package repositories ; do
     \#*) continue ;; # comment
     "") continue ;; # empty line
     *) # yes
-      case $repositories in
-	*${TARGET_REP}*) build_dirs[${#build_dirs[*]}]="$package" ;;
-	*)
-	  echo $package
-	  continue ;; # don't build this one for this repository
-      esac ;;
+      if [[ "$repositories" = *${TARGET_REP}* ]] ; then
+	if [ $ARCH = "all" ] || grep -qE "^Architecture: (any|$ARCH)" $package/debian/control ; then
+	  build_dirs[${#build_dirs[*]}]="$package"
+	fi
+      fi ;;
   esac
 done < $FILE_IN
 
@@ -59,6 +60,7 @@ done < $FILE_IN
 for directory in "${build_dirs[@]}" ; do
   echo 
   echo "# $directory"
+  continue
   # cd into it, and attempt to build
   pushd "$directory"
   make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP VERSION="$VERSION" clean-chroot version ${CHECK_EXISTENCE}
