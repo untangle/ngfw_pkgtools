@@ -40,7 +40,7 @@ DESTDIR_FILE := debian/destdir
 CHROOT_DIR := /var/cache/pbuilder
 CHROOT_UPDATE_SCRIPT := $(PKGTOOLS_DIR)/chroot-update.sh
 CHROOT_CHECK_PACKAGE_VERSION_SCRIPT := $(PKGTOOLS_DIR)/chroot-check-for-package-version.sh
-CHROOT_ORIG := $(CHROOT_DIR)/$(REPOSITORY)+untangle.cow
+CHROOT_ORIG := $(CHROOT_DIR)/$(REPOSITORY)+untangle$(shell uname -m | grep -q 64 && echo _amd64).cow
 CHROOT_WORK := $(CHROOT_DIR)/$(REPOSITORY)+untangle_$(shell date "+%Y-%m-%dT%H%M%S_%N").cow
 
 # used for checking existence of a package on the package server
@@ -53,7 +53,7 @@ AVAILABILITY_MARKER := __NOT-AVAILABLE__
 checkroot:
 	@if [ "$$UID" = "0" ] ; then \
 	  echo "You can't be root to build packages"; \
-	  exit 1; \
+#	  exit 1; \
 	fi
 
 create-dest-dir:
