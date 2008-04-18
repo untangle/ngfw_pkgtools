@@ -60,7 +60,6 @@ done < $FILE_IN
 for directory in "${build_dirs[@]}" ; do
   echo 
   echo "# $directory"
-  continue
   # cd into it, and attempt to build
   pushd "$directory"
   make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP VERSION="$VERSION" clean-chroot version ${CHECK_EXISTENCE}
