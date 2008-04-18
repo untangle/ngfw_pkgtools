@@ -1,16 +1,17 @@
 #! /bin/bash
 
 usage() {
-  echo "Usage: $0 -r <repository> [-s] [-e <regex>|-n <negate_regex>] [-c <component>] [-t (dsc|deb)] <fromDistribution> <toDistribution>"
-  echo "-s             : simulate"
-  echo "-e <regex>     : only act on packages matching <regexp>"
-  echo "-n <regex>     : exclude packages matching <regexp>"
-  echo "-c <component> : only act on <component>"
-  echo "-t (dsc,deb)   : only act on source or binary packages"
+  echo "Usage: $0 -r <repository> [-s] [-e <regex>|-n <negate_regex>] [-a <architecture>] [-c <component>] [-t (dsc|deb)] <fromDistribution> <toDistribution>"
+  echo "-s                : simulate"
+  echo "-e <regex>        : only act on packages matching <regexp>"
+  echo "-n <regex>        : exclude packages matching <regexp>"
+  echo "-c <component>    : only act on <component>"
+  echo "-a <architecture> : only act on <architecture>"
+  echo "-t (dsc,deb)      : only act on source or binary packages"
   exit 1
 }
 
-while getopts "r:d:c:e:n:t:hs" opt ; do
+while getopts "r:d:a:c:e:n:t:hs" opt ; do
   case "$opt" in
     r) REPOSITORY=$OPTARG ;;
     d) DISTRIBUTION=$OPTARG ;;
@@ -18,6 +19,7 @@ while getopts "r:d:c:e:n:t:hs" opt ; do
     n) NREGEX="-v -E $OPTARG" ;;
     s) SIMULATE=true ;;
     c) COMPONENT="-C $OPTARG" ;;
+    a) ARCHITECTURE="-A $OPTARG" ;;
     t) TYPE="-T $OPTARG" ;;
     h) usage ;;
     \?) usage ;;
