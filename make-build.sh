@@ -68,6 +68,8 @@ for directory in "${build_dirs[@]}" ; do
   make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP source pkg-chroot ${RELEASE}
   result=$?
   processResult $result
+  # if we're building only arch-dependent pkgs, we need to give the IQD time to process uploads
+  [ $ARCH = "all" ] || sleep 31
 done
 
 exit $results
