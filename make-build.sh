@@ -12,7 +12,7 @@ while getopts r:b:d:v:a:uenh option ; do
     b) BUILD_DIR="$OPTARG" ;;
     d) DISTRIBUTION="$OPTARG" ;;
     v) VERSION="$OPTARG" ;;
-    n) BINARY_UPLOAD="BINARY_UPLOAD=true"
+    n) BINARY_UPLOAD="BINARY_UPLOAD=true" ;;
     u) RELEASE="release" ;;
     a) ARCH="$OPTARG" ;;
     e) CHECK_EXISTENCE="check-existence" ;;
