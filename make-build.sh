@@ -1,17 +1,18 @@
 #!/bin/bash
 
 usage() {
-  echo "$0 -r <repository> -d <distribution> -b <builddir> [-a <arch>] [-v <version>] [-u] [-e]"
+  echo "$0 -r <repository> -d <distribution> -b <builddir> [-n] [-a <arch>] [-v <version>] [-u] [-e]"
   exit 1
 }
 
 ### CLI args
-while getopts r:b:d:v:a:ueh option ; do
+while getopts r:b:d:v:a:uenh option ; do
   case "$option" in
     r) TARGET_REP="$OPTARG" ;;
     b) BUILD_DIR="$OPTARG" ;;
     d) DISTRIBUTION="$OPTARG" ;;
     v) VERSION="$OPTARG" ;;
+    n) BINARY_UPLOAD="BINARY_UPLOAD=true"
     u) RELEASE="release" ;;
     a) ARCH="$OPTARG" ;;
     e) CHECK_EXISTENCE="check-existence" ;;
@@ -65,7 +66,7 @@ for directory in "${build_dirs[@]}" ; do
   make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP VERSION="$VERSION" clean-chroot version ${CHECK_EXISTENCE}
   result=$?      
   [ $result = 2 ] && processResult 0 && continue
-  make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP source pkg-chroot ${RELEASE}
+  make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP $BINARY_UPLOAD source pkg-chroot ${RELEASE}
   result=$?
   processResult $result
   # if we're building only arch-dependent pkgs, we need to give the IQD time to process uploads
