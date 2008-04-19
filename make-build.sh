@@ -49,9 +49,7 @@ while read package repositories ; do
     "") continue ;; # empty line
     *) # yes
       if [[ "$repositories" = *${TARGET_REP}* ]] ; then
-	echo $package
 	if [ $ARCH = "all" ] || grep -qE "^Architecture:.*(any|$ARCH)" $package/debian/control ; then
-	  echo blah
 	  build_dirs[${#build_dirs[*]}]="$package"
 	fi
       fi ;;
