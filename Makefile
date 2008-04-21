@@ -53,7 +53,7 @@ AVAILABILITY_MARKER := __NOT-AVAILABLE__
 checkroot:
 	@if [ "$$UID" = "0" ] ; then \
 	  echo "You can't be root to build packages"; \
-#	  exit 1; \
+	  exit 1; \
 	fi
 
 create-dest-dir:
