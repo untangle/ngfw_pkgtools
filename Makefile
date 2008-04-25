@@ -21,7 +21,7 @@ DPKGBUILDPACKAGE_OPTIONS := -i -us -uc
 ifeq ($(origin BINARY_UPLOAD), undefined)
   DPKGBUILDPACKAGE_OPTIONS += -sa
 else
-  DPKGBUILDPACKAGE_OPTIONS += -b
+  DPKGBUILDPACKAGE_OPTIONS += -B
 endif
 
 # cwd
@@ -40,15 +40,20 @@ DESTDIR_FILE := debian/destdir
 CHROOT_DIR := /var/cache/pbuilder
 CHROOT_UPDATE_SCRIPT := $(PKGTOOLS_DIR)/chroot-update.sh
 CHROOT_CHECK_PACKAGE_VERSION_SCRIPT := $(PKGTOOLS_DIR)/chroot-check-for-package-version.sh
-CHROOT_ORIG := $(CHROOT_DIR)/$(REPOSITORY)+untangle$(shell uname -m | grep -q 64 && echo _amd64).cow
-CHROOT_WORK := $(CHROOT_DIR)/$(REPOSITORY)+untangle_$(shell date "+%Y-%m-%dT%H%M%S_%N").cow
+TIMESTAMP := $(shell date "+%Y-%m-%dT%H%M%S_%N")
+ARCH := $(shell uname -m | grep -q 64 && echo _amd64)
+CHROOT_BASE := $(CHROOT_DIR)/$(REPOSITORY)+untangle$(ARCH)
+CHROOT_ORIG := $(CHROOT_BASE).cow
+CHROOT_WORK := $(CHROOT_BASE)_$(TIMESTAMP).cow
+# this one is overridable
+CHROOT_EXISTENCE ?= $(CHROOT_BASE)_$(TIMESTAMP)_existence.cow
 
 # used for checking existence of a package on the package server
 AVAILABILITY_MARKER := __NOT-AVAILABLE__
 
 ########################################################################
 # Rules
-.PHONY: checkroot create-dest-dir revert-changelog parse-changelog move-debian-files clean-debian-files clean-build clean version-real version check-existence source pkg-real pkg pkg-chroot-real pkg-chroot release release-deb
+.PHONY: checkroot create-dest-dir revert-changelog parse-changelog move-debian-files clean-debian-files clean-build clean version-real version check-existence source pkg-real pkg pkg-chroot-real pkg-chroot release release-deb create-existence-chroot remove-existence-chroot remove-chroot create-chroot
 
 checkroot:
 	@if [ "$$UID" = "0" ] ; then \
@@ -90,8 +95,12 @@ version-real: checkroot
 	bash $(PKGTOOLS_DIR)/incVersion.sh $(DISTRIBUTION) VERSION=$(VERSION) REPOSITORY=$(REPOSITORY)
 version: version-real parse-changelog
 
-check-existence: checkroot
-	output=`sudo cowbuilder --execute --basepath $(CHROOT_ORIG) -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(FIRST_BINARY_PACKAGE) $(REPOSITORY) $(DISTRIBUTION) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
+create-existence-chroot:
+	[ -d $(CHROOT_EXISTENCE) ] || sudo cp -al $(CHROOT_ORIG) $(CHROOT_EXISTENCE)
+remove-existence-chroot:
+	rm -fr $(CHROOT_EXISTENCE)
+check-existence: create-existence-chroot
+	output=`sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_ORIG) -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(FIRST_BINARY_PACKAGE) $(REPOSITORY) $(DISTRIBUTION) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
 	echo "$${output}" | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat $(VERSION_FILE)) of $(SOURCE_NAME) is not available in $(REPOSITORY)/$(DISTRIBUTION)"
 
 source: checkroot parse-changelog
@@ -102,19 +111,21 @@ source: checkroot parse-changelog
 pkg-real: checkroot parse-changelog
 	# FIXME: sign packages themselves when we move to apt 0.6
 	/usr/bin/debuild $(DEBUILD_OPTIONS) $(DPKGBUILDPACKAGE_OPTIONS)
-pkg: pkg-real create-dest-dir move-debian-files
+pkg: create-dest-dir pkg-real move-debian-files
 
-pkg-chroot-real: checkroot parse-changelog create-dest-dir
-	# FIXME: sign packages themselves when we move to apt 0.6
+create-chroot:
 	sudo rm -fr $(CHROOT_WORK)
 	sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK)
+remove-chroot:
+	sudo rm -fr $(CHROOT_WORK)
+pkg-chroot-real: checkroot parse-changelog create-dest-dir
+	# FIXME: sign packages themselves when we move to apt 0.6
 	sudo cowbuilder --execute --basepath $(CHROOT_WORK) --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION)
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
 		 --buildresult `cat $(DESTDIR_FILE)` \
 	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
 	         --basepath $(CHROOT_WORK)
-	sudo rm -fr $(CHROOT_WORK)
-pkg-chroot: create-dest-dir pkg-chroot-real move-debian-files
+pkg-chroot: create-dest-dir create-chroot pkg-chroot-real remove-chroot move-debian-files
 
 release:
 	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER)_$(REPOSITORY) `cat $(DESTDIR_FILE)`/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes

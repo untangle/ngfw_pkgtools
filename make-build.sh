@@ -21,12 +21,22 @@ while getopts r:b:d:v:a:uenh option ; do
   esac
 done
 [ -z "$ARCH" ] && ARCH=all
+MAKE_VARIABLES="DISTRIBUTION=${DISTRIBUTION} REPOSITORY=${TARGET_REP} ${BINARY_UPLOAD}"
+if [ -n "$CHECK_EXISTENCE" ] ; then
+  MAKE_VARIABLES="$MAKE_VARIABLES CHROOT_EXISTENCE=/var/cache/pbuilder/${TARGET_REP}+untangle_${ARCH}_`date +%Y-%m-%dT%H%M%S_%N`.cow"
+fi
+if [ -n "$VERSION" ] ; then
+  MAKE_VARIABLES="$MAKE_VARIABLES VERSION=\"${VERSION}\""
+  VERSION_TARGET="version"
+else
+  VERSION_TARGET=""
+fi
 
 processResult() {
   result=$1
   [ $result = 0 ] && resultString="SUCCESS" || resultString="ERROR"
   let results=results+result
-  make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP clean-chroot
+  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot
   echo "**** ${resultString}: make in $directory exited with return code $result"
   echo
   echo "# ======================="
@@ -63,10 +73,10 @@ for directory in "${build_dirs[@]}" ; do
   echo "# $directory"
   # cd into it, and attempt to build
   pushd "$directory" > /dev/null
-  make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP VERSION="$VERSION" clean-chroot version ${CHECK_EXISTENCE}
+  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot $VERSION_TARGET $CHECK_EXISTENCE
   result=$?      
   [ $result = 2 ] && processResult 0 && continue
-  make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP $BINARY_UPLOAD source pkg-chroot ${RELEASE}
+  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES source pkg-chroot ${RELEASE}
   result=$?
   processResult $result
   # if we're building only arch-dependent pkgs, we need to give the IQD time to process uploads
