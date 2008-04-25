@@ -46,7 +46,7 @@ CHROOT_BASE := $(CHROOT_DIR)/$(REPOSITORY)+untangle$(ARCH)
 CHROOT_ORIG := $(CHROOT_BASE).cow
 CHROOT_WORK := $(CHROOT_BASE)_$(TIMESTAMP).cow
 # this one is overridable
-CHROOT_EXISTENCE ?= $(CHROOT_BASE)_$(TIMESTAMP)_existence.cow
+xCHROOT_EXISTENCE ?= $(CHROOT_BASE)_$(TIMESTAMP)_existence.cow
 
 # used for checking existence of a package on the package server
 AVAILABILITY_MARKER := __NOT-AVAILABLE__
@@ -98,7 +98,7 @@ version: version-real parse-changelog
 create-existence-chroot:
 	[ -d $(CHROOT_EXISTENCE) ] || sudo cp -al $(CHROOT_ORIG) $(CHROOT_EXISTENCE)
 remove-existence-chroot:
-	rm -fr $(CHROOT_EXISTENCE)
+	sudo rm -fr $(CHROOT_EXISTENCE)
 check-existence: create-existence-chroot
 	output=`sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_EXISTENCE) -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(FIRST_BINARY_PACKAGE) $(REPOSITORY) $(DISTRIBUTION) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
 	echo "$${output}" | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat $(VERSION_FILE)) of $(SOURCE_NAME) is not available in $(REPOSITORY)/$(DISTRIBUTION)"
