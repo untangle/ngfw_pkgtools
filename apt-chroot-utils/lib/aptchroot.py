@@ -1,21 +1,29 @@
 import apt, apt_pkg, os, sys, urllib
 
+# constants
+ops = { '<=' : lambda x: x <= 0,
+        '<'  : lambda x: x < 0,
+        '=' :  lambda x: x == 0,
+        '>'  : lambda x: x > 0,
+        '>=' : lambda x: x >= 0 }
+
 def initializeChroot(TMP_DIR, sources, preferences):
   # FIXME
   global cache, pkgCache, depcache
 
   os.system('rm -fr ' + TMP_DIR)
-  SOURCES    = TMP_DIR + '/sources.list'
-  PREFS      = TMP_DIR + '/preferences'
-  ARCHIVES   = TMP_DIR + '/archives'
-  STATE      = TMP_DIR + '/varlibapt'
+  APT_DIR    = TMP_DIR + '/etc/apt'
+  SOURCES    = APT_DIR + '/sources.list'
+  PREFS      = APT_DIR + '/preferences'
+  ARCHIVES   = TMP_DIR + '/var/cache/apt/archives'
+  STATE      = TMP_DIR + '/var/lib/apt'
   LISTS      = STATE + '/lists'
-  STATUS_DIR = TMP_DIR + '/varlibdpkg'
+  STATUS_DIR = TMP_DIR + '/var/lib/dpkg'
   STATUS     = STATUS_DIR + '/status'
   
   os.system('rm -fr ' + TMP_DIR)
 
-  os.makedirs(TMP_DIR)
+  os.makedirs(APT_DIR)
   os.makedirs(ARCHIVES + '/partial')
   os.makedirs(STATE)
   os.makedirs(LISTS + '/partial')
@@ -30,19 +38,27 @@ def initializeChroot(TMP_DIR, sources, preferences):
   # create preferences files
   open(PREFS, 'w').write(preferences)
 
-  apt_pkg.InitConfig()
-  apt_pkg.InitSystem()
-  apt_pkg.Config.Set("Dir::Etc::sourcelist", SOURCES)
-  apt_pkg.Config.Set("Dir::Etc::preferences", PREFS)
-  apt_pkg.Config.Set("Dir::Cache::archives", ARCHIVES)
+  apt_pkg.init()
+
+  apt_pkg.Config.Set("Dir::Etc::Sourcelist", SOURCES)
+  apt_pkg.Config.Set("Dir::Etc::Preferences", PREFS)
+  apt_pkg.Config.Set("Dir::Cache::Archives", ARCHIVES)
   apt_pkg.Config.Set("Dir::State", STATE)
   apt_pkg.Config.Set("Dir::State::Lists",  LISTS)
   apt_pkg.Config.Set("Dir::State::status", STATUS)
 
-  cache = apt.Cache()
+  apt_pkg.Config.Set("Debug::pkgPolicy","1");
+  apt_pkg.Config.Set("Debug::pkgOrderList","1");
+  apt_pkg.Config.Set("Debug::sourceList","1");
+  apt_pkg.Config.Set("Debug::pkgProblemResolver","1");
+  apt_pkg.Config.Set("Debug::pkgDPkgPM","1");
+  apt_pkg.Config.Set("Debug::pkgPackageManager","1");
+  apt_pkg.Config.Set("Debug::pkgDPkgProgressReporting","1");
 
+  cache = apt.Cache(rootdir=TMP_DIR)
   cache.update()
   cache.open(apt.progress.OpTextProgress())
+
   pkgCache      = apt_pkg.GetCache()
   depcache      = apt_pkg.GetDepCache(pkgCache)
 

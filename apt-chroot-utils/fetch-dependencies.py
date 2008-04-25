@@ -6,13 +6,6 @@ import optparse
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), "lib"))
 import aptchroot
 
-# constants
-ops = { '<=' : lambda x: x <= 0,
-        '<'  : lambda x: x < 0,
-        '=' :  lambda x: x == 0,
-        '>'  : lambda x: x > 0,
-        '>=' : lambda x: x >= 0 }
-
 TMP_DIR    = '/tmp/foo'
 
 # functions
@@ -76,13 +69,12 @@ class UntangleStore:
 # main
 
 pkgs, options = parseCommandLineArgs(sys.argv[1:])
-sources = '''
-deb http://http.us.debian.org/debian %s main contrib non-free
+sources = '''deb http://http.us.debian.org/debian %s main contrib non-free
 deb http://security.debian.org/ %s/updates main contrib non-free
 #php5
 #deb http://people.debian.org/~dexter php5 woody
 # backports
-#deb http://www.backports.org/debian %s-backports main contrib non-free
+deb http://www.backports.org/debian %s-backports main contrib non-free
 # volatile
 deb http://volatile.debian.org/debian-volatile %s/volatile main contrib non-free
 # mephisto
@@ -91,22 +83,18 @@ deb http://10.0.0.105/public/%s stable main premium upstream\n''' % (options.dis
                                                                      options.distribution,
                                                                      options.distribution,
                                                                      options.distribution)
-preferences = '''
-Package: *
+preferences = '''Package: *
 Pin: release l=Untangle
-Pin-Priority: 700
+Pin-Priority: 1001
 Package: *
 Pin: origin volatile.debian.org
-Pin-Priority: 695
+Pin-Priority: 1001
 Package: *
-Pin: release a=%s-backports
-Pin-Priority: 690
+Pin: origin www.backports.org
+Pin-Priority: 1001
 Package: *
-Pin: release a=%s
-Pin-Priority: 600
-Package: *
-Pin: origin debian.org
-Pin-Priority: 550\n''' % (options.distribution, options.distribution)
+Pin: release o=Debian
+Pin-Priority: 100\n''' # % (options.distribution,) # options.distribution)
 
 aptchroot.initializeChroot(TMP_DIR, sources, preferences)
 

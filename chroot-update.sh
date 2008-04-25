@@ -21,9 +21,12 @@ case "$HOME" in
 esac
 
 # also search in nightly-$branch if not buildbot
-if [ $DISTRIBUTION != nightly ] && [ "$USER" != "buildbot" ]; then
-  echo deb http://mephisto/public/$REPOSITORY nightly${branch} main premium upstream >> ${SOURCES}
-fi
+case $DISTRIBUTION in
+  nightly*) ;;
+  *) if [ "$USER" != "buildbot" ]; then
+              echo deb http://mephisto/public/$REPOSITORY nightly${branch} main premium upstream >> ${SOURCES}
+     fi ;;
+esac
 
 apt-get -q update
 
