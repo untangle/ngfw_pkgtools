@@ -100,7 +100,7 @@ create-existence-chroot:
 remove-existence-chroot:
 	rm -fr $(CHROOT_EXISTENCE)
 check-existence: create-existence-chroot
-	output=`sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_ORIG) -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(FIRST_BINARY_PACKAGE) $(REPOSITORY) $(DISTRIBUTION) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
+	output=`sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_EXISTENCE) -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(FIRST_BINARY_PACKAGE) $(REPOSITORY) $(DISTRIBUTION) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
 	echo "$${output}" | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat $(VERSION_FILE)) of $(SOURCE_NAME) is not available in $(REPOSITORY)/$(DISTRIBUTION)"
 
 source: checkroot parse-changelog
