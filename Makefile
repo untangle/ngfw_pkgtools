@@ -39,6 +39,7 @@ DESTDIR_FILE := debian/destdir
 # chroot stuff
 CHROOT_DIR := /var/cache/pbuilder
 CHROOT_UPDATE_SCRIPT := $(PKGTOOLS_DIR)/chroot-update.sh
+CHROOT_UPDATE_EXISTENCE_SCRIPT := $(PKGTOOLS_DIR)/chroot-update-existence.sh
 CHROOT_CHECK_PACKAGE_VERSION_SCRIPT := $(PKGTOOLS_DIR)/chroot-check-for-package-version.sh
 TIMESTAMP := $(shell date "+%Y-%m-%dT%H%M%S_%N")
 ARCH := $(shell uname -m | grep -q 64 && echo _amd64)
@@ -96,11 +97,14 @@ version-real: checkroot
 version: version-real parse-changelog
 
 create-existence-chroot:
-	[ -d $(CHROOT_EXISTENCE) ] || sudo cp -al $(CHROOT_ORIG) $(CHROOT_EXISTENCE)
+	if [ ! -d $(CHROOT_EXISTENCE) ] ; then \
+          sudo cp -al $(CHROOT_ORIG) $(CHROOT_EXISTENCE) \
+          sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_EXISTENCE) -- $(CHROOT_UPDATE_EXISTENCE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION)
+        fi
 remove-existence-chroot:
 	sudo rm -fr $(CHROOT_EXISTENCE)
 check-existence: create-existence-chroot
-	output=`sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_EXISTENCE) -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(FIRST_BINARY_PACKAGE) $(REPOSITORY) $(DISTRIBUTION) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
+	output=`sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_EXISTENCE) -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(FIRST_BINARY_PACKAGE) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
 	echo "$${output}" | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat $(VERSION_FILE)) of $(SOURCE_NAME) is not available in $(REPOSITORY)/$(DISTRIBUTION)"
 
 source: checkroot parse-changelog
