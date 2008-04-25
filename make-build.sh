@@ -30,7 +30,7 @@ processResult() {
   echo "**** ${resultString}: make in $directory exited with return code $result"
   echo
   echo "# ======================="
-  popd
+  popd > /dev/null
 }
 
 ### a few variables
@@ -62,7 +62,7 @@ for directory in "${build_dirs[@]}" ; do
   echo 
   echo "# $directory"
   # cd into it, and attempt to build
-  pushd "$directory"
+  pushd "$directory" > /dev/null
   make -f $PKGTOOLS_HOME/Makefile DISTRIBUTION=$DISTRIBUTION REPOSITORY=$TARGET_REP VERSION="$VERSION" clean-chroot version ${CHECK_EXISTENCE}
   result=$?      
   [ $result = 2 ] && processResult 0 && continue
