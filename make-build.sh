@@ -27,9 +27,9 @@ if [ -n "$CHECK_EXISTENCE" ] ; then
 fi
 if [ -n "$VERSION" ] ; then
   MAKE_VARIABLES="$MAKE_VARIABLES VERSION=\"${VERSION}\""
-  VERSION_TARGET="version"
-else
   VERSION_TARGET=""
+else
+  VERSION_TARGET="version"
 fi
 
 processResult() {
