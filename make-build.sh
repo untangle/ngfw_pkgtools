@@ -36,7 +36,7 @@ processResult() {
   result=$1
   [ $result = 0 ] && resultString="SUCCESS" || resultString="ERROR"
   let results=results+result
-  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot remove-existence-chroot remove-chroot
+  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot remove-chroot
   echo "**** ${resultString}: make in $directory exited with return code $result"
   echo
   echo "# ======================="
@@ -82,5 +82,8 @@ for directory in "${build_dirs[@]}" ; do
   # if we're building only arch-dependent pkgs, we need to give the IQD time to process uploads
   [ $ARCH = "all" ] || sleep 31
 done
+
+# do this last
+make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES remove-existence-chroot
 
 exit $results
