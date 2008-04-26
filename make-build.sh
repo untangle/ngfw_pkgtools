@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CHROOT_BASE=
+
 usage() {
   echo "$0 -r <repository> -d <distribution> -b <builddir> [-n] [-a <arch>] [-v <version>] [-u] [-e]"
   exit 1
@@ -21,10 +23,7 @@ while getopts r:b:d:v:a:uenh option ; do
   esac
 done
 [ -z "$ARCH" ] && ARCH=all
-MAKE_VARIABLES="DISTRIBUTION=${DISTRIBUTION} REPOSITORY=${TARGET_REP} ${BINARY_UPLOAD}"
-if [ -n "$CHECK_EXISTENCE" ] ; then
-  MAKE_VARIABLES="$MAKE_VARIABLES CHROOT_EXISTENCE=/var/cache/pbuilder/${TARGET_REP}+untangle_${ARCH}_`date +%Y-%m-%dT%H%M%S_%N`.cow"
-fi
+MAKE_VARIABLES="DISTRIBUTION=${DISTRIBUTION} REPOSITORY=${TARGET_REP} ${BINARY_UPLOAD} TIMESTAMP=`date +%Y-%m-%dT%H%M%S_%N`"
 if [ -n "$VERSION" ] ; then
   MAKE_VARIABLES="$MAKE_VARIABLES VERSION=\"${VERSION}\""
   VERSION_TARGET=""
@@ -36,7 +35,7 @@ processResult() {
   result=$1
   [ $result = 0 ] && resultString="SUCCESS" || resultString="ERROR"
   let results=results+result
-  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot remove-chroot
+  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot
   echo "**** ${resultString}: make in $directory exited with return code $result"
   echo
   echo "# ======================="
@@ -84,6 +83,6 @@ for directory in "${build_dirs[@]}" ; do
 done
 
 # do this last
-make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES remove-existence-chroot
+make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES remove-existence-chroot remove-chroot
 
 exit $results

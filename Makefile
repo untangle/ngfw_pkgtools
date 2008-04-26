@@ -9,6 +9,7 @@ PKGTOOLS_DIR := $(shell dirname $(MAKEFILE_LIST))
 DISTRIBUTION ?= $(USER)
 PACKAGE_SERVER ?= mephisto
 REPOSITORY ?= $(shell $(PKGTOOLS_DIR)/getPlatform.sh)
+TIMESTAMP ?= $(shell date "+%Y-%m-%dT%H%M%S_%N")
 
 # binary upload
 ifneq ($(origin RECURSIVE), undefined)
@@ -41,13 +42,11 @@ CHROOT_DIR := /var/cache/pbuilder
 CHROOT_UPDATE_SCRIPT := $(PKGTOOLS_DIR)/chroot-update.sh
 CHROOT_UPDATE_EXISTENCE_SCRIPT := $(PKGTOOLS_DIR)/chroot-update-existence.sh
 CHROOT_CHECK_PACKAGE_VERSION_SCRIPT := $(PKGTOOLS_DIR)/chroot-check-for-package-version.sh
-TIMESTAMP := $(shell date "+%Y-%m-%dT%H%M%S_%N")
 ARCH := $(shell uname -m | grep -q 64 && echo _amd64)
 CHROOT_BASE := $(CHROOT_DIR)/$(REPOSITORY)+untangle$(ARCH)
 CHROOT_ORIG := $(CHROOT_BASE).cow
 CHROOT_WORK := $(CHROOT_BASE)_$(TIMESTAMP).cow
-# this one is overridable
-xCHROOT_EXISTENCE ?= $(CHROOT_BASE)_$(TIMESTAMP)_existence.cow
+CHROOT_EXISTENCE := $(CHROOT_BASE)_$(TIMESTAMP)_existence.cow
 
 # used for checking existence of a package on the package server
 AVAILABILITY_MARKER := __NOT-AVAILABLE__
@@ -98,8 +97,8 @@ version: version-real parse-changelog
 
 create-existence-chroot:
 	if [ ! -d $(CHROOT_EXISTENCE) ] ; then \
-          sudo cp -al $(CHROOT_ORIG) $(CHROOT_EXISTENCE) \
-          sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_EXISTENCE) -- $(CHROOT_UPDATE_EXISTENCE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION)
+          sudo cp -al $(CHROOT_ORIG) $(CHROOT_EXISTENCE) ; \
+          sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_EXISTENCE) -- $(CHROOT_UPDATE_EXISTENCE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
         fi
 remove-existence-chroot:
 	sudo rm -fr $(CHROOT_EXISTENCE)
@@ -118,8 +117,10 @@ pkg-real: checkroot parse-changelog
 pkg: create-dest-dir pkg-real move-debian-files
 
 create-chroot:
-	sudo rm -fr $(CHROOT_WORK)
-	sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK)
+	if [ ! -d $(CHROOT_WORK) ] ; then \
+          sudo rm -fr $(CHROOT_WORK) ; \
+          sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK) ; \
+        fi
 remove-chroot:
 	sudo rm -fr $(CHROOT_WORK)
 pkg-chroot-real: checkroot parse-changelog create-dest-dir
@@ -129,7 +130,7 @@ pkg-chroot-real: checkroot parse-changelog create-dest-dir
 		 --buildresult `cat $(DESTDIR_FILE)` \
 	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
 	         --basepath $(CHROOT_WORK)
-pkg-chroot: create-dest-dir create-chroot pkg-chroot-real remove-chroot move-debian-files
+pkg-chroot: create-dest-dir create-chroot pkg-chroot-real move-debian-files
 
 release:
 	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER)_$(REPOSITORY) `cat $(DESTDIR_FILE)`/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
