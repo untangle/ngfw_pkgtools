@@ -8,7 +8,7 @@ SOURCES=/etc/apt/sources.list
 
 if [ $# = 0 ] ; then
   apt-get update
-  DEBIAN_FRONTEND=noninteractive apt-get --yes dist-upgrade
+  DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -o DPkg::Options::=--force-confnew --yes --force-yes --fix-broken --purge
   exit 0
 fi
 
