@@ -15,7 +15,7 @@ fi
 
 addSource() {
   SRC="deb $1"
-  grep -q "$SRC" || echo $SRC >> ${SOURCES}
+  grep -q "$SRC" ${SOURCES} || echo $SRC >> ${SOURCES}
 }
 
 
