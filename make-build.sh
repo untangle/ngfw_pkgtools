@@ -76,7 +76,7 @@ for directory in "${build_dirs[@]}" ; do
   echo "# $directory"
   # cd into it, and attempt to build
   pushd "$directory" > /dev/null
-  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot $VERSION_TARGET $CHECK_EXISTENCE
+  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot-files $VERSION_TARGET $CHECK_EXISTENCE
   result=$?      
   [ $result = 2 ] && processResult 0 && continue
   make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES source pkg-chroot ${RELEASE}

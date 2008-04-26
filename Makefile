@@ -53,7 +53,7 @@ AVAILABILITY_MARKER := __NOT-AVAILABLE__
 
 ########################################################################
 # Rules
-.PHONY: checkroot create-dest-dir revert-changelog parse-changelog move-debian-files clean-debian-files clean-build clean version-real version check-existence source pkg-real pkg pkg-chroot-real pkg-chroot release release-deb create-existence-chroot remove-existence-chroot remove-chroot create-chroot upgrade-base-chroot
+.PHONY: checkroot create-dest-dir revert-changelog parse-changelog move-debian-files clean-debian-files clean-chroot-files clean-build clean version-real version check-existence source pkg-real pkg pkg-chroot-real pkg-chroot release release-deb create-existence-chroot remove-existence-chroot remove-chroot create-chroot upgrade-base-chroot
 
 checkroot:
 	@if [ "$$UID" = "0" ] ; then \
@@ -86,8 +86,7 @@ clean-debian-files:
 	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec rm -f "{}" \; ; \
  	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec rm -f "{}" \; ; \
 	fi
-clean-chroot: clean-debian-files clean-untangle-files
-	sudo rm -fr $(CHROOT_WORK)
+clean-chroot-files: clean-debian-files clean-untangle-files
 
 clean: clean-chroot clean-build
 
