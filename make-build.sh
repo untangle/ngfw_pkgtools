@@ -3,18 +3,19 @@
 CHROOT_BASE=
 
 usage() {
-  echo "$0 -r <repository> -d <distribution> -b <builddir> [-n] [-a <arch>] [-v <version>] [-u] [-e]"
+  echo "$0 -r <repository> -d <distribution> -b <builddir> [-n] [-a <arch>] [-v <version>] [-u] [-e] [-c]"
   exit 1
 }
 
 ### CLI args
-while getopts r:b:d:v:a:uenh option ; do
+while getopts r:b:d:v:a:uench option ; do
   case "$option" in
     r) TARGET_REP="$OPTARG" ;;
     b) BUILD_DIR="$OPTARG" ;;
     d) DISTRIBUTION="$OPTARG" ;;
     v) VERSION="$OPTARG" ;;
     n) BINARY_UPLOAD="BINARY_UPLOAD=true" ;;
+    c) CHECKROOT_UPGRADE="true" ;;
     u) RELEASE="release" ;;
     a) ARCH="$OPTARG" ;;
     e) CHECK_EXISTENCE="check-existence" ;;
@@ -67,7 +68,7 @@ while read package repositories ; do
 done < $FILE_IN
 
 # do this only once, instead of for each package
-make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES upgrade-base-chroot
+[ -n "$CHECKROOT_UPGRADE" ] && make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES upgrade-base-chroot
 
 # now cd into each dir in build_dirs and make
 for directory in "${build_dirs[@]}" ; do
