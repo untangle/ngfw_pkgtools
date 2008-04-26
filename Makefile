@@ -117,9 +117,7 @@ pkg-real: checkroot parse-changelog
 pkg: create-dest-dir pkg-real move-debian-files
 
 upgrade-base-chroot:
-	sudo cowbuilder --execute --basepath $(CHROOT_ORIG) --save-after-exec -- /usr/bin/apt-get update
-	export DEBIAN_FRONTEND=noninteractive ; \
-	sudo cowbuilder --execute --basepath $(CHROOT_ORIG) --save-after-exec -- /usr/bin/apt-get --yes dist-upgrade
+	sudo cowbuilder --execute --basepath $(CHROOT_ORIG) --save-after-exec -- $(CHROOT_UPDATE_SCRIPT)
 
 create-chroot:
 	if [ ! -d $(CHROOT_WORK) ] ; then \

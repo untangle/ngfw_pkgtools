@@ -6,6 +6,12 @@
 
 SOURCES=/etc/apt/sources.list
 
+if [ $# = 0 ] ; then
+  apt-get update
+  DEBIAN_FRONTEND=noninteractive apt-get --yes dist-upgrade
+  exit 0
+fi
+
 REPOSITORY=$1
 DISTRIBUTION=$2
 
