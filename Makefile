@@ -53,7 +53,7 @@ AVAILABILITY_MARKER := __NOT-AVAILABLE__
 
 ########################################################################
 # Rules
-.PHONY: checkroot create-dest-dir revert-changelog parse-changelog move-debian-files clean-debian-files clean-build clean version-real version check-existence source pkg-real pkg pkg-chroot-real pkg-chroot release release-deb create-existence-chroot remove-existence-chroot remove-chroot create-chroot
+.PHONY: checkroot create-dest-dir revert-changelog parse-changelog move-debian-files clean-debian-files clean-build clean version-real version check-existence source pkg-real pkg pkg-chroot-real pkg-chroot release release-deb create-existence-chroot remove-existence-chroot remove-chroot create-chroot upgrade-base-chroot
 
 checkroot:
 	@if [ "$$UID" = "0" ] ; then \
@@ -115,6 +115,11 @@ pkg-real: checkroot parse-changelog
 	# FIXME: sign packages themselves when we move to apt 0.6
 	/usr/bin/debuild $(DEBUILD_OPTIONS) $(DPKGBUILDPACKAGE_OPTIONS)
 pkg: create-dest-dir pkg-real move-debian-files
+
+upgrade-base-chroot:
+	sudo cowbuilder --execute --basepath $(CHROOT_ORIG) --save-after-exec -- /usr/bin/apt-get update
+	export DEBIAN_FRONTEND=noninteractive ; \
+	sudo cowbuilder --execute --basepath $(CHROOT_ORIG) --save-after-exec -- /usr/bin/apt-get --yes dist-upgrade
 
 create-chroot:
 	if [ ! -d $(CHROOT_WORK) ] ; then \
