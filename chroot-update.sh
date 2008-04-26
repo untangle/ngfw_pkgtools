@@ -18,7 +18,6 @@ addSource() {
   grep -q "$SRC" ${SOURCES} || echo $SRC >> ${SOURCES}
 }
 
-
 REPOSITORY=$1
 DISTRIBUTION=$2
 
@@ -29,14 +28,14 @@ esac
 
 # for our own build-deps
 addSource "http://mephisto/public/$REPOSITORY $DISTRIBUTION main premium upstream"
-case "$USER" in # to sign packages with the real untangle java keystore
+case "$HOME" in # to sign packages with the real untangle java keystore
   *buildbot|seb*) addSource "http://mephisto/public/$REPOSITORY $DISTRIBUTION internal"
 esac
 
 # also search in nightly-$branch if not buildbot
 case $DISTRIBUTION in
   nightly*) ;;
-  *) if [ "$USER" != "buildbot" ]; then
+  *) if [ "$HOME" != "buildbot" ]; then
        addSource "http://mephisto/public/$REPOSITORY nightly${branch} main premium upstream"
      fi ;;
 esac
