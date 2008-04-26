@@ -36,7 +36,7 @@ processResult() {
   result=$1
   [ $result = 0 ] && resultString="SUCCESS" || resultString="ERROR"
   let results=results+result
-  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot
+  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot-files
   echo "**** ${resultString}: make in $directory exited with return code $result"
   echo
   echo "# ======================="
