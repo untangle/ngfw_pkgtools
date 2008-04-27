@@ -103,7 +103,7 @@ create-existence-chroot:
 remove-existence-chroot:
 	sudo rm -fr $(CHROOT_EXISTENCE)
 check-existence: create-existence-chroot
-	output=`sudo chroot $(CHROOT_EXISTENCE) /$(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(FIRST_BINARY_PACKAGE) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
+	output=`sudo chroot $(CHROOT_EXISTENCE) /$(shell basename $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT)) $(FIRST_BINARY_PACKAGE) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
 	echo "$${output}" | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat $(VERSION_FILE)) of $(SOURCE_NAME) is not available in $(REPOSITORY)/$(DISTRIBUTION)"
 
 source: checkroot parse-changelog
@@ -129,7 +129,7 @@ remove-chroot:
 	sudo rm -fr $(CHROOT_WORK)
 pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	# FIXME: sign packages themselves when we move to apt 0.6
-	sudo chroot $(CHROOT_WORK) /$(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION)
+	sudo chroot $(CHROOT_WORK) /$(shell basename $(CHROOT_UPDATE_SCRIPT)) $(REPOSITORY) $(DISTRIBUTION)
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
 		 --buildresult `cat $(DESTDIR_FILE)` \
 	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
