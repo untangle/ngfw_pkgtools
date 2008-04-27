@@ -98,11 +98,12 @@ create-existence-chroot:
 	if [ ! -d $(CHROOT_EXISTENCE) ] ; then \
           sudo cp -al $(CHROOT_ORIG) $(CHROOT_EXISTENCE) ; \
           sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_EXISTENCE) -- $(CHROOT_UPDATE_EXISTENCE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
+          sudo cp -al $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(CHROOT_EXISTENCE) ; \
         fi
 remove-existence-chroot:
 	sudo rm -fr $(CHROOT_EXISTENCE)
 check-existence: create-existence-chroot
-	output=`sudo cowbuilder --execute --basepath $(CHROOT_EXISTENCE) -- $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(FIRST_BINARY_PACKAGE) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
+	output=`sudo chroot $(CHROOT_EXISTENCE) /$(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(FIRST_BINARY_PACKAGE) $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
 	echo "$${output}" | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat $(VERSION_FILE)) of $(SOURCE_NAME) is not available in $(REPOSITORY)/$(DISTRIBUTION)"
 
 source: checkroot parse-changelog
@@ -122,12 +123,13 @@ create-chroot:
 	if [ ! -d $(CHROOT_WORK) ] ; then \
           sudo rm -fr $(CHROOT_WORK) ; \
           sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK) ; \
+          sudo cp -al $(CHROOT_UPDATE_SCRIPT) $(CHROOT_WORK) ; \
         fi
 remove-chroot:
 	sudo rm -fr $(CHROOT_WORK)
 pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	# FIXME: sign packages themselves when we move to apt 0.6
-	sudo cowbuilder --execute --basepath $(CHROOT_WORK) --save-after-exec -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION)
+	sudo chroot $(CHROOT_WORK) /$(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION)
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
 		 --buildresult `cat $(DESTDIR_FILE)` \
 	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
