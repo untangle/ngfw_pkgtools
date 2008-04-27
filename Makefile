@@ -98,7 +98,7 @@ create-existence-chroot:
 	if [ ! -d $(CHROOT_EXISTENCE) ] ; then \
           sudo cp -al $(CHROOT_ORIG) $(CHROOT_EXISTENCE) ; \
           sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_EXISTENCE) -- $(CHROOT_UPDATE_EXISTENCE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
-          sudo cp -al $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(CHROOT_EXISTENCE) ; \
+          sudo cp $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(CHROOT_EXISTENCE) ; \
         fi
 remove-existence-chroot:
 	sudo rm -fr $(CHROOT_EXISTENCE)
@@ -123,7 +123,7 @@ create-chroot:
 	if [ ! -d $(CHROOT_WORK) ] ; then \
           sudo rm -fr $(CHROOT_WORK) ; \
           sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK) ; \
-          sudo cp -al $(CHROOT_UPDATE_SCRIPT) $(CHROOT_WORK) ; \
+          sudo cp $(CHROOT_UPDATE_SCRIPT) $(CHROOT_WORK) ; \
         fi
 remove-chroot:
 	sudo rm -fr $(CHROOT_WORK)
