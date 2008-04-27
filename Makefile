@@ -112,7 +112,6 @@ source: checkroot parse-changelog
 	       -f ../$(SOURCE_NAME)_`dpkg-parsechangelog | awk '/^Version:/{gsub(/(^.+:|-.*)/, "", $$2) ; print $$2}'`.orig.tar.gz ../$(CUR_DIR)
 
 pkg-real: checkroot parse-changelog
-	# FIXME: sign packages themselves when we move to apt 0.6
 	/usr/bin/debuild $(DEBUILD_OPTIONS) $(DPKGBUILDPACKAGE_OPTIONS)
 pkg: create-dest-dir pkg-real move-debian-files
 
@@ -124,12 +123,15 @@ create-chroot:
           sudo rm -fr $(CHROOT_WORK) ; \
           sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK) ; \
           sudo cp $(CHROOT_UPDATE_SCRIPT) $(CHROOT_WORK) ; \
+          sudo chroot $(CHROOT_WORK) /$(shell basename $(CHROOT_UPDATE_SCRIPT)) $(REPOSITORY) $(DISTRIBUTION) ; \
         fi
 remove-chroot:
 	sudo rm -fr $(CHROOT_WORK)
 pkg-chroot-real: checkroot parse-changelog create-dest-dir
-	# FIXME: sign packages themselves when we move to apt 0.6
-	sudo chroot $(CHROOT_WORK) /$(shell basename $(CHROOT_UPDATE_SCRIPT)) $(REPOSITORY) $(DISTRIBUTION)
+	# if we depend on an untangle-* package, we want to apt-get update
+	# to get the latest available version (that might have been uploaded
+	# during the current make-build.sh run)
+	grep -E '^Build-Depends:.*untangle' debian/control && sudo chroot $(CHROOT_WORK) /$(shell basename $(CHROOT_UPDATE_SCRIPT)) $(REPOSITORY) $(DISTRIBUTION)
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
 		 --buildresult `cat $(DESTDIR_FILE)` \
 	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
