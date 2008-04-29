@@ -1,11 +1,11 @@
-import apt, apt_pkg, commands, os.path, re, sys, urllib
+import apt, apt_pkg, commands, os, os.path, re, sys, urllib
 import optparse
 
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), "lib"))
 import aptchroot
 
 # constants
-TMP_DIR = '/tmp/foo'
+TMP_DIR = os.tmpnam()
 SOURCE = "deb http://%s/public/%s %s main premium upstream"
 SVN_LOG = "svn log -r %s:%s svn://chef/%s"
 MSG1 = 'r%s,svn://chef/%s,%s,,\n'
@@ -13,7 +13,7 @@ MSG2 = ',,,%s,http://bugzilla.untangle.com/show_bug.cgi?id=%s\n'
 reUntangle = re.compile(r'untangle')
 reSplitter = re.compile(r'\n-+\n', re.MULTILINE)
 reExtract = re.compile(r'^r(\d+) \| (.*?) .*?closes:\s*(?:bug)?\s*\#\s*(\d+)(?:,\s*(?:bug)?\s*\#\s*(\d+))?.*?', re.MULTILINE | re.DOTALL | re.IGNORECASE)
-reRevision = re.compile('.+svn.+r(\d+).+')
+reRevision = re.compile('.+svn.+r(\d+)(.+)-\d[a-z]+$')
 
 # functions
 def usage():
@@ -23,18 +23,21 @@ def usage():
 def getVersion(name):
   return aptchroot.VersionedPackage(name).version
 
-def getRevisionFromVersion(version):
-  return reRevision.sub(r'\1', version)
+def getRevisionAndBranchFromVersion(version):
+  return reRevision.match(version).groups()
 
-def getHighestRevisionFromSource(source):
+def getHighestRevisionAndBranchFromSource(source):
   aptchroot.initializeChroot(TMP_DIR, source, "")
+  # versions for all the untangle-* packages
   v = [ getVersion(name)
         for name in aptchroot.cache.keys()
         if reUntangle.search(name) ]
-  return getRevisionFromVersion(max(v))
+  return getRevisionAndBranchFromVersion(max(v))
 
 def getSVNLog(revs, name):
-  return commands.getoutput(SVN_LOG % tuple(revs+[name,]))
+  s = SVN_LOG % tuple(revs+[name,])
+  print s
+  return commands.getoutput(s)
 
 def getClosedBugs(st, name):
   result = ""
@@ -68,21 +71,38 @@ for f in txtFile,csvFile:
     print "%s already exist, aborting" % (f,)
     sys.exit(1)
 
-revs = []
-sources = []
+revs     = []
+sources  = []
+branches = set()
 
 for arg in revArgs:
   if re.search(r',', arg):
     source = SOURCE % tuple(arg.split(","))
-    rev = getHighestRevisionFromSource(source)
+    rev, branch = getHighestRevisionAndBranchFromSource(source)
+    branches.add(branch)
   else:
     source = None
     rev = arg
   revs.append(rev)
   sources.append(source)
 
-work = getSVNLog(revs, "work")
-hades = getSVNLog(revs, "hades")
+if len(branches) == 0:
+  print "Couldn't determine the branch to run the diff for."
+  exit(1)
+elif len(branches) == 2:
+  print "Those 2 sources are built from different branches (%s), can't run the diff." % (branches,)
+  exit(1)
+
+branch = branches.pop()
+if not branch == "":
+  branch = "branch/prod/%s" % (branch,)
+branch = "%s/" % (branch,)
+# argh
+branch = branch.replace('release', 'release-')
+branch = branch.replace('web-ui', 'web-ui')
+
+work = getSVNLog(revs, branch + "work")
+hades = getSVNLog(revs, branch + "hades")
 
 writeToFile('%s\n%s\n\n' % (sources,revs), txtFile)
 writeToFile(work, txtFile)

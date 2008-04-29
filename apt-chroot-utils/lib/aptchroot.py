@@ -47,13 +47,13 @@ def initializeChroot(TMP_DIR, sources, preferences):
   apt_pkg.Config.Set("Dir::State::Lists",  LISTS)
   apt_pkg.Config.Set("Dir::State::status", STATUS)
 
-  apt_pkg.Config.Set("Debug::pkgPolicy","1");
-  apt_pkg.Config.Set("Debug::pkgOrderList","1");
-  apt_pkg.Config.Set("Debug::sourceList","1");
-  apt_pkg.Config.Set("Debug::pkgProblemResolver","1");
-  apt_pkg.Config.Set("Debug::pkgDPkgPM","1");
-  apt_pkg.Config.Set("Debug::pkgPackageManager","1");
-  apt_pkg.Config.Set("Debug::pkgDPkgProgressReporting","1");
+#   apt_pkg.Config.Set("Debug::pkgPolicy","1");
+#   apt_pkg.Config.Set("Debug::pkgOrderList","1");
+#   apt_pkg.Config.Set("Debug::sourceList","1");
+#   apt_pkg.Config.Set("Debug::pkgProblemResolver","1");
+#   apt_pkg.Config.Set("Debug::pkgDPkgPM","1");
+#   apt_pkg.Config.Set("Debug::pkgPackageManager","1");
+#   apt_pkg.Config.Set("Debug::pkgDPkgProgressReporting","1");
 
   cache = apt.Cache(rootdir=TMP_DIR)
   cache.update()
