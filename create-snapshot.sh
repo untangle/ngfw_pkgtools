@@ -1,7 +1,7 @@
 #! /bin/bash -x
 
 usage() {
-  echo "Usage: $0 -r <repository> -d <distribution> [-t <scheduledHour>] <snapshot>"
+  echo "Usage: $0 -r <repository> -d <distribution> [-t <scheduledHour>]"
   exit 1
 }
 
@@ -16,9 +16,9 @@ while getopts "r:d:t:" opt ; do
 done
 shift $(($OPTIND - 1))
 
-[ ! $# = 1 ] && usage
+[ ! $# = 0 ] && usage
 
-SNAPSHOT=$1
+SNAPSHOT=`date -d "-1day" "+%Y-%m-%d"`
 
 if [ -z "$SCHEDULED_HOUR" ] || [ "$SCHEDULED_HOUR" -eq `date "+%H"` ] ; then
   ./reprepro-untangle.sh -V -b /var/www/public/$REPOSITORY gensnapshot $DISTRIBUTION $SNAPSHOT
