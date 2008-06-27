@@ -32,10 +32,10 @@ shift $(($OPTIND - 1))
 
 . `dirname $0`/release-constants.sh
 
-list=`${REPREPRO_BASE_COMMAND} listfilter ${DISTRIBUTION} Package | grep $REGEX $NREGEX | sort -u`
+list=`${REPREPRO_BASE_COMMAND} listfilter ${DISTRIBUTION} Package | grep $REGEX $NREGEX | awk '{print $2}' | sort -u`
 
 if [ -n "$SIMULATE" ] ; then
   echo "$list"
 else
-  [ -n "$list" ] && echo "$list" | awk '{print $2}' | xargs ${REPREPRO_BASE_COMMAND} remove ${DISTRIBUTION}
+  [ -n "$list" ] && echo "$list" | xargs ${REPREPRO_BASE_COMMAND} remove ${DISTRIBUTION}
 fi
