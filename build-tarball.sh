@@ -38,7 +38,7 @@ if [ -z "${SUBVERSION_REVISION}" ] || [ -z "${RELEASE_VERSION}" ]; then
 fi
 
 EXPORT_DIRECTORY=`mktemp -d`
-ARCHIVE=`date +"untangle-${TARBALL_TYPE}-${RELEASE_VERSION}-%Y%m%dr${SUBVERSION_REVISION}"`
+ARCHIVE=`date +"untangle_${TARBALL_TYPE}_${RELEASE_VERSION}_%Y%m%dr${SUBVERSION_REVISION}"`
 
 ## Export the tree into the export directory
 echo "[svn] export -r ${SUBVERSION_REVISION} ${BRANCH} ${EXPORT_DIRECTORY}/${ARCHIVE}"
