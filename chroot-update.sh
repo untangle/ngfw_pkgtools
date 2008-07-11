@@ -1,4 +1,4 @@
-#! /bin/bash -x
+#! /bin/bash
 
 # Use the current distro to pull main, but use upstream from stage/testing+$1/testing+$1/alpha
 # (not everyone has upstream in his target distro)
@@ -35,9 +35,11 @@ esac
 # also search in nightly-$branch if not buildbot
 case $DISTRIBUTION in
   nightly*) ;;
-  *) if [ "$HOME" != "buildbot" ]; then
-       addSource "http://mephisto/public/$REPOSITORY nightly${branch} main premium upstream"
-     fi ;;
+  *)
+    case "$HOME" in
+      *buildbot*) ;;
+      *) addSource "http://mephisto/public/$REPOSITORY nightly${branch} main premium upstream"
+    esac ;;
 esac
 
 apt-get -q update
