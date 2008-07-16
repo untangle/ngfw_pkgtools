@@ -1,8 +1,7 @@
 import apt, apt_pkg, commands, os, os.path, re, sys, urllib
 import optparse
 
-sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), "lib"))
-import aptchroot
+from lib import aptchroot
 
 # constants
 TMP_DIR = os.tmpnam()
