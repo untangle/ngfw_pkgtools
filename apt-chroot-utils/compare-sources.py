@@ -97,9 +97,10 @@ branch = branches.pop()
 if not branch == "":
   branch = "branch/prod/%s" % (branch,)
 branch = "%s/" % (branch,)
-# argh
+
+# FIXME: this is so fucked-up...
 branch = branch.replace('release', 'release-')
-branch = branch.replace('web-ui', 'web-ui')
+branch = branch.replace('webui', 'web-ui')
 
 work = getSVNLog(revs, branch + "work")
 hades = getSVNLog(revs, branch + "hades")
