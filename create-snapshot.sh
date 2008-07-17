@@ -1,4 +1,4 @@
-#! /bin/bash -x
+#! /bin/bash
 
 usage() {
   echo "Usage: $0 -r <repository> -d <distribution> [-t <scheduledHour>]"
