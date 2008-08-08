@@ -44,4 +44,8 @@ esac
 
 apt-get -q update
 
+# do not ever prompt the user, even if the distribution name doesn't
+# please dch
+sed -e '/garbage/d' /usr/bin/dch
+
 exit 0
