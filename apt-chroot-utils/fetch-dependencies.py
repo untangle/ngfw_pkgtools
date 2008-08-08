@@ -77,7 +77,7 @@ deb http://www.backports.org/debian %s-backports main contrib non-free
 # volatile
 deb http://volatile.debian.org/debian-volatile %s/volatile main contrib non-free
 # mephisto
-#deb http://10.0.0.105/public/%s stable main premium upstream\n''' % (options.distribution,
+deb http://10.0.0.105/public/%s stable main premium upstream\n''' % (options.distribution,
                                                                      options.distribution,
                                                                      options.distribution,
                                                                      options.distribution,
