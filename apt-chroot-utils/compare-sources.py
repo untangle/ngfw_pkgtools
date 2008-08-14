@@ -23,7 +23,10 @@ def getVersion(name):
   return aptchroot.VersionedPackage(name).version
 
 def getRevisionAndBranchFromVersion(version):
-  return reRevision.match(version).groups()
+  rev, branch = reRevision.match(version).groups()
+  if branch == 'trunk':
+    branch = ''
+  return rev, branch
 
 def getHighestRevisionAndBranchFromSource(source):
   aptchroot.initializeChroot(TMP_DIR, source, "")
