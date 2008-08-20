@@ -9,7 +9,7 @@ usage() {
   exit 1
 }
 
-while getopts "shr:d:" opt ; do
+while getopts "shr:d:m" opt ; do
   case "$opt" in
     s) simulate=1 ;;
     m) MANIFEST=1 ;;
@@ -30,7 +30,7 @@ pkgtools=`dirname $0`
 . $pkgtools/release-constants.sh
 
 tmp_base=/tmp/sync-$REPOSITORY-$DISTRIBUTION-`date -Iminutes`
-diffCommand="$pkgtools/apt-chroot-utils/compare-sources.py `hostname`,$REPOSITORY,$DISTRIBUTION user:user@updates.untangle.com,$REPOSITORY,$DISTRIBUTION $tmp_base"
+diffCommand="$pkgtools/apt-chroot-utils/compare-sources.py `hostname`,$REPOSITORY,$DISTRIBUTION user:metavize@updates.untangle.com,$REPOSITORY,$DISTRIBUTION $tmp_base"
 
 # MAIN
 if [ -z "$simulate" ] ; then
