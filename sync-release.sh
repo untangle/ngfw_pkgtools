@@ -40,8 +40,12 @@ if [ -z "$simulate" ] ; then
 
   date="`date`"
   $REPREPRO_REMOTE_COMMAND --noskipold update ${DISTRIBUTION}
-  # also remove source packages for premium
+
+  # also remove source packages for premium; this is really just a
+  # safety measure now, as the update process itself is smarter and
+  # knows not to pull sources for premium.
   $SSH_COMMAND ./remove-packages.sh -r ${REPOSITORY} -d ${DISTRIBUTION} -t dsc -c premium
+
   $REPREPRO_REMOTE_COMMAND export ${DISTRIBUTION}
 
   local -a attachments
