@@ -76,6 +76,7 @@ dchargs="-v ${version} -D ${distribution}"
 #    dchargs="$dchargs --distributor Untangle"
 #fi
 
+sed -i -e '/garbage/d' /usr/bin/dch
 echo "Setting version to \"${version}\", distribution to \"$distribution\""
 DEBEMAIL="${DEBEMAIL:-${USER}@untangle.com}" dch $dchargs "auto build"
 # check changelog back in if version was forced; FIXME: disabled for now
