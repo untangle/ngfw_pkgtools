@@ -83,7 +83,7 @@ for directory in "${build_dirs[@]}" ; do
   result=$?
   processResult $result
   # if we're building only arch-dependent pkgs, we need to give the IQD time to process uploads
-  [ $ARCH = "all" ] || sleep 31
+  [ $ARCH = "i386" ] || sleep 31
 done
 
 # do this last
