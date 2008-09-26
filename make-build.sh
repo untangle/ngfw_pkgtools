@@ -23,7 +23,7 @@ while getopts r:b:d:v:a:uench option ; do
     \?) usage ;;
   esac
 done
-[ -z "$ARCH" ] && ARCH=all
+[ -z "$ARCH" ] && ARCH=i386
 MAKE_VARIABLES="DISTRIBUTION=${DISTRIBUTION} REPOSITORY=${TARGET_REP} ${BINARY_UPLOAD} TIMESTAMP=`date +%Y-%m-%dT%H%M%S_%N`"
 if [ -n "$VERSION" ] ; then
   MAKE_VARIABLES="$MAKE_VARIABLES VERSION=\"${VERSION}\""
@@ -60,7 +60,7 @@ while read package repositories ; do
     "") continue ;; # empty line
     *) # yes
       if [[ "$repositories" = *${TARGET_REP}* ]] ; then
-	if [ $ARCH = "all" ] || grep -qE "^Architecture:.*(any|$ARCH)" $package/debian/control ; then
+	if [ $ARCH = "i386" ] || grep -qE "^Architecture:.*(any|$ARCH)" $package/debian/control ; then
 	  build_dirs[${#build_dirs[*]}]="$package"
 	fi
       fi ;;
