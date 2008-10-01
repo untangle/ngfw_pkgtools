@@ -17,8 +17,8 @@ repository=${3/REPOSITORY=}
 
 osdist=unknown
 case $repository in
-  sarge|etch|sid) osdist=debian ;;
-  feisty|gutsy|hardy) osdist=ubuntu ;;
+  sarge|etch|lenny|sid) osdist=debian ;;
+  feisty|gutsy|intrepid|hardy) osdist=ubuntu ;;
 esac
 
 if [ -z "$version" ] ; then
