@@ -21,6 +21,8 @@ case $repository in
   feisty|gutsy|intrepid|hardy) osdist=ubuntu ;;
 esac
 
+previousUpstreamVersion=`dpkg-parsechangelog | awk '/Version: / { gsub(/-.*/, "", $2) ; print $2 }'`
+
 if [ -z "$version" ] ; then
   # not exactly kosher, but I'll contend that incVersion.sh is only
   # called from the Makefile :>
@@ -45,8 +47,12 @@ if [ -z "$version" ] ; then
   baseVersion=`cat $versionFile`~svn${timestamp}r${revision}${branch}
 
   if [ -f UNTANGLE-KEEP-UPSTREAM-VERSION ] ; then
-    previousUpstreamVersion=`dpkg-parsechangelog | awk '/Version: / { gsub(/-.*/, "", $2) ; print $2 }'`
     baseVersion=${previousUpstreamVersion}+${baseVersion}
+  elif [ -f UNTANGLE-FORCE-UPSTREAM-VERSION ] ; then
+    # if we find UNTANGLE-FORCE-UPSTREAM-VERSION, do nothing as it
+    # means we want to build an upstream package without modifying it
+    # at all.
+    baseVersion=${previousUpstreamVersion}
   fi
 
   if [ -z "$hasLocalChanges" ] ; then
@@ -70,7 +76,7 @@ fi
 
 version=${version}${repository}
 
-dchargs="-v ${version} -D ${distribution}"
+dchargs="--preserve -v ${version} -D ${distribution}"
 ## dch is called outside the chroot...
 #if [ "$osdist" = ubuntu ]; then
 #    dchargs="$dchargs --distributor Untangle"
