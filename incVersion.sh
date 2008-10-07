@@ -21,6 +21,7 @@ case $repository in
   feisty|gutsy|intrepid|hardy) osdist=ubuntu ;;
 esac
 
+previousVersion=`dpkg-parsechangelog | awk '/Version: / { print $2 }'`
 previousUpstreamVersion=`dpkg-parsechangelog | awk '/Version: / { gsub(/-.*/, "", $2) ; print $2 }'`
 
 if [ -z "$version" ] ; then
@@ -52,7 +53,7 @@ if [ -z "$version" ] ; then
     # if we find UNTANGLE-FORCE-UPSTREAM-VERSION, do nothing as it
     # means we want to build an upstream package without modifying it
     # at all.
-    baseVersion=${previousUpstreamVersion}
+    baseVersion=${previousVersion}
   fi
 
   if [ -z "$hasLocalChanges" ] ; then
@@ -62,7 +63,10 @@ if [ -z "$version" ] ; then
     version=${baseVersion}+$USER`date +"%Y%m%dT%H%M%S"`
     distribution=$USER
   fi
-  version=${version}-1
+
+  if [ ! -f UNTANGLE-FORCE-UPSTREAM-VERSION ] ; then  # FIXME: ugly, but will do for now
+    version=${version}-1
+  fi
 else # force version
   if [ -f UNTANGLE-KEEP-UPSTREAM-VERSION ] ; then
     previousUpstreamVersion=`dpkg-parsechangelog | awk '/Version: / { gsub(/-.*/, "", $2) ; print $2 }'`
