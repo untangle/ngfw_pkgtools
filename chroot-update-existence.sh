@@ -8,4 +8,6 @@ echo deb http://mephisto/public/$REPOSITORY $DISTRIBUTION main premium upstream 
 
 apt-get update
 
+apt-get install --yes debhelper
+
 exit 0
