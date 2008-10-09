@@ -101,7 +101,13 @@ create-existence-chroot:
 remove-existence-chroot:
 	sudo rm -fr $(CHROOT_EXISTENCE)
 check-existence: create-existence-chroot
-	output=`sudo chroot $(CHROOT_EXISTENCE) /$(shell basename $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT)) "$(ARCH)" $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
+	if [ -z "$(ARCH)" ] ; then \
+	  DH_SWITCH="" ; \
+	else \
+	  DH_SWITCH="-a" ; \
+	fi ; \
+	packageName=`dh_listpackages $(DH_SWITCH) | head -1` ;\
+	output=`sudo chroot $(CHROOT_EXISTENCE) /$(shell basename $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT)) "$packageName" $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
 	echo "$${output}" | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat $(VERSION_FILE)) of $(SOURCE_NAME) is not available in $(REPOSITORY)/$(DISTRIBUTION)"
 
 source: checkroot parse-changelog
