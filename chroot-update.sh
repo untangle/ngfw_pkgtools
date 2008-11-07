@@ -5,6 +5,8 @@
 # --Seb
 
 SOURCES=/etc/apt/sources.list
+DEBIAN_MIRROR=http://debian/debian
+UBUNTU_MIRROR=http://ubuntu/ubuntu
 
 if [ $# = 0 ] ; then
   apt-get update
@@ -41,6 +43,12 @@ case $DISTRIBUTION in
       *) addSource "http://mephisto/public/$REPOSITORY nightly${branch} main premium upstream"
     esac ;;
 esac
+
+if grep -q debian $SOURCES ; then
+  grep -q "non-free" $SOURCES || perl -i -pe 's/main$/main contrib non-free' $SOURCES
+else
+  grep -q "universe" $SOURCES || perl -i -pe 's/main$/main universe multiverse' $SOURCES
+fi
 
 apt-get -q update
 
