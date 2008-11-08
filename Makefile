@@ -128,18 +128,18 @@ create-chroot:
           sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK) ; \
           sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
         fi
-	ls $(CHROOT_WORK)
+	ls -la $(CHROOT_WORK)
 remove-chroot:
 	sudo rm -fr $(CHROOT_WORK)
 pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	# if we depend on an untangle-* package, we want to apt-get update
 	# to get the latest available version (that might have been uploaded
 	# during the current make-build.sh run)
-	ls $(CHROOT_WORK)
+	ls -la $(CHROOT_WORK)
 	if grep -E '^Build-Depends:.*untangle' debian/control ; then \
           sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
         fi
-	ls $(CHROOT_WORK)
+	ls -la $(CHROOT_WORK)
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
 		 --buildresult `cat $(DESTDIR_FILE)` \
 	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
