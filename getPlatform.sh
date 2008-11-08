@@ -8,6 +8,7 @@ case `head -1 /etc/issue | awk "{ print \\$$i }"` in
   7.04*) repository=feisty ;;
   7.10*) repository=gutsy ;;
   8.04*|hardy) repository=hardy ;;
+  8.10*|intrepid) repository=intrepid ;;
   *) echo "Couldn't guess your platform, giving up" ; exit 1 ;;
 esac
 
