@@ -36,10 +36,21 @@ TO_DISTRIBUTION=$2
 
 . `dirname $0`/release-constants.sh
 
-list=`${REPREPRO_BASE_COMMAND} listfilter ${FROM_DISTRIBUTION} Package | grep $REGEX $NREGEX | awk '{print $2}' | sort -u`
+case $FROM_DISTRIBUTION in
+  */snapshots/*)
+    parent=`echo $FROM_DISTRIBUTION | perl -pe 's|/snapshots/.+||'`
+    date=`echo $FROM_DISTRIBUTION | perl -pe 's|.+/snapshots/(.+)|$1|'`
+    list=`${REPREPRO_BASE_COMMAND} dumpreferences | perl -ne 'print $1 . "\n" if $_ =~ m|^s='$parent=$date'.+/(.+?)_.*\.deb|' | grep $REGEX $NREGEX | sort -u`
+    FROM_DISTRIBUTION="s=$parent=$date"
+    copy="restore"
+    FROM_DISTRIBUTION="$date" ;;
+  *)
+    list=`${REPREPRO_BASE_COMMAND} listfilter ${FROM_DISTRIBUTION} Package | grep $REGEX $NREGEX | awk '{print $2}' | sort -u`
+    copy="copy" ;;
+esac
 
 if [ -n "$SIMULATE" ] ; then
   echo "$list"
 else
-  [ -n "$list" ] && echo "$list" | xargs ${REPREPRO_BASE_COMMAND} copy ${TO_DISTRIBUTION} ${FROM_DISTRIBUTION}
+  [ -n "$list" ] && echo "$list" | xargs ${REPREPRO_BASE_COMMAND} $copy ${TO_DISTRIBUTION} ${FROM_DISTRIBUTION}
 fi
