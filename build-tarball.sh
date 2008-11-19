@@ -22,7 +22,7 @@ BRANCH=${BRANCH:+svn://chef/${BRANCH}}
 if [ $# -gt 3 ] || [ -z "${TARBALL_TYPE}" ]; then usage ; fi
 
 ## Get the version string
-RELEASE_VERSION=`svn cat ${BRANCH}/version/resources/VERSION`
+RELEASE_VERSION=${RELEASE_VERSION:-`svn cat ${BRANCH}/version/resources/VERSION`}
 
 SUBVERSION_REVISION=$3
 
