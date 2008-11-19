@@ -2,9 +2,10 @@
 
 BRANCH_PATH=$1
 DESCRIPTION="$2"
+BRANCH_REVISION="${3:+-r $3}"
 
 if [ -z "${DESCRIPTION}" ] || [ -z "${BRANCH_PATH}" ]; then
-    echo "Usage: $0 <svn path> <branch description>"
+    echo "Usage: $0 <svn path> <branch description> [<branch revision>]"
     exit 1
 fi
 
@@ -36,25 +37,25 @@ TEMP_DIST=`mktemp -d`
 rm -rf "${TEMP_DIST}"
 svn checkout ${BRANCH_PATH} ${TEMP_DIST}
 
-echo "[svn copy] svn://chef/work ${BRANCH_PATH}"
-svn copy svn://chef/work ${TEMP_DIST}
+echo "[svn copy] ${BRANCH_REVISION} svn://chef/work ${BRANCH_PATH}"
+svn copy ${BRANCH_REVISION} svn://chef/work ${TEMP_DIST}
 echo "Copying work to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 
-echo "[svn copy] svn://chef/hades ${BRANCH_PATH}"
-svn copy svn://chef/hades ${TEMP_DIST}
+echo "[svn copy] ${BRANCH_REVISION} svn://chef/hades ${BRANCH_PATH}"
+svn copy ${BRANCH_REVISION} svn://chef/hades ${TEMP_DIST}
 echo "Copying hades to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 
-echo "[svn copy] svn://chef/internal/pkgtools ${BRANCH_PATH}"
-svn copy svn://chef/internal/pkgtools ${TEMP_DIST}
+echo "[svn copy] ${BRANCH_REVISION} svn://chef/internal/pkgtools ${BRANCH_PATH}"
+svn copy ${BRANCH_REVISION} svn://chef/internal/pkgtools ${TEMP_DIST}
 echo "Copying pkgtools to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 
-echo "[svn copy] svn://chef/internal/isotools ${BRANCH_PATH}"
-svn copy svn://chef/internal/isotools ${TEMP_DIST}
+echo "[svn copy] ${BRANCH_REVISION} svn://chef/internal/isotools ${BRANCH_PATH}"
+svn copy ${BRANCH_REVISION} svn://chef/internal/isotools ${TEMP_DIST}
 echo "Copying isotools to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 
 for t in `svn list 'svn://chef/internal' | awk '/^upstream_/ { print $1 }'` ; do 
-    echo "[svn copy] svn://chef/internal/${t} ${BRANCH_PATH}"
-    svn copy svn://chef/internal/${t} ${TEMP_DIST}
+    echo "[svn copy] ${BRANCH_REVISION} svn://chef/internal/${t} ${BRANCH_PATH}"
+    svn copy ${BRANCH_REVISION} svn://chef/internal/${t} ${TEMP_DIST}
     echo "Copying svn://chef/internal/${t} to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 done
 
