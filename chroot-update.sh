@@ -1,4 +1,4 @@
-#! /bin/bash -x
+#! /bin/bash
 
 # Use the current distro to pull main, but use upstream from stage/testing+$1/testing+$1/alpha
 # (not everyone has upstream in his target distro)
