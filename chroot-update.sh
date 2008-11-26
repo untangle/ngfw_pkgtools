@@ -45,9 +45,9 @@ case $DISTRIBUTION in
 esac
 
 if grep -q debian $SOURCES ; then
-  grep -q "non-free" $SOURCES || perl -i -pe 's/main$/main contrib non-free/' $SOURCES
+  grep -q "non-free" $SOURCES || perl -i -pe 's/main\s*$/main contrib non-free/' $SOURCES
 else
-  grep -q "universe" $SOURCES || perl -i -pe 's/main$/main universe multiverse/' $SOURCES
+  grep -q "universe" $SOURCES || perl -i -pe 's/main\s*$/main universe multiverse/' $SOURCES
 fi
 
 apt-get -q update
