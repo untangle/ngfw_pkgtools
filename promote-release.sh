@@ -1,18 +1,24 @@
 #! /bin/bash
 
 usage() {
-  echo "Usage: $0 [-s] [-w] [-m] -r <repository> <fromDistribution> <toDistribution>"
+  echo "Usage: $0 [-s] [-w]  [-A architecture] [-C <component>] [-T (dsc|udeb|deb)] [-m] -r <repository> <fromDistribution> <toDistribution>"
   echo "-s : simulate"
   echo "-m : manifest"
   echo "-w : wipe out <toDistribution> first"
+  echo "-C <component>    : only act on component <component>"
+  echo "-T (dsc,udeb,deb) : only act on source/udeb/deb packages"
+  echo "-A <arch>         : only act on architecture <arch>"
   exit 1
 }
 
 while getopts "shwr:d:m" opt ; do
   case "$opt" in
-    s) simulate=1 && EXTRA_ARGS="-s" ;;
+    s) simulate=1 && EXTRA_ARGS="$EXTRA_ARGS -s" ;;
     r) REPOSITORY=$OPTARG ;;
     m) MANIFEST=1 ;;
+    C) COMPONENT="$OPTARG" && EXTRA_ARGS="$EXTRA_ARGS -C $COMPONENT" ;;
+    A) ARCHITECTURE="$OPTARG" && EXTRA_ARGS="$EXTRA_ARGS -A $ARCHITECTURE" ;;
+    T) TYPE="$OPTARG" && EXTRA_ARGS="$EXTRA_ARGS -T $TYPE" ;;;;
     w) WIPE_OUT_TARGET=1 ;;
     h) usage ;;
     \?) usage ;;

@@ -1,25 +1,26 @@
 #! /bin/bash
 
 usage() {
-  echo "Usage: $0 -r <repository> -d <distribution> [-s] [-e <regex>|-n <negate_regex>] [-a architecture] [-c <component>] [-t (dsc|deb)]"
+  echo "Usage: $0 -r <repository> -d <distribution> [-s] [-e <regex>|-n <negate_regex>] [-A architecture] [-C <component>] [-T (dsc|udeb|deb)]"
   echo "-s                : simulate"
   echo "-e <regex>        : only act on packages matching <regexp>"
   echo "-n <regex>        : exclude packages matching <regexp>"
-  echo "-c <component>    : only act on <component>"
-  echo "-c (dsc,udeb,deb) : only act on source or binary packages"
+  echo "-C <component>    : only act on component <component>"
+  echo "-T (dsc,udeb,deb) : only act on source/udeb/deb packages"
+  echo "-A <arch>         : only act on architecture <arch>"
   exit 1
 }
 
-while getopts "r:d:a:c:e:n:t:hs" opt ; do
+while getopts "r:d:A:C:T:e:n:hs" opt ; do
   case "$opt" in
     r) REPOSITORY=$OPTARG ;;
     d) DISTRIBUTION=$OPTARG ;;
     e) REGEX="-E $OPTARG" ;;
     n) NREGEX="-v -E $OPTARG" ;;
     s) SIMULATE=true ;;
-    c) COMPONENT="-C $OPTARG" ;;
-    a) ARCHITECTURE="-A $OPTARG" ;;
-    t) TYPE="-T $OPTARG" ;;
+    C) COMPONENT="$OPTARG" && EXTRA_ARGS="$EXTRA_ARGS -C $COMPONENT" ;;
+    A) ARCHITECTURE="$OPTARG" && EXTRA_ARGS="$EXTRA_ARGS -A $ARCHITECTURE" ;;
+    T) TYPE="$OPTARG" && EXTRA_ARGS="$EXTRA_ARGS -T $TYPE" ;;;;
     h) usage ;;
     \?) usage ;;
   esac
@@ -32,10 +33,10 @@ shift $(($OPTIND - 1))
 
 . `dirname $0`/release-constants.sh
 
-list=`${REPREPRO_BASE_COMMAND} listfilter ${DISTRIBUTION} Package | grep $REGEX $NREGEX | awk '{print $2}' | sort -u`
+list=`${REPREPRO_BASE_COMMAND} $EXTRA_ARGS listfilter ${DISTRIBUTION} Package | grep $REGEX $NREGEX | awk '{print $2}' | sort -u`
 
 if [ -n "$SIMULATE" ] ; then
   echo "$list"
 else
-  [ -n "$list" ] && echo "$list" | xargs ${REPREPRO_BASE_COMMAND} remove ${DISTRIBUTION}
+  [ -n "$list" ] && echo "$list" | xargs ${REPREPRO_BASE_COMMAND} $EXTRA_ARGS remove ${DISTRIBUTION}
 fi
