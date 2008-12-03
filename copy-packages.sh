@@ -42,12 +42,12 @@ case $FROM_DISTRIBUTION in
     date=`echo $FROM_DISTRIBUTION | perl -pe 's|.+/snapshots/(.+)|$1|'`
     # if any extra arg is used, this will wail with an informative
     # message, which is the Proper Behavior(TM)
-    list=`${REPREPRO_BASE_COMMAND} dumpreferences $EXTRA_ARGS | perl -ne 'print $1 . "\n" if $_ =~ m|^s='$parent=$date'.+/(.+?)_.*\.deb|' | grep $REGEX $NREGEX | sort -u`
+    list=`${REPREPRO_BASE_COMMAND} dumpreferences | perl -ne 'print $1 . "\n" if $_ =~ m|^s='$parent=$date'.+/(.+?)_.*\.deb|' | grep $REGEX $NREGEX | sort -u`
     FROM_DISTRIBUTION="s=$parent=$date"
     copy="restore"
     FROM_DISTRIBUTION="$date" ;;
   *)
-    list=`${REPREPRO_BASE_COMMAND} $EXTRA_ARGS listfilter ${FROM_DISTRIBUTION} Package | grep $REGEX $NREGEX | awk '{print $2}' | sort -u`
+    list=`${REPREPRO_BASE_COMMAND} listfilter ${FROM_DISTRIBUTION} Package | grep $REGEX $NREGEX | awk '{print $2}' | sort -u`
     copy="copy" ;;
 esac
 

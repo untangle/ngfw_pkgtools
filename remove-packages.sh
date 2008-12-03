@@ -38,5 +38,5 @@ list=`${REPREPRO_BASE_COMMAND} $EXTRA_ARGS listfilter ${DISTRIBUTION} Package | 
 if [ -n "$SIMULATE" ] ; then
   echo "$list"
 else
-  [ -n "$list" ] && echo "$list" | xargs ${REPREPRO_BASE_COMMAND} $EXTRA_ARGS remove ${DISTRIBUTION}
+  [ -n "$list" ] && echo "$list" | xargs ${REPREPRO_BASE_COMMAND} remove ${DISTRIBUTION}
 fi
