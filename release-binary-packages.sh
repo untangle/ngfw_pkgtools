@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash -x
 
 usage() {
   echo "Usage: $0 -r <repository> -d <distribution> [-h host] [a]"
