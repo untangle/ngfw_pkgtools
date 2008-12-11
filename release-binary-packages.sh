@@ -23,13 +23,17 @@ HOST=${HOST:-mephisto}
 [ -z "$REPOSITORY" ] || [ -z "$DISTRIBUTION" ] && usage
 
 DEBS=$(find . $MAX_DEPTH -name "*.deb" | xargs)
+UDEBS=$(find . $MAX_DEPTH -name "*.udeb" | xargs)
 
-if [ -n "$DEBS" ] ; then
+if [ -n "$DEBS" ] || [ -n "$UDEBS" ] ; then
   for p in $DEBS ; do
     touch ${p/.deb/.${REPOSITORY}_${DISTRIBUTION}.manifest}
   done
+  for p in $UDEBS ; do
+    touch ${p/.udeb/.${REPOSITORY}_${DISTRIBUTION}.manifest}
+  done
 
   MANIFESTS=$(find . $MAXDEPTH -name "*.manifest" | xargs)
-  lftp -e "set net:max-retries 1 ; cd $REPOSITORY/incoming ; put $DEBS $MANIFESTS ; exit" $HOST
+  lftp -e "set net:max-retries 1 ; cd $REPOSITORY/incoming ; put $DEBS $UDEBS $MANIFESTS ; exit" $HOST
   rm -f $MANIFESTS
 fi
