@@ -52,7 +52,10 @@ results=0
 # cd into the main trunk (the buildbot is already in there)
 cd "${BUILD_DIR}" 2> /dev/null
 
-# first grab the content of the build-order.txt file
+# patch, if necessary
+[ -f Makefile ] && grep -qE '^patch:' Makefile && make patch
+
+# grab the content of the build-order.txt file
 build_dirs=()
 while read package repositories ; do
   case $package in
