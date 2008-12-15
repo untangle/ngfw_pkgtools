@@ -53,7 +53,7 @@ results=0
 cd "${BUILD_DIR}" 2> /dev/null
 
 # patch, if necessary
-[ -f ../Makefile ] && grep -qE '^patch:' Makefile && echo "Patching sources" && make -f ../Makefile patch
+[ -f Makefile ] && grep -qE '^patch:' Makefile && echo "Patching sources" && make -f Makefile patch
 
 # grab the content of the build-order.txt file
 build_dirs=()
