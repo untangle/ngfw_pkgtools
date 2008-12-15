@@ -1,4 +1,4 @@
-#! /bin/bash -x
+#! /bin/bash
 
 usage() {
   echo "Usage: $0 -r <repository> -d <distribution> [-h host] [a]"
@@ -34,6 +34,9 @@ if [ -n "$DEBS" ] || [ -n "$UDEBS" ] ; then
   done
 
   MANIFESTS=$(find . $MAXDEPTH -name "*.manifest" | xargs)
+
+  echo "About to upload: $DEBS $UDEBS"
+
   lftp -e "set net:max-retries 1 ; cd $REPOSITORY/incoming ; put $DEBS $UDEBS $MANIFESTS ; exit" $HOST
   rm -f $MANIFESTS
 fi
