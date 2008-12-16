@@ -70,8 +70,8 @@ while read package repositories ; do
   esac
 done < $FILE_IN
 
-# do this only once, instead of for each package
-[ -n "$CHECKROOT_UPGRADE" ] && make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES upgrade-base-chroot
+# # do this only once, instead of for each package
+# [ -n "$CHECKROOT_UPGRADE" ] && make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES upgrade-base-chroot
 
 # now cd into each dir in build_dirs and make
 for directory in "${build_dirs[@]}" ; do
