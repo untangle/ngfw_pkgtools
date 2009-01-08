@@ -45,5 +45,3 @@ if [ -n "$deps" ] ; then
 else
   echo "No dependencies found."
 fi
-
-rm -fr $tmpDir
