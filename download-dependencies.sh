@@ -39,10 +39,11 @@ if [ -n "$deps" ] ; then
   echo -n "Downloading..."
   aptitude $APTOPTS download $@ $deps > /dev/null 2>&1
   echo " done"
-  rename 's/%3a/:/' *
+  rename 's/%3a/:/' * # no http encoding
   popd > /dev/null
   echo "Your packages are in $downloadsDir"
 else
   echo "No dependencies found."
 fi
 
+rm -fr $tmpDir
