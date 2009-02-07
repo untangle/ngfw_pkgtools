@@ -1,4 +1,4 @@
-import apt, apt_pkg, os, sys, urllib
+import apt, apt_pkg, os, re, sys, urllib
 
 # constants
 ops = { '<=' : lambda x: x <= 0,
@@ -77,7 +77,7 @@ class Package:
     self.name     = name
     self.version  = version
     self.fileName = fileName
-
+    
   def __str__(self):
     return "%s %s" % (self.name, self.version)
       
@@ -229,3 +229,39 @@ class DepPackage(Package):
       return True
     else:
       return False
+
+
+class LocalPackages:
+  reObj = re.compile(r'(.+?)_([^_]+)_[^\.]+\.deb')
+
+  def __init__(self, basedir):
+    self.basedir = basedir
+    self.pkgs = {}
+    for root, dirs, files in os.walk(basedir):
+      if root.count('/.svn'):
+        continue
+      for f in files:
+        m = LocalPackages.reObj.match(f)
+        if m:
+#          print "Found in store: %s (%s)" % (m.group(1), m.group(2))
+          self.pkgs[m.group(1)] = VersionedPackage(m.group(1),
+                                                   m.group(2),
+                                                   os.path.join(root, f))
+
+  def add(self, pkg):
+    self.pkgs[pkg.name] = pkg
+
+  def has(self, pkg):
+    return pkg.name in self.pkgs
+
+  def getByName(self, name):
+    return self.pkgs[name]
+
+  def get(self, pkg):
+    return self.pkgs[pkg.name]
+
+  def __str__(self):
+    s = ""
+    for p in self.pkgs.values():
+      s += "%s\n" % p
+    return s[:-1]
