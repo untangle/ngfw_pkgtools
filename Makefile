@@ -127,8 +127,11 @@ upgrade-base-chroot:
 
 create-chroot:
 	if [ ! -d $(CHROOT_WORK) ] ; then \
+	  echo 1 ; \
           sudo rm -fr $(CHROOT_WORK) ; \
+	  echo 2 ; \
           sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK) ; \
+	  echo 3 ; \
           sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
         fi
 remove-chroot:
