@@ -111,14 +111,14 @@ if options.mode == 'download-dependencies':
     #    print "%s is in the store and satisfies the dependency" % lp.get(versionedPackage)
 elif options.mode == 'update-all':
   for pkg in lp.pkgs.itervalues():
-    cachePkg = aptchroot.VersionedPackage(pkg.name)
-    if apt_pkg.VersionCompare(pkg.version, cachePkg.version):
+    newPkg = aptchroot.VersionedPackage(pkg.name)
+    if apt_pkg.VersionCompare(pkg.version, newPkg.version):
       pkgPath = pkg.fileName
-      newName = os.path.basename(cachePkg.fileName)
+      newName = os.path.basename(newPkg.fileName)
       newPath = os.path.join(os.path.dirname(pkgPath), newName)
-      print "%s: %s -> %s" % (cachePkg.name, pkg.version, cachePkg.version)
+      print "%s: %s -> %s" % (newPkg.name, pkg.version, newPkg.version)
       os.system("svn rm %s" % (pkgPath,))
-      cachePkg.download()
+      newPkg.download()
       os.system("mv %s %s" % (newName, newPath))
       os.system("svn add %s" % (newPath))
 
