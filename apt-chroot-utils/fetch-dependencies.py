@@ -81,7 +81,7 @@ if options.mode == 'download-dependencies':
     for p in deps:
       try:
         versionedPackage = aptchroot.VersionedPackage(p.name)
-  #      print "*** ", versionedPackage.name, versionedPackage.version
+#        print "*** ", versionedPackage.name, versionedPackage.version
 
         if (versionedPackage.isVirtual or versionedPackage.isRequired or versionedPackage.isImportant or versionedPackage.isStandard) and not options.forceDownload:
           print "%s won't be downloaded since --force-download wasn't used." % p.name

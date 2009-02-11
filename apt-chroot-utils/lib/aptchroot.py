@@ -134,7 +134,7 @@ class VersionedPackage(Package):
     if self.foundDeps:
       return self.deps
     
-    if self.isVirtual or self.isRequired or self.isImportant or self.isStandard:
+    if self.isVirtual or self.isRequired: # or self.isImportant or self.isStandard:
       return []
     deps = self._versionedPackage.DependsList
     if self.dependsKey in deps:
@@ -161,6 +161,7 @@ class VersionedPackage(Package):
 
   def _getAllDeps(self, deps = set(), extra = None):
     for p in self.getDependsList(extra):
+#      print "%s" % (p,)
       if not p in deps:
 #        print "%s is a dep of %s" % (p, self)
         deps.add(p)
@@ -207,7 +208,6 @@ class VersionedPackage(Package):
         name = re.sub(r'_(.*?)_', '_%s_' % (self.version,), self.fileName)
       except:
         pass
-      print 
       name = os.path.basename(name)
     print "%s --> %s" % (self.url, name)
     urllib.urlretrieve(self.url, name)
