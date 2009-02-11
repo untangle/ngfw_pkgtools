@@ -202,7 +202,12 @@ class VersionedPackage(Package):
 
   def download(self, name = None):
     if not name:
-      name = re.sub(r'_(.*?)_', '_%s_' % (self.version,), self.fileName)
+      name = self.fileName
+      try:
+        name = re.sub(r'_(.*?)_', '_%s_' % (self.version,), self.fileName)
+      except:
+        pass
+      print 
       name = os.path.basename(name)
     print "%s --> %s" % (self.url, name)
     urllib.urlretrieve(self.url, name)
