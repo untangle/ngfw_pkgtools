@@ -91,7 +91,8 @@ if options.mode == 'download-dependencies':
           print "Package %s is missing" % p.name
         elif lp.has(versionedPackage):
           if versionedPackage.name in pkgs:
-            print "Download explicitely requested"
+            print "Download explicitely requested, but we already have that package"
+            continue
           elif not lp.get(versionedPackage).satisfies(p):
             print "Version of %s doesn't satisfy dependency (%s)" % (lp.get(versionedPackage), p)
             print "Downloading new one, but you probably want to remove the older one (%s)" % lp.getByName(p.name)
@@ -119,6 +120,7 @@ elif options.mode == 'update-all':
       print "%s: %s -> %s" % (newPkg.name, pkg.version, newPkg.version)
       os.system("svn rm %s" % (pkgPath,))
       newPkg.download()
+      lp.add(newPkg)
       os.system("mv %s %s" % (newName, newPath))
       os.system("svn add %s" % (newPath))
 
