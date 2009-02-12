@@ -18,6 +18,9 @@ def parseCommandLineArgs(args):
   parser.add_option("-d", "--distribution", dest="distribution",
                     action="store", default="nightly",
                     help="Set target distribution" )
+  parser.add_option("", "--host", dest="host",
+                    action="store", default="10.0.0.105",
+                    help="Set Untangle mirror host" )  
   parser.add_option("-r", "--repository", dest="repository",
                     action="store", default="lenny",
                     help="Set target repository" )
@@ -54,10 +57,11 @@ sources = '''# backports
 # volatile
 deb http://volatile.debian.org/debian-volatile %s/volatile main contrib non-free
 # mephisto
-deb http://10.0.0.105/public/%s %s main premium upstream\n''' % (options.repository,
-                                                                 options.repository,
-                                                                 options.repository,
-                                                                 options.distribution)
+deb http://%s/public/%s %s main premium upstream\n''' % (options.repository,
+                                                         options.repository,
+                                                         options.host,
+                                                         options.repository,
+                                                         options.distribution)
 
 if options.useDebianMirrors:
   sources += '''deb http://http.us.debian.org/debian %s main contrib non-free
