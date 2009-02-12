@@ -18,6 +18,9 @@ def parseCommandLineArgs(args):
   parser.add_option("-d", "--distribution", dest="distribution",
                     action="store", default="nightly",
                     help="Set target distribution" )
+  parser.add_option("-i", "--include-only-regex", dest="regex",
+                    action="store", default=".",
+                    help="Set include regex." )
   parser.add_option("", "--host", dest="host",
                     action="store", default="10.0.0.105",
                     help="Set Untangle mirror host" )  
@@ -52,20 +55,20 @@ def parseCommandLineArgs(args):
 
 # main
 pkgs, options = parseCommandLineArgs(sys.argv[1:])
-sources = '''# backports
+sources = '''deb http://%s/public/%s %s main premium upstream\n''' % (options.host,
+                                                                      options.repository,
+                                                                      options.distribution)
+
+if options.useDebianMirrors:
+  sources += '''# backports
 #deb http://www.backports.org/debian %s-backports main contrib non-free
 # volatile
 deb http://volatile.debian.org/debian-volatile %s/volatile main contrib non-free
-# mephisto
-deb http://%s/public/%s %s main premium upstream\n''' % (options.repository,
-                                                         options.repository,
-                                                         options.host,
-                                                         options.repository,
-                                                         options.distribution)
-
-if options.useDebianMirrors:
-  sources += '''deb http://http.us.debian.org/debian %s main contrib non-free
+# untangle
+deb http://http.us.debian.org/debian %s main contrib non-free
 deb http://security.debian.org/ %s/updates main contrib non-free''' % (options.repository,
+                                                                       options.repository,
+                                                                       options.repository,
                                                                        options.repository )
 
 # FIXME? provide a command line way to specify pinning
@@ -103,7 +106,11 @@ if options.mode == 'download-dependencies':
           continue
 
         if not lp.has(versionedPackage):
-          print "Package %s is missing" % p.name
+          if options.simulate:
+            if re.search(options.regex, p.name):
+              print "%s" % p.name
+          else:
+            print "Package %s is missing" % p.name
         elif lp.has(versionedPackage):
           if versionedPackage.name in pkgs:
             if options.verbose:
