@@ -24,6 +24,15 @@ def parseCommandLineArgs(args):
   parser.add_option("-l", "--local-packages", dest="localPackages",
                     action="store", default="",
                     help="Set target repository" )
+  parser.add_option("-s", "--simulate", dest="simulate",
+                    action="store_true", default=False,
+                    help="Simulate, but do not download" )
+  parser.add_option("-u", "--use-debian-mirros", dest="useDebianMirrors",
+                    action="store_true", default=False,
+                    help="Simulate, but do not download" )
+  parser.add_option("-v", "--verbose", dest="verbose",
+                    action="store_true", default=False,
+                    help="Verbose" )
   parser.add_option("-m", "--mode", dest="mode",
                     action="store", default="download-dependencies",
                     help="Set mode: 'download-dependencies'(default), 'update-all'" )
@@ -40,9 +49,7 @@ def parseCommandLineArgs(args):
 
 # main
 pkgs, options = parseCommandLineArgs(sys.argv[1:])
-sources = '''deb http://http.us.debian.org/debian %s main contrib non-free
-deb http://security.debian.org/ %s/updates main contrib non-free
-# backports
+sources = '''# backports
 #deb http://www.backports.org/debian %s-backports main contrib non-free
 # volatile
 deb http://volatile.debian.org/debian-volatile %s/volatile main contrib non-free
@@ -50,9 +57,12 @@ deb http://volatile.debian.org/debian-volatile %s/volatile main contrib non-free
 deb http://10.0.0.105/public/%s %s main premium upstream\n''' % (options.repository,
                                                                  options.repository,
                                                                  options.repository,
-                                                                 options.repository,
-                                                                 options.repository,
                                                                  options.distribution)
+
+if options.useDebianMirrors:
+  sources += '''deb http://http.us.debian.org/debian %s main contrib non-free
+deb http://security.debian.org/ %s/updates main contrib non-free''' % (options.repository,
+                                                                       options.repository )
 
 # FIXME? provide a command line way to specify pinning
 preferences = '''Package: *
@@ -84,25 +94,29 @@ if options.mode == 'download-dependencies':
 #        print "*** ", versionedPackage.name, versionedPackage.version
 
         if (versionedPackage.isVirtual or versionedPackage.isRequired or versionedPackage.isImportant or versionedPackage.isStandard) and not options.forceDownload:
-          print "%s won't be downloaded since --force-download wasn't used." % p.name
+          if options.verbose:
+            print "%s won't be downloaded since --force-download wasn't used." % p.name
           continue
 
         if not lp.has(versionedPackage):
           print "Package %s is missing" % p.name
         elif lp.has(versionedPackage):
           if versionedPackage.name in pkgs:
-            print "Download explicitely requested, but we already have that package"
+            if options.verbose:
+              print "Download explicitely requested, but we already have that package"
             continue
           elif not lp.get(versionedPackage).satisfies(p):
-            print "Version of %s doesn't satisfy dependency (%s)" % (lp.get(versionedPackage), p)
-            print "Downloading new one, but you probably want to remove the older one (%s)" % lp.getByName(p.name)
+            if options.verbose:
+              print "Version of %s doesn't satisfy dependency (%s)" % (lp.get(versionedPackage), p)
+              print "Downloading new one, but you probably want to remove the older one (%s)" % lp.getByName(p.name)
           else:
             continue
         else:
           continue
 
-        versionedPackage.download()
-        lp.add(versionedPackage)
+        if not options.simulate:
+          versionedPackage.download()
+          lp.add(versionedPackage)
 
       except Exception,e:
         print p, type(p), p.name, dir(p)

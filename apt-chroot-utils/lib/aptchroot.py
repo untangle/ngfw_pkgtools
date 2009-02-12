@@ -118,7 +118,7 @@ class VersionedPackage(Package):
         indexFile = cache._list.FindIndex(packageFile)
         self.url = indexFile.ArchiveURI(self.fileName)
       except KeyError: # FIXME
-        print "ooops, couldn't find package %s" % self.name
+#        print "ooops, couldn't find package %s" % self.name
         self.isVirtual = True
 
   def _sanitizeName(self, name):
@@ -192,10 +192,10 @@ class VersionedPackage(Package):
       return True
     r = apt_pkg.VersionCompare(self.version, depPkg.version)
     result = apply( ops[depPkg.comp], (r,) )
-    print "compared package %s: %s to %s -> %s" % (depPkg.name,
-                                                   self.version,
-                                                   depPkg.version,
-                                                   result)
+#     print "compared package %s: %s to %s -> %s" % (depPkg.name,
+#                                                    self.version,
+#                                                    depPkg.version,
+#                                                    result)
     return result
   
   def getURL(self):
@@ -209,7 +209,7 @@ class VersionedPackage(Package):
       except:
         pass
       name = os.path.basename(name)
-    print "%s --> %s" % (self.url, name)
+#    print "%s --> %s" % (self.url, name)
     urllib.urlretrieve(self.url, name)
 
 class DepPackage(Package):
