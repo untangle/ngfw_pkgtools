@@ -110,7 +110,12 @@ class VersionedPackage(Package):
         self.isImportant       = self._section['Priority'] == 'important'
         self.isStandard        = self._section['Priority'] == 'standard'
         self.fileName          = self._sanitizeName(self._section["Filename"])
-        
+        self.fileNameWithEpoch = os.path.basename(self.fileName)
+        try:
+          self.fileNameWithEpoch = re.sub(r'_(.*?)_', '_%s_' % (self.version,), self.fileNameWithEpoch)
+        except:
+          pass
+
         self._versionedPackage = depcache.GetCandidateVer(\
           pkgCache[self.name])
             
@@ -203,12 +208,7 @@ class VersionedPackage(Package):
 
   def download(self, name = None):
     if not name:
-      name = self.fileName
-      try:
-        name = re.sub(r'_(.*?)_', '_%s_' % (self.version,), self.fileName)
-      except:
-        pass
-      name = os.path.basename(name)
+      name = self.fileNameWithEpoch
 #    print "%s --> %s" % (self.url, name)
     urllib.urlretrieve(self.url, name)
 

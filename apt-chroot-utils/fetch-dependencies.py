@@ -35,7 +35,7 @@ def parseCommandLineArgs(args):
                     help="Simulate, but do not download" )
   parser.add_option("-u", "--use-debian-mirros", dest="useDebianMirrors",
                     action="store_true", default=False,
-                    help="Simulate, but do not download" )
+                    help="Use Debian mirrors" )
   parser.add_option("-v", "--verbose", dest="verbose",
                     action="store_true", default=False,
                     help="Verbose" )
@@ -140,7 +140,7 @@ elif options.mode == 'update-all':
     newPkg = aptchroot.VersionedPackage(pkg.name)
     if apt_pkg.VersionCompare(pkg.version, newPkg.version):
       pkgPath = pkg.fileName
-      newName = os.path.basename(newPkg.fileName)
+      newName = os.path.basename(newPkg.fileNameWithEpoch)
       newPath = os.path.join(os.path.dirname(pkgPath), newName)
       print "%s: %s -> %s" % (newPkg.name, pkg.version, newPkg.version)
       os.system("svn rm %s" % (pkgPath,))
