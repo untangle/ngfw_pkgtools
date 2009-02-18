@@ -100,7 +100,11 @@ if options.mode == 'download-dependencies':
         versionedPackage = aptchroot.VersionedPackage(p.name)
 #        print "*** ", versionedPackage.name, versionedPackage.version
 
-        if (versionedPackage.isVirtual or versionedPackage.isRequired or versionedPackage.isImportant or versionedPackage.isStandard) and not options.forceDownload:
+        if versionedPackage.isVirtual:
+          if options.verbose:
+            print "%s won't be downloaded since it is virtual." % p.name
+          continue
+        elif (versionedPackage.isRequired or versionedPackage.isImportant or versionedPackage.isStandard) and not options.forceDownload:
           if options.verbose:
             print "%s won't be downloaded since --force-download wasn't used." % p.name
           continue
