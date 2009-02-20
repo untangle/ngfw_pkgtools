@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -e
+
 usage() {
   echo "Usage: $0 -r <repository> -d <distribution> [-h host] [a]"
   echo -e "\t-a : all (recurse into subdirectories)"
