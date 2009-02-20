@@ -27,18 +27,22 @@ HOST=${HOST:-mephisto}
 DEBS=$(find . $MAX_DEPTH -name "*.deb" | xargs)
 UDEBS=$(find . $MAX_DEPTH -name "*.udeb" | xargs)
 
+echo "About to upload:"
+
 if [ -n "$DEBS" ] || [ -n "$UDEBS" ] ; then
-  for p in $DEBS ; do
-    touch ${p/.deb/.${REPOSITORY}_${DISTRIBUTION}.manifest}
+  for p in $DEBS $UDEBS ; do
+    echo $p
+    manifest=$(echo $p | perl -pe 's/u?deb$/'${REPOSITORY}_${DISTRIBUTION}.manifest'/')
+    touch $manifest
+    echo $manifest
   done
   for p in $UDEBS ; do
-    touch ${p/.udeb/.${REPOSITORY}_${DISTRIBUTION}.manifest}
+    echo $p
+    touch ${p/.udeb\$/.${REPOSITORY}_${DISTRIBUTION}.manifest}
   done
 
   MANIFESTS=$(find . $MAXDEPTH -name "*.manifest" | xargs)
-
-  echo "About to upload: $DEBS $UDEBS"
-
+  
   lftp -e "set net:max-retries 1 ; cd $REPOSITORY/incoming ; put $DEBS $UDEBS $MANIFESTS ; exit" $HOST
   rm -f $MANIFESTS
 fi
