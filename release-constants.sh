@@ -1,25 +1,43 @@
-# CONSTANTS
+# constants
 
 [ -z "$REPOSITORY" ] && echo "REPOSITORY has to be set" && exit 1
 
 PKGTOOLS=`dirname $0`
 
 MUTT_CONF_FILE=$PKGTOOLS/mutt.conf
-RECIPIENT="tech-internal@untangle.com"
+RECIPIENT="engineering@untangle.com"
 
 REMOTE_USER="root"
 REMOTE_SERVER="updates.untangle.com"
+REMOTE_PKGTOOLS=$(mktemp -d /tmp/pkgtools.XXXXXXXXXXXXXXX)
 REPREPRO_BASE_DIR="/var/www/public/$REPOSITORY"
 REPREPRO_DIST_DIR="${REPREPRO_BASE_DIR}/dists"
 REPREPRO_CONF_DIR="${REPREPRO_BASE_DIR}/conf"
 REPREPRO_DISTRIBUTIONS_FILE="${REPREPRO_CONF_DIR}/distributions"
 REPREPRO_COMMAND="./reprepro-untangle.sh -V -b ${REPREPRO_BASE_DIR} ${EXTRA_ARGS}"
-REPREPRO_BASE_COMMAND="$PKGTOOLS/${REPREPRO_COMMAND}"
-REPREPRO_REMOTE_BASE_COMMAND="$PKGTOOLS/reprepro-untangle.sh -V -b ${REPREPRO_BASE_DIR} ${EXTRA_ARGS}"
-SSH_COMMAND="ssh -t ${REMOTE_USER}@${REMOTE_SERVER} cd /localhome/seb/svn/internal/pkgtools &&"
-REPREPRO_REMOTE_COMMAND="${SSH_COMMAND} ${REPREPRO_COMMAND}"
 
-# FUNCTIONS
+# functions
+repreproLocal() {
+  $PKGTOOLS/${REPREPRO_COMMAND} "$@"
+}
+
+remoteCommand() {
+  ssh -t ${REMOTE_USER}@${REMOTE_SERVER} cd ${REMOTE_PKGTOOLS} && "$@"
+}
+
+repreproRemote() {
+  remoteCommand ${REPREPRO_COMMAND} "$@"
+}
+
+removeRemotePkgtools() {
+  remoteCommand rm -fr ${REMOTE_PKGTOOLS}
+}
+
+copyRemotePkgtools() {
+  removeRemotePkgtools
+  scp -r $PKGTOOLS ${REMOTE_USER}@${REMOTE_SERVER}:${REMOTE_PKGTOOLS}
+}
+
 backup_conf() {
   tar czvf /var/www/public/$1/conf.`date -Iseconds`.tar.gz /var/www/public/$1/conf
 }

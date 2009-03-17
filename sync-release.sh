@@ -41,18 +41,23 @@ if [ -z "$simulate" ] ; then
   # the notice
   touch ${tmp_base}.txt ${tmp_base}.csv
 
+  copyRemotePkgtools
+
   # wipe out target distribution first
-  [ -n "$WIPE_OUT_TARGET" ] && $SSH_COMMAND ./remove-packages.sh -r ${REPOSITORY} -d ${DISTRIBUTION}
+  [ -n "$WIPE_OUT_TARGET" ] && remoteCommand ./remove-packages.sh -r ${REPOSITORY} -d ${DISTRIBUTION}
 
   date="`date`"
-  $REPREPRO_REMOTE_COMMAND --noskipold update ${DISTRIBUTION} || exit 1
+  repreproRemote --noskipold update ${DISTRIBUTION} || exit 1
 
   # also remove source packages for premium; this is really just a
   # safety measure now, as the update process itself is smarter and
   # knows not to pull sources for premium.
 #  $SSH_COMMAND ./remove-packages.sh -r ${REPOSITORY} -d ${DISTRIBUTION} -t dsc -c premium
 
-  $REPREPRO_REMOTE_COMMAND export ${DISTRIBUTION} || exit 1
+  repreproRemote export ${DISTRIBUTION} || exit 1
+
+  # remove remote pkgtools
+  removeRemotePkgtools
 
   if [ -n "$MANIFEST" ] ; then
     attachments="-a ${tmp_base}.txt -a ${tmp_base}.csv"

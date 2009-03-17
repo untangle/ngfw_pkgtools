@@ -33,10 +33,11 @@ shift $(($OPTIND - 1))
 
 . `dirname $0`/release-constants.sh
 
-list=`${REPREPRO_BASE_COMMAND} $EXTRA_ARGS listfilter ${DISTRIBUTION} Package | grep $REGEX $NREGEX | awk '{print $2}' | sort -u`
+list=`repreproLocal $EXTRA_ARGS listfilter ${DISTRIBUTION} Package | grep $REGEX $NREGEX | awk '{print $2}' | sort -u`
 
 if [ -n "$SIMULATE" ] ; then
   echo "$list"
 else
-  [ -n "$list" ] && echo "$list" | xargs ${REPREPRO_BASE_COMMAND} remove ${DISTRIBUTION}
+  # can't use "xargs functionName"
+  [ -n "$list" ] && echo "$list" | xargs $PKGTOOLS/${REPREPRO_COMMAND} remove ${DISTRIBUTION}
 fi

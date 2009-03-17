@@ -18,8 +18,12 @@ shift $(($OPTIND - 1))
 
 [ ! $# = 0 ] && usage
 
+pkgtools=`dirname $0`
+
+. $pkgtools/release-constants.sh
+
 SNAPSHOT=`date -d "-1day" "+%Y-%m-%d"`
 
 if [ -z "$SCHEDULED_HOUR" ] || [ "$SCHEDULED_HOUR" -eq `date "+%H"` ] ; then
-  ./reprepro-untangle.sh -V -b /var/www/public/$REPOSITORY gensnapshot $DISTRIBUTION $SNAPSHOT
+  repreproLocal gensnapshot $DISTRIBUTION $SNAPSHOT
 fi

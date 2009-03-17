@@ -42,17 +42,18 @@ case $FROM_DISTRIBUTION in
     date=`echo $FROM_DISTRIBUTION | perl -pe 's|.+/snapshots/(.+)|$1|'`
     # if any extra arg is used, this will wail with an informative
     # message, which is the Proper Behavior(TM)
-    list=`${REPREPRO_BASE_COMMAND} dumpreferences | perl -ne 'print $1 . "\n" if $_ =~ m|^s='$parent=$date'.+/(.+?)_.*\.deb|' | grep $REGEX $NREGEX | sort -u`
+    list=`repreproLocal dumpreferences | perl -ne 'print $1 . "\n" if $_ =~ m|^s='$parent=$date'.+/(.+?)_.*\.deb|' | grep $REGEX $NREGEX | sort -u`
     FROM_DISTRIBUTION="s=$parent=$date"
     copy="restore"
     FROM_DISTRIBUTION="$date" ;;
   *)
-    list=`${REPREPRO_BASE_COMMAND} listfilter ${FROM_DISTRIBUTION} Package | grep $REGEX $NREGEX | awk '{print $2}' | sort -u`
+    list=`repreproLocal listfilter ${FROM_DISTRIBUTION} Package | grep $REGEX $NREGEX | awk '{print $2}' | sort -u`
     copy="copy" ;;
 esac
 
 if [ -n "$SIMULATE" ] ; then
   echo "$list"
 else
-  [ -n "$list" ] && echo "$list" | xargs ${REPREPRO_BASE_COMMAND} $EXTRA_ARGS $copy ${TO_DISTRIBUTION} ${FROM_DISTRIBUTION}
+  # can't use "xargs functionName"
+  [ -n "$list" ] && echo "$list" | xargs $PKGTOOLS/${REPREPRO_COMMAND} $EXTRA_ARGS $copy ${TO_DISTRIBUTION} ${FROM_DISTRIBUTION}
 fi
