@@ -9,7 +9,10 @@ RECIPIENT="engineering@untangle.com"
 
 REMOTE_USER="root"
 REMOTE_SERVER="updates.untangle.com"
-REMOTE_PKGTOOLS=$(mktemp -d /tmp/pkgtools.XXXXXXXXXXXXXXX)
+SSH_COMMAND="ssh -t ${REMOTE_USER}@${REMOTE_SERVER}"
+if [ $(hostname) != "pkgs" ] ; then
+  REMOTE_PKGTOOLS=$(mktemp -d /tmp/pkgtools.XXXXXXXXXXXXXXX)
+fi
 REPREPRO_BASE_DIR="/var/www/public/$REPOSITORY"
 REPREPRO_DIST_DIR="${REPREPRO_BASE_DIR}/dists"
 REPREPRO_CONF_DIR="${REPREPRO_BASE_DIR}/conf"
@@ -18,33 +21,29 @@ REPREPRO_COMMAND="./reprepro-untangle.sh -V -b ${REPREPRO_BASE_DIR} ${EXTRA_ARGS
 
 # functions
 repreproLocal() {
+  echo "Running local command '$@'"
   $PKGTOOLS/${REPREPRO_COMMAND} "$@"
 }
 
 remoteCommand() {
-  ssh -t ${REMOTE_USER}@${REMOTE_SERVER} cd ${REMOTE_PKGTOOLS} && "$@"
+  echo "Running remote command: '$@'"
+  case "$@" in
+    *"${REMOTE_PKGTOOLS}"*)
+      $SSH_COMMAND "$@" ;;
+    *)
+      $SSH_COMMAND "cd ${REMOTE_PKGTOOLS} && $@" ;;
+  esac
 }
 
 repreproRemote() {
   remoteCommand ${REPREPRO_COMMAND} "$@"
 }
 
-removeRemotePkgtools() {
-  remoteCommand rm -fr ${REMOTE_PKGTOOLS}
-}
-
 copyRemotePkgtools() {
   removeRemotePkgtools
-  scp -r $PKGTOOLS ${REMOTE_USER}@${REMOTE_SERVER}:${REMOTE_PKGTOOLS}
+  rsync -aH $PKGTOOLS/ ${REMOTE_USER}@${REMOTE_SERVER}:${REMOTE_PKGTOOLS}/
 }
 
-backup_conf() {
-  tar czvf /var/www/public/$1/conf.`date -Iseconds`.tar.gz /var/www/public/$1/conf
-}
-
-push_new_releases_names() {
-  # copy files
-  scp $REPREPRO_DISTRIBUTIONS_FILE ${REPREPRO_CONF_DIR}/updates ${REMOTE_USER}@${REMOTE_SERVER}:${REPREPRO_CONF_DIR}/
-  # create symlinks
-  $REPREPRO_REMOTE_COMMAND --delete createsymlinks
+removeRemotePkgtools() {
+  remoteCommand "rm -fr ${REMOTE_PKGTOOLS}"
 }

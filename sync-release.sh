@@ -33,6 +33,8 @@ tmp_base=/tmp/sync-$REPOSITORY-$DISTRIBUTION-`date -Iminutes`
 diffCommand="$pkgtools/apt-chroot-utils/compare-sources.py `hostname`,$REPOSITORY,$DISTRIBUTION user:metavize@updates.untangle.com,$REPOSITORY,$DISTRIBUTION $tmp_base"
 
 # MAIN
+copyRemotePkgtools
+
 if [ -z "$simulate" ] ; then
 #  $SSH_COMMAND /etc/init.d/untangle-gpg-agent start
   /bin/rm -f ${tmp_base}*
@@ -40,8 +42,6 @@ if [ -z "$simulate" ] ; then
   # in case the previous diff failed, we still want mutt to email out
   # the notice
   touch ${tmp_base}.txt ${tmp_base}.csv
-
-  copyRemotePkgtools
 
   # wipe out target distribution first
   [ -n "$WIPE_OUT_TARGET" ] && remoteCommand ./remove-packages.sh -r ${REPOSITORY} -d ${DISTRIBUTION}
@@ -55,9 +55,6 @@ if [ -z "$simulate" ] ; then
 #  $SSH_COMMAND ./remove-packages.sh -r ${REPOSITORY} -d ${DISTRIBUTION} -t dsc -c premium
 
   repreproRemote export ${DISTRIBUTION} || exit 1
-
-  # remove remote pkgtools
-  removeRemotePkgtools
 
   if [ -n "$MANIFEST" ] ; then
     attachments="-a ${tmp_base}.txt -a ${tmp_base}.csv"
@@ -78,6 +75,9 @@ EOF
   /bin/rm -f ${tmp_base}*
 #  $SSH_COMMAND /etc/init.d/untangle-gpg-agent stop
 else
-  $REPREPRO_REMOTE_COMMAND checkupdate $DISTRIBUTION | grep upgraded
-  $SSH_COMMAND ./remove-packages.sh -r ${REPOSITORY} -d ${DISTRIBUTION} -t dsc -c premium -s
+  repreproRemote "checkupdate $DISTRIBUTION 2>&1 | grep upgraded | sort -u"
+  remoteCommand ./remove-packages.sh -r ${REPOSITORY} -d ${DISTRIBUTION} -T dsc -C premium -s
 fi
+
+# remove remote pkgtools
+removeRemotePkgtools
