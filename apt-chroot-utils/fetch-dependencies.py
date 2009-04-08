@@ -65,7 +65,7 @@ if options.useDebianMirrors:
 # volatile
 deb http://volatile.debian.org/debian-volatile %s/volatile main contrib non-free
 # untangle
-deb http://http.us.debian.org/debian %s main contrib non-free
+deb http://http.us.debian.org/debian %s main contrib non-free main/debian-installer
 deb http://security.debian.org/ %s/updates main contrib non-free''' % (options.repository,
                                                                        options.repository,
                                                                        options.repository,
