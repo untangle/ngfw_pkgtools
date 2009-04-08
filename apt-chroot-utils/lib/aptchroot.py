@@ -238,7 +238,7 @@ class DepPackage(Package):
 
 
 class LocalPackages:
-  reObj = re.compile(r'(.+?)_([^_]+)_[^\.]+\.deb')
+  reObj = re.compile(r'(.+?)_([^_]+)_[^\.]+\.u?deb')
 
   def __init__(self, basedir):
     self.basedir = basedir

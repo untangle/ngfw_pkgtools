@@ -142,7 +142,7 @@ if options.mode == 'download-dependencies':
 elif options.mode == 'update-all':
   for pkg in lp.pkgs.itervalues():
     newPkg = aptchroot.VersionedPackage(pkg.name)
-    if apt_pkg.VersionCompare(pkg.version, newPkg.version):
+    if newPkg.version and apt_pkg.VersionCompare(pkg.version, newPkg.version):
       pkgPath = pkg.fileName
       newName = os.path.basename(newPkg.fileNameWithEpoch)
       newPath = os.path.join(os.path.dirname(pkgPath), newName)
@@ -150,7 +150,7 @@ elif options.mode == 'update-all':
       os.system("svn rm %s" % (pkgPath,))
       newPkg.download()
       lp.add(newPkg)
-      os.system("mv %s %s" % (newName, newPath))
+#      os.system("mv %s %s" % (newName, newPath))
       os.system("svn add %s" % (newPath))
 
 os.system('rm -fr ' + TMP_DIR)
