@@ -150,7 +150,7 @@ elif options.mode == 'update-all':
       os.system("svn rm %s" % (pkgPath,))
       newPkg.download()
       lp.add(newPkg)
-#      os.system("mv %s %s" % (newName, newPath))
+      os.system("mv %s %s 2> /dev/null" % (newName, newPath))
       os.system("svn add %s" % (newPath))
 
 os.system('rm -fr ' + TMP_DIR)
