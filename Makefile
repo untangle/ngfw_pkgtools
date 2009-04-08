@@ -147,4 +147,4 @@ release:
 	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER)_$(REPOSITORY) `cat $(DESTDIR_FILE)`/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
 
 release-deb:
-	$(PKGTOOLS_DIR)/release-binary-packages.sh -r $(REPOSITORY) -d $(DISTRIBUTION) $(REC)
+	$(PKGTOOLS_DIR)/release-binary-packages.sh -A `dpkg-architecture -qDEB_BUILD_ARCH` -r $(REPOSITORY) -d $(DISTRIBUTION) $(REC)
