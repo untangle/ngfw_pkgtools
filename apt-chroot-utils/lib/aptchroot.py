@@ -1,6 +1,7 @@
-import apt, apt_pkg, os, re, sys, urllib
+import apt, apt_pkg, commands, os, re, sys, urllib
 
 # constants
+ARCHITECTURE = commands.getoutput('dpkg-architecture -qDEB_BUILD_ARCH')
 ops = { '<=' : lambda x: x <= 0,
         '<'  : lambda x: x < 0,
         '=' :  lambda x: x == 0,
@@ -73,9 +74,10 @@ class Package:
 #  basePackages = ( 'libc6', 'debconf', 'libx11-6', 'xfree86-common',
 #                   'debianutils', 'zlib1g', 'perl' )
 
-  def __init__(self, name, version = None, fileName = None):
+  def __init__(self, name, version = None, arch = None, fileName = None):
     self.name     = name
     self.version  = version
+    self.arch     = arch
     self.fileName = fileName
     
   def __str__(self):
@@ -91,8 +93,8 @@ class Package:
 
 class VersionedPackage(Package):
 
-  def __init__(self, name, version = None, fileName = None):
-    Package.__init__(self, name, version, fileName)
+  def __init__(self, name, version = None, arch = None, fileName = None):
+    Package.__init__(self, name, version, arch, fileName)
 
     # FIXME
     self.isVirtual               = False
@@ -106,6 +108,7 @@ class VersionedPackage(Package):
         self._record           = self._package._records.Record
         self._section          = apt_pkg.ParseSection(self._record)
         self.version           = self._section['Version']
+        self.arch              = self._section['Architecture']
         self.isRequired        = self._section['Priority'] == 'required'
         self.isImportant       = self._section['Priority'] == 'important'
         self.isStandard        = self._section['Priority'] == 'standard'
@@ -238,7 +241,7 @@ class DepPackage(Package):
 
 
 class LocalPackages:
-  reObj = re.compile(r'(.+?)_([^_]+)_[^\.]+\.u?deb')
+  reObj = re.compile(r'(.+?)_([^_]+)_([^\.]+)\.u?deb')
 
   def __init__(self, basedir):
     self.basedir = basedir
@@ -252,13 +255,14 @@ class LocalPackages:
 #          print "Found in store: %s (%s)" % (m.group(1), m.group(2))
           self.pkgs[m.group(1)] = VersionedPackage(m.group(1),
                                                    m.group(2),
+                                                   m.group(3),
                                                    os.path.join(root, f))
 
   def add(self, pkg):
     self.pkgs[pkg.name] = pkg
 
   def has(self, pkg):
-    return pkg.name in self.pkgs
+    return ((pkg.name in self.pkgs) and (self.pkgs[pkg.name].arch in ('all', ARCHITECTURE)))
 
   def getByName(self, name):
     return self.pkgs[name]

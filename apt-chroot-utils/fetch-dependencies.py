@@ -118,7 +118,7 @@ if options.mode == 'download-dependencies':
         elif lp.has(versionedPackage):
           if versionedPackage.name in pkgs:
             if options.verbose:
-              print "Download explicitely requested, but we already have that package"
+              print "Download of %s (version %s) explicitely requested, but we already have that package" % (versionedPackage.name, versionedPackage.version)
             continue
           elif not lp.get(versionedPackage).satisfies(p):
             if options.verbose:
