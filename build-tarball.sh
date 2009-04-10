@@ -4,7 +4,7 @@ usage() {
     echo "USAGE $0 <type> [<branch>] [<revision>]"
     echo "\tThis will create a tarball of the current trunk"
     echo "\t<type> is the type of the release,"
-    echo "\t\tthis is typically either development, beta, or release." 
+    echo "\t\tthis is typically 'source' for a normal build, for kernel, use 'kernel'." 
     echo "\t\tThe version string and, svn revision are automatically appended."
     echo "\t<branch> is the branch to use, do not specify 'svn://chef/'."
     echo "\t\t the file svn://chef/\${branch}/version/resources/VERSION should exist"
@@ -19,7 +19,13 @@ BRANCH=$2
 BRANCH=${BRANCH:-work}
 BRANCH=${BRANCH:+svn://chef/${BRANCH}}
 
+EXTRA_PATH=""
+
 if [ $# -gt 3 ] || [ -z "${TARBALL_TYPE}" ]; then usage ; fi
+
+if [ ${BRANCH%/work} != ${BRANCH} ] || [ ${BRANCH%/work/} != ${BRANCH} ]; then
+    EXTRA_PATH="/work"
+fi
 
 ## Get the version string
 RELEASE_VERSION=${RELEASE_VERSION:-`svn cat ${BRANCH}/version/resources/VERSION`}
@@ -41,8 +47,13 @@ EXPORT_DIRECTORY=`mktemp -d`
 ARCHIVE=`date +"untangle_${TARBALL_TYPE}_${RELEASE_VERSION}_%Y%m%dr${SUBVERSION_REVISION}"`
 
 ## Export the tree into the export directory
-echo "[svn] export -r ${SUBVERSION_REVISION} ${BRANCH} ${EXPORT_DIRECTORY}/${ARCHIVE}"
-svn export -r ${SUBVERSION_REVISION} ${BRANCH} ${EXPORT_DIRECTORY}/${ARCHIVE}
+if [ -n "${EXTRA_PATH}" ]; then
+    echo "[mkdir] ${EXPORT_DIRECTORY}/${ARCHIVE}"
+    mkdir -p ${EXPORT_DIRECTORY}/${ARCHIVE}
+fi
+
+echo "[svn] export -r ${SUBVERSION_REVISION} ${BRANCH} ${EXPORT_DIRECTORY}/${ARCHIVE}${EXTRA_PATH}"
+svn export -r ${SUBVERSION_REVISION} ${BRANCH} ${EXPORT_DIRECTORY}/${ARCHIVE}${EXTRA_PATH}
 
 if [ "${BRANCH}x" !=  "svn://chef/work" ]; then
     echo "${BRANCH}@${SUBVERSION_REVISION}" > ${EXPORT_DIRECTORY}/${ARCHIVE}/.untangle_branch
