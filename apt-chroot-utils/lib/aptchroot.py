@@ -267,6 +267,9 @@ class LocalPackages:
   def getByName(self, name):
     return self.pkgs[name]
 
+  def getPkgs(self):
+    return [ pkg for pkg in self.pkgs if self.has(self, pkg) ]
+
   def get(self, pkg):
     return self.pkgs[pkg.name]
 

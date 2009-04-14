@@ -140,7 +140,7 @@ if options.mode == 'download-dependencies':
     #  else:
     #    print "%s is in the store and satisfies the dependency" % lp.get(versionedPackage)
 elif options.mode == 'update-all':
-  for pkg in lp.pkgs.itervalues():
+  for pkg in lp.getPkgs.itervalues():
     newPkg = aptchroot.VersionedPackage(pkg.name)
     if newPkg.version and apt_pkg.VersionCompare(pkg.version, newPkg.version):
       pkgPath = pkg.fileName
