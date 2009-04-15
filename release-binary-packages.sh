@@ -26,7 +26,9 @@ HOST=${HOST:-mephisto}
 
 [ -z "$REPOSITORY" ] || [ -z "$DISTRIBUTION" ] && usage
 
-DEBS=$(find . $MAX_DEPTH -iregex '.+_\(all\|'$ARCH'\)\.u?deb$' | xargs)
+DEBS=$(find . $MAX_DEPTH -iregex '.+_'$ARCH'\.u?deb$' | xargs)
+
+[ $ARCH = i386 ] && DEBS="$DEBS $(find . $MAX_DEPTH -iregex '.+_all\.u?deb$' | xargs)"
 
 echo "About to upload:"
 
