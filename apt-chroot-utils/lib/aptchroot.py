@@ -2,6 +2,7 @@ import apt, apt_pkg, commands, os, re, sys, urllib
 
 # constants
 ARCHITECTURE = commands.getoutput('dpkg-architecture -qDEB_BUILD_ARCH')
+
 ops = { '<=' : lambda x: x <= 0,
         '<'  : lambda x: x < 0,
         '=' :  lambda x: x == 0,
@@ -251,8 +252,8 @@ class LocalPackages:
         continue
       for f in files:
         m = LocalPackages.reObj.match(f)
-        if m:
-#          print "Found in store: %s (%s)" % (m.group(1), m.group(2))
+        if m and m.group(3) in ('all', ARCHITECTURE):
+#          print "Found in store: %s (%s for %s)" % (m.group(1), m.group(2), m.group(3))
           self.pkgs[m.group(1)] = VersionedPackage(m.group(1),
                                                    m.group(2),
                                                    m.group(3),
@@ -262,13 +263,13 @@ class LocalPackages:
     self.pkgs[pkg.name] = pkg
 
   def has(self, pkg):
-    return ((pkg.name in self.pkgs) and (self.pkgs[pkg.name].arch in ('all', ARCHITECTURE)))
+    return pkg.name in self.pkgs
 
   def getByName(self, name):
     return self.pkgs[name]
 
   def getPkgs(self):
-    return [ pkg for pkg in self.pkgs if self.has(self, pkg) ]
+    return self.pkgs.values()
 
   def get(self, pkg):
     return self.pkgs[pkg.name]

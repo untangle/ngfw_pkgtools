@@ -65,7 +65,7 @@ if options.useDebianMirrors:
 # volatile
 deb http://volatile.debian.org/debian-volatile %s/volatile main contrib non-free
 # untangle
-deb http://http.us.debian.org/debian %s main contrib non-free main/debian-installer
+deb http://ftp.debian.org/debian %s main contrib non-free main/debian-installer
 deb http://security.debian.org/ %s/updates main contrib non-free''' % (options.repository,
                                                                        options.repository,
                                                                        options.repository,
@@ -140,8 +140,10 @@ if options.mode == 'download-dependencies':
     #  else:
     #    print "%s is in the store and satisfies the dependency" % lp.get(versionedPackage)
 elif options.mode == 'update-all':
-  for pkg in lp.getPkgs():
+   for pkg in lp.getPkgs():
     newPkg = aptchroot.VersionedPackage(pkg.name)
+    if options.verbose:
+      print "%s: local=%s remote=%s" % (pkg.name, pkg.version, newPkg.version)
     if newPkg.version and apt_pkg.VersionCompare(pkg.version, newPkg.version):
       pkgPath = pkg.fileName
       newName = os.path.basename(newPkg.fileNameWithEpoch)
