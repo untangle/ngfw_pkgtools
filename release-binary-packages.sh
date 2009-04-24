@@ -41,7 +41,8 @@ if [ -n "$DEBS" ] ; then
   done
 
   MANIFESTS=$(find . $MAXDEPTH -name "*.manifest" | xargs)
-  
-  lftp -e "set net:max-retries 1 ; cd $REPOSITORY/incoming ; put $DEBS $UDEBS $MANIFESTS ; exit" $HOST
+
+  [ -n "$MANIFESTS" ] && lftp -e "set net:max-retries 1 ; cd $REPOSITORY/incoming ; put $DEBS $UDEBS $MANIFESTS ; exit" $HOST
+
   rm -f $MANIFESTS
 fi
