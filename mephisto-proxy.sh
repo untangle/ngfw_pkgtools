@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash -x
 
 # FIMXE: does it get any nastier than this ??
 # make that a CGI on mephisto, for fucksake...

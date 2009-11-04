@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash -x
 
 usage() {
   echo "Usage: $0 -r <repository> -d <distribution> [-s] [-e <regex>|-n <negate_regex>] [-A architecture] [-C <component>] [-T (dsc|udeb|deb)]"
