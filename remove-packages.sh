@@ -1,4 +1,4 @@
-#! /bin/bash -x
+#! /bin/bash
 
 usage() {
   echo "Usage: $0 -r <repository> -d <distribution> [-s] [-e <regex>|-n <negate_regex>] [-A architecture] [-C <component>] [-T (dsc|udeb|deb)]"
@@ -39,5 +39,5 @@ if [ -n "$SIMULATE" ] ; then
   echo "$list"
 else
   # can't use "xargs functionName"
-  [ -n "$list" ] && echo "$list" | xargs $PKGTOOLS/${REPREPRO_COMMAND} remove ${DISTRIBUTION}
+  [ -z "$list" ] || echo "$list" | xargs $PKGTOOLS/${REPREPRO_COMMAND} remove ${DISTRIBUTION}
 fi

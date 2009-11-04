@@ -55,5 +55,5 @@ if [ -n "$SIMULATE" ] ; then
   echo "$list"
 else
   # can't use "xargs functionName"
-  [ -n "$list" ] && echo "$list" | xargs $PKGTOOLS/${REPREPRO_COMMAND} $EXTRA_ARGS $copy ${TO_DISTRIBUTION} ${FROM_DISTRIBUTION}
+  [ -z "$list" ] || echo "$list" | xargs $PKGTOOLS/${REPREPRO_COMMAND} $EXTRA_ARGS $copy ${TO_DISTRIBUTION} ${FROM_DISTRIBUTION}
 fi
