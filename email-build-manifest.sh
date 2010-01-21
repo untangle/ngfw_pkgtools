@@ -15,7 +15,7 @@ pkgtools=$(dirname $0)
 . $pkgtools/release-constants.sh
 
 HOST=mephisto
-SNAPSHOT=`date -d "-2day" "+%Y-%m-%d"`
+SNAPSHOT=`date -d "-1day" "+%Y-%m-%d"`
 
 tmp_base=/tmp/manifest-$REPOSITORY-$DISTRIBUTION-`date -Iminutes`
 /bin/rm -f ${tmp_base}*
