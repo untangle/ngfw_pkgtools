@@ -24,7 +24,7 @@ def getVersion(name):
 
 def getRevisionAndBranchFromVersion(version):
   rev, branch = reRevision.match(version).groups()
-  if branch == 'trunk':
+  if branch in ('trunk', 'main'):
     branch = ''
   return rev, branch
 
@@ -38,7 +38,6 @@ def getHighestRevisionAndBranchFromSource(source):
 
 def getSVNLog(revs, name):
   s = SVN_LOG % tuple(revs+[name,])
-  print s
   return commands.getoutput(s)
 
 def getClosedBugs(st, name):
@@ -65,8 +64,8 @@ if not len(sys.argv) == 4:
 revArgs = sys.argv[1:3]
 fileBase = sys.argv[3]
 
-txtFile = fileBase + ".txt"
-csvFile = fileBase + ".csv"
+txtFile = fileBase + "_svn-changes.txt"
+csvFile = fileBase + "_closed-bugs.csv"
 
 for f in txtFile,csvFile:
   if os.path.isfile(f):
@@ -102,7 +101,6 @@ branch = "%s/" % (branch,)
 
 # FIXME: this is so fucked-up...
 branch = branch.replace('release', 'release-')
-branch = branch.replace('webui', 'web-ui')
 
 work = getSVNLog(revs, branch + "work")
 hades = getSVNLog(revs, branch + "hades")
@@ -112,5 +110,5 @@ writeToFile(work, txtFile)
 writeToFile(hades, txtFile)
 
 writeToFile('%s\n%s\n\n' % (sources,revs), csvFile)
-writeToFile(getClosedBugs(work, "work"), fileBase + ".csv")
-writeToFile(getClosedBugs(hades, "hades"), fileBase + ".csv")
+writeToFile(getClosedBugs(work, "work"), csvFile)
+writeToFile(getClosedBugs(hades, "hades"), csvFile)
