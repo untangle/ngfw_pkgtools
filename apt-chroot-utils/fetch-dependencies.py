@@ -126,7 +126,6 @@ if options.mode == 'download-dependencies':
               print "Downloading new one, but you probably want to remove the older one (%s)" % lp.getByName(p.name)
           else:
             if options.verbose:
-              print lp.get(versionedPackage).version
               print "Download of %s (version %s) explicitely requested, but we already have that package" % (versionedPackage.name, versionedPackage.version)
             continue
         else:
