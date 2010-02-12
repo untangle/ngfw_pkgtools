@@ -76,14 +76,14 @@ preferences = '''Package: *
 Pin: release l=Untangle
 Pin-Priority: 900
 Package: *
-Pin: release o=volatile.debian.org
-Pin-Priority: 900
+Pin: release a=stable, o=volatile.debian.org
+Pin-Priority: 2000
 Package: *
 Pin: release o=www.backports.org
 Pin-Priority: 900
 Package: *
 Pin: release o=Debian
-Pin-Priority: 900\n''' # % (options.distribution,) # options.distribution)
+Pin-Priority: 900\n''' # % (options.repository,) # options.distribution)
 
 aptchroot.initializeChroot(TMP_DIR, sources, preferences)
 
@@ -116,15 +116,18 @@ if options.mode == 'download-dependencies':
           else:
             print "Package %s is missing" % p.name
         elif lp.has(versionedPackage):
-          if versionedPackage.name in pkgs:
+          if not lp.get(versionedPackage).satisfies(p):
             if options.verbose:
-              print "Download of %s (version %s) explicitely requested, but we already have that package" % (versionedPackage.name, versionedPackage.version)
-            continue
-          elif not lp.get(versionedPackage).satisfies(p):
+              print "Version of %s doesn't satisfy dependency (%s)" % (versionedPackage.name, p)
+              print "Downloading new one, but you probably want to remove the older one (%s)" % lp.getByName(p.name)
+          elif lp.get(versionedPackage).version < versionedPackage.version:
             if options.verbose:
-              print "Version of %s doesn't satisfy dependency (%s)" % (lp.get(versionedPackage), p)
+              print "New version of %s available (%s)" % (versionedPackage.name, versionedPackage.version)
               print "Downloading new one, but you probably want to remove the older one (%s)" % lp.getByName(p.name)
           else:
+            if options.verbose:
+              print lp.get(versionedPackage).version
+              print "Download of %s (version %s) explicitely requested, but we already have that package" % (versionedPackage.name, versionedPackage.version)
             continue
         else:
           continue

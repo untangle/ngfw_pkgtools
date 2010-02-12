@@ -1,4 +1,4 @@
-import apt, apt_pkg, commands, os, re, sys, urllib
+import apt, apt_pkg, commands, os, os.path, re, sys, urllib
 
 # constants
 ARCHITECTURE = commands.getoutput('dpkg-architecture -qDEB_BUILD_ARCH')
@@ -17,7 +17,8 @@ def initializeChroot(TMP_DIR, sources, preferences):
   APT_DIR    = TMP_DIR + '/etc/apt'
   SOURCES    = APT_DIR + '/sources.list'
   PREFS      = APT_DIR + '/preferences'
-  ARCHIVES   = TMP_DIR + '/var/cache/apt/archives'
+  CACHE_DIR  = TMP_DIR + '/var/cache/apt'
+  ARCHIVES   = CACHE_DIR + '/archives'
   STATE      = TMP_DIR + '/var/lib/apt'
   LISTS      = STATE + '/lists'
   STATUS_DIR = TMP_DIR + '/var/lib/dpkg'
@@ -42,12 +43,15 @@ def initializeChroot(TMP_DIR, sources, preferences):
 
   apt_pkg.init()
 
-  apt_pkg.Config.Set("Dir::Etc::Sourcelist", SOURCES)
-  apt_pkg.Config.Set("Dir::Etc::Preferences", PREFS)
-  apt_pkg.Config.Set("Dir::Cache::Archives", ARCHIVES)
-  apt_pkg.Config.Set("Dir::State", STATE)
-  apt_pkg.Config.Set("Dir::State::Lists",  LISTS)
-  apt_pkg.Config.Set("Dir::State::status", STATUS)
+  apt_pkg.Config.Set("Dir", TMP_DIR)
+  apt_pkg.Config.Set("Dir::Etc", APT_DIR[1:])
+  apt_pkg.Config.Set("Dir::Etc::sourcelist", SOURCES)
+  apt_pkg.Config.Set("Dir::Etc::preferences", os.path.basename(PREFS))
+  apt_pkg.Config.Set("Dir::Cache", "var/cache/apt")  
+  apt_pkg.Config.Set("Dir::Cache::Archives", os.path.basename(ARCHIVES))
+  apt_pkg.Config.Set("Dir::State", "var/lib/apt")
+  apt_pkg.Config.Set("Dir::State::Lists",  os.path.basename(LISTS))
+  apt_pkg.Config.Set("Dir::State::status", os.path.basename(STATUS))
 
 #   apt_pkg.Config.Set("Debug::pkgPolicy","1");
 #   apt_pkg.Config.Set("Debug::pkgOrderList","1");
