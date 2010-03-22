@@ -37,8 +37,10 @@ def getHighestRevisionAndBranchFromSource(source):
   return getRevisionAndBranchFromVersion(max(v))
 
 def getSVNLog(revs, name):
-  s = SVN_LOG % tuple(revs+[name,])
-  return commands.getoutput(s)
+  output = ""
+  if revs[0] != revs[1]:
+    output = commands.getoutput(SVN_LOG % tuple(revs+[name,]))
+  return output
 
 def getClosedBugs(st, name):
   result = ""
