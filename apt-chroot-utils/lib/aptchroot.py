@@ -13,7 +13,6 @@ def initializeChroot(TMP_DIR, sources, preferences):
   # FIXME
   global cache, pkgCache, depcache
 
-  os.system('rm -fr ' + TMP_DIR)
   APT_DIR    = TMP_DIR + '/etc/apt'
   SOURCES    = APT_DIR + '/sources.list'
   PREFS      = APT_DIR + '/preferences'
@@ -25,7 +24,6 @@ def initializeChroot(TMP_DIR, sources, preferences):
   STATUS     = STATUS_DIR + '/status'
   
   os.system('rm -fr ' + TMP_DIR)
-
   os.makedirs(APT_DIR)
   os.makedirs(ARCHIVES + '/partial')
   os.makedirs(STATE)
@@ -44,14 +42,14 @@ def initializeChroot(TMP_DIR, sources, preferences):
   apt_pkg.init()
 
   apt_pkg.Config.Set("Dir", TMP_DIR)
-  apt_pkg.Config.Set("Dir::Etc", APT_DIR[1:])
-  apt_pkg.Config.Set("Dir::Etc::sourcelist", SOURCES)
+  apt_pkg.Config.Set("Dir::Etc", "etc/apt/")
+  apt_pkg.Config.Set("Dir::Etc::sourcelist", os.path.basename(SOURCES))
   apt_pkg.Config.Set("Dir::Etc::preferences", os.path.basename(PREFS))
-  apt_pkg.Config.Set("Dir::Cache", "var/cache/apt")  
+  apt_pkg.Config.Set("Dir::Cache", "var/cache/apt")
   apt_pkg.Config.Set("Dir::Cache::Archives", os.path.basename(ARCHIVES))
-  apt_pkg.Config.Set("Dir::State", "var/lib/apt")
-  apt_pkg.Config.Set("Dir::State::Lists",  os.path.basename(LISTS))
-  apt_pkg.Config.Set("Dir::State::status", os.path.basename(STATUS))
+  apt_pkg.Config.Set("Dir::State", "var/lib/apt/")
+  apt_pkg.Config.Set("Dir::State::Lists",  "lists/")
+  apt_pkg.Config.Set("Dir::State::status", STATUS)
 
 #   apt_pkg.Config.Set("Debug::pkgPolicy","1");
 #   apt_pkg.Config.Set("Debug::pkgOrderList","1");

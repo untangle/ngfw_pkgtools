@@ -60,8 +60,9 @@ sources = '''deb http://%s/public/%s %s main premium upstream\n''' % (options.ho
                                                                       options.distribution)
 
 if options.useDebianMirrors:
-  sources += '''# backports
-#deb http://www.backports.org/debian %s-backports main contrib non-free
+  sources += '''
+# backports
+deb http://www.backports.org/debian %s-backports main contrib non-free
 # volatile
 deb http://volatile.debian.org/debian-volatile %s/volatile main contrib non-free
 # untangle
@@ -75,15 +76,18 @@ deb http://security.debian.org/ %s/updates main contrib non-free''' % (options.r
 preferences = '''Package: *
 Pin: release l=Untangle
 Pin-Priority: 900
+
 Package: *
 Pin: release a=stable, o=volatile.debian.org
-Pin-Priority: 2000
+Pin-Priority: 850
+
 Package: *
-Pin: release o=www.backports.org
-Pin-Priority: 900
+Pin: release a=%s-backports
+Pin-Priority: 1001
+
 Package: *
 Pin: release o=Debian
-Pin-Priority: 900\n''' # % (options.repository,) # options.distribution)
+Pin-Priority: 901\n''' % (options.repository,) # options.distribution)
 
 aptchroot.initializeChroot(TMP_DIR, sources, preferences)
 
@@ -98,7 +102,8 @@ if options.mode == 'download-dependencies':
     for p in deps:
       try:
         versionedPackage = aptchroot.VersionedPackage(p.name)
-#        print "*** ", versionedPackage.name, versionedPackage.version
+        if options.verbose:
+          print "*** ", versionedPackage.name, versionedPackage.version
 
         if versionedPackage.isVirtual:
           if options.verbose:
@@ -157,4 +162,4 @@ elif options.mode == 'update-all':
       os.system("mv %s %s 2> /dev/null" % (newName, newPath))
       os.system("svn add %s" % (newPath))
 
-os.system('rm -fr ' + TMP_DIR)
+#os.system('rm -fr ' + TMP_DIR)
