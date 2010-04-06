@@ -1,4 +1,24 @@
-import apt, apt_pkg, commands, os, os.path, re, sys, urllib
+import commands, os, os.path, re, sys, urllib
+
+MINIMUM_VERSION = '0.7.7.1'
+
+MSG = "You need to install python-apt >= %s" % (MINIMUM_VERSION,)
+
+def error():
+  print MSG
+  sys.exit(1)
+
+try:
+  import apt, apt_pkg
+except:
+  error()
+
+for i, j in zip(map(int, apt.apt_pkg.Version.split('.')),
+                map(int, MINIMUM_VERSION.split('.'))):
+  if i < j:
+    error()
+  if i > j:
+    break
 
 # constants
 ARCHITECTURE = commands.getoutput('dpkg-architecture -qDEB_BUILD_ARCH')
