@@ -39,6 +39,9 @@ def parseCommandLineArgs(args):
   parser.add_option("-v", "--verbose", dest="verbose",
                     action="store_true", default=False,
                     help="Verbose" )
+  parser.add_option("-b", "--backports-and-volatile", dest="backportsAndVolatile",
+                    action="store_true", default=False,
+                    help="Use backports and volatile repositories" )
   parser.add_option("-m", "--mode", dest="mode",
                     action="store", default="download-dependencies",
                     help="Set mode: 'download-dependencies'(default), 'update-all'" )
@@ -72,6 +75,13 @@ deb http://security.debian.org/ %s/updates main contrib non-free''' % (options.r
                                                                        options.repository,
                                                                        options.repository )
 
+if options.backportsAndVolatile and options.mode == 'download-dependencies':
+  volatilePin = 1001
+  backportsPin = 1001
+else:
+  volatilePin = -1001
+  backportsPin = -1001
+
 # FIXME? provide a command line way to specify pinning
 preferences = '''Package: *
 Pin: release l=Untangle
@@ -79,15 +89,17 @@ Pin-Priority: 900
 
 Package: *
 Pin: release a=stable, o=volatile.debian.org
-Pin-Priority: 850
+Pin-Priority: %s
 
 Package: *
 Pin: release a=%s-backports
-Pin-Priority: 1001
+Pin-Priority: %s
 
 Package: *
 Pin: release o=Debian
-Pin-Priority: 901\n''' % (options.repository,) # options.distribution)
+Pin-Priority: 901\n''' % (volatilePin,
+                          options.repository,
+                          backportsPin) # options.distribution)
 
 aptchroot.initializeChroot(TMP_DIR, sources, preferences)
 
@@ -151,7 +163,7 @@ elif options.mode == 'update-all':
     newPkg = aptchroot.VersionedPackage(pkg.name)
     if options.verbose:
       print "%s: local=%s remote=%s" % (pkg.name, pkg.version, newPkg.version)
-    if newPkg.version and apt_pkg.VersionCompare(pkg.version, newPkg.version):
+    if newPkg.version and not pkg.version.find('bpo') > 0 and not pkg.version.find('volatile') > 0 and apt_pkg.VersionCompare(pkg.version, newPkg.version):
       pkgPath = pkg.fileName
       newName = os.path.basename(newPkg.fileNameWithEpoch)
       newPath = os.path.join(os.path.dirname(pkgPath), newName)
