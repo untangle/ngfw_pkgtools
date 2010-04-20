@@ -70,7 +70,7 @@ deb http://www.backports.org/debian %s-backports main contrib non-free
 deb http://volatile.debian.org/debian-volatile %s/volatile main contrib non-free
 # main
 deb http://ftp.debian.org/debian %s main contrib non-free main/debian-installer
-deb http://debian:8080/security %s/updates main main/debian-installer contrib non-free''' % (options.repository,
+deb http://debian:8080/security %s/updates main contrib non-free''' % (options.repository,
                                                                        options.repository,
                                                                        options.repository,
                                                                        options.repository )
