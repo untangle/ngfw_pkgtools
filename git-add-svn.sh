@@ -11,7 +11,11 @@ GIT_REMOTE_TRUNK=".git/refs/remotes/trunk"
 # main
 module=$(git config --get remote.origin.url | perl -pe 's|.*/(.+)\.git|$1|')
 
-dir=${SVN_BASE_DIR}/$module
+if [ "$module" = "work" ] || [ "$module" = "pkgs" ] ; then
+  dir=${SVN_BASE_DIR}/$module
+else
+  dir=$module
+fi
 
 git svn init -T $dir \
              -b branch/prod/*/$dir \
