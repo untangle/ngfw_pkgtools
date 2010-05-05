@@ -25,3 +25,5 @@ git svn init -T $dir \
 git show $GIT_BRANCH | awk '{print $2 ; exit}' >| $GIT_REMOTE_TRUNK
 
 git svn fetch -r HEAD
+
+git remote rm origin
