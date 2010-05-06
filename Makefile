@@ -137,17 +137,11 @@ pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	if grep -E '^Build-Depends:.*untangle' debian/control ; then \
           sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
         fi
-	if grep -q linux-headers-2.6 debian/control ; then \
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
 		 --buildresult `cat $(DESTDIR_FILE)` \
 	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
-	         --basepath $(CHROOT_WORK) || true ; \
-	else \
-	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
-		 --buildresult `cat $(DESTDIR_FILE)` \
-	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
-	         --basepath $(CHROOT_WORK) ; \
-	fi
+	         --basepath $(CHROOT_WORK)
+
 pkg-chroot: create-dest-dir create-chroot pkg-chroot-real move-debian-files
 
 release:
