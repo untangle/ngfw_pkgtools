@@ -108,10 +108,9 @@ echo "[svn copy] ${BRANCH_REVISION} svn://chef/internal/isotools ${BRANCH_PATH}"
 svn copy ${BRANCH_REVISION} svn://chef/internal/isotools ${TEMP_DIST}
 echo "Copying isotools to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 
-for t in `svn list 'svn://chef/internal' | awk '/^upstream_/ { print $1 }'` ; do 
-    echo "[svn copy] ${BRANCH_REVISION} svn://chef/internal/${t} ${BRANCH_PATH}"
-    svn copy ${BRANCH_REVISION} svn://chef/internal/${t} ${TEMP_DIST}
-    echo "Copying svn://chef/internal/${t} to ${BRANCH_PATH}" >> ${CHANGE_LOG}
+echo "[svn copy] ${BRANCH_REVISION} svn://chef/upstream/pkgs ${BRANCH_PATH}"
+svn copy ${BRANCH_REVISION} svn://chef/upstream/pkgs ${TEMP_DIST}
+echo "Copying svn://chef/upstream/pkgs to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 done
 
 # Update all of the externals, this will no longer be necessary when we move to subversion 1.5
