@@ -3,7 +3,6 @@
 set -e
 
 SVN_SERVER="chef"
-SVN_BASE_DIR="work"
 
 GIT_DEFAULT_BRANCH="origin/master"
 GIT_REMOTE_TRUNK=".git/refs/remotes/trunk"
@@ -11,11 +10,10 @@ GIT_REMOTE_TRUNK=".git/refs/remotes/trunk"
 # main
 module=$(git config --get remote.origin.url | perl -pe 's|.*/(.+)\.git|$1|')
 
-if [ "$module" = "work" ] || [ "$module" = "pkgs" ] ; then
-  dir=${SVN_BASE_DIR}/$module
-else
-  dir=$module
-fi
+case $module in
+  src|pkgs) dir=work/$module ;;
+  *) dir=$module ;;   
+esac
 
 git svn init -T $dir \
              -b branch/prod/*/$dir \
