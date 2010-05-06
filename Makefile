@@ -141,12 +141,12 @@ pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
 		 --buildresult `cat $(DESTDIR_FILE)` \
 	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
-	         --basepath $(CHROOT_WORK) || true \
+	         --basepath $(CHROOT_WORK) || true ; \
 	else \
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
 		 --buildresult `cat $(DESTDIR_FILE)` \
 	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
-	         --basepath $(CHROOT_WORK) \
+	         --basepath $(CHROOT_WORK) ; \
 	fi
 pkg-chroot: create-dest-dir create-chroot pkg-chroot-real move-debian-files
 
