@@ -235,8 +235,10 @@ class VersionedPackage(Package):
   def download(self, name = None):
     if not name:
       name = self.fileNameWithEpoch
-#    print "%s --> %s" % (self.url, name)
-    urllib.urlretrieve(self.url, name)
+    print "%s --> %s" % (self.url, name)
+#    urllib.urlretrieve(self.url, name)
+    os.system("curl -o '%s' '%s'" % (name, self.url))
+    print "download succeeded"
 
 class DepPackage(Package):
 
