@@ -38,6 +38,7 @@ DESTDIR_FILE := debian/destdir
 
 # chroot stuff
 CHROOT_DIR := /var/cache/pbuilder
+CHROOT_BUILD_KERNEL_MODULE := $(PKGTOOLS_DIR)/chroot-build-kernel-module.sh
 CHROOT_UPDATE_SCRIPT := $(PKGTOOLS_DIR)/chroot-update.sh
 CHROOT_UPDATE_EXISTENCE_SCRIPT := $(PKGTOOLS_DIR)/chroot-update-existence.sh
 CHROOT_CHECK_PACKAGE_VERSION_SCRIPT := $(PKGTOOLS_DIR)/chroot-check-for-package-version.sh
@@ -143,6 +144,11 @@ pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	         --basepath $(CHROOT_WORK)
 
 pkg-chroot: create-dest-dir create-chroot pkg-chroot-real move-debian-files
+
+kernel-module-chroot-real: checkroot parse-changelog create-dest-dir
+	sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_BUILD_KERNEL_MODULE) $(SOURCE_NAME)
+	cp -f $(CHROOT_WORK)/usr/src/*deb .
+kernel-module-chroot: create-dest-dir create-chroot kernel-module-chroot-real
 
 release:
 	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER)_$(REPOSITORY) `cat $(DESTDIR_FILE)`/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
