@@ -2,6 +2,8 @@
 
 PKG_NAME=${1/-source}-source
 
+rm -f /usr/src/*deb
+
 apt-get install --yes --force-yes module-assistant untangle-keyring
 apt-get update
 
