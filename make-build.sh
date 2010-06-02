@@ -3,9 +3,11 @@
 CHROOT_BASE=
 
 usage() {
-  echo "$0 -r <repository> -d <distribution> -b <builddir> [-n] [-a <arch>] [-v <version>] [-u] [-e] [-c]"
+  echo "$0 -r <repository> -d <distribution> -b <builddir> [-n] [-a <arch>] [-v <version>] [-u] [-e] [-c] [-m]"
   exit 1
 }
+
+DEFAULT_TARGETS="source pkg-chroot"
 
 ### CLI args
 while getopts r:b:d:v:a:uench option ; do
@@ -19,6 +21,7 @@ while getopts r:b:d:v:a:uench option ; do
     u) RELEASE="release" ;;
     a) ARCH="$OPTARG" ;;
     e) CHECK_EXISTENCE="check-existence" ;;
+    m) DEFAULT_TARGETS="kernel-module-chroot" ;;
     h) usage ;;
     \?) usage ;;
   esac
@@ -82,7 +85,7 @@ for directory in "${build_dirs[@]}" ; do
   make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot-files $VERSION_TARGET $CHECK_EXISTENCE
   result=$?      
   [ $result = 2 ] && processResult 0 && continue
-  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES source pkg-chroot ${RELEASE}
+  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES $DEFAULT_TARGETS $RELEASE
   result=$?
   processResult $result
   # if we're building only arch-dependent pkgs, we need to give the IQD time to process uploads
