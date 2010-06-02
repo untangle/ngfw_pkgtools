@@ -10,7 +10,7 @@ usage() {
 DEFAULT_TARGETS="source pkg-chroot"
 
 ### CLI args
-while getopts r:b:d:v:a:uench option ; do
+while getopts r:b:d:v:a:uencmh option ; do
   case "$option" in
     r) TARGET_REP="$OPTARG" ;;
     b) BUILD_DIR="$OPTARG" ;;
