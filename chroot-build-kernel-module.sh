@@ -1,6 +1,6 @@
 #! /bin/bash -x
 
-PKG_NAME=$1
+PKG_NAME="$(basename $(pwd))-source"
 
 apt-get install --yes --force-yes module-assistant untangle-keyring
 apt-get update

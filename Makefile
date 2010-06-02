@@ -146,7 +146,7 @@ pkg-chroot-real: checkroot parse-changelog create-dest-dir
 pkg-chroot: create-dest-dir create-chroot pkg-chroot-real move-debian-files
 
 kernel-module-chroot-real: checkroot parse-changelog create-dest-dir
-	sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_BUILD_KERNEL_MODULE) $(SOURCE_NAME)
+	sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_BUILD_KERNEL_MODULE)
 	cp -f $(CHROOT_WORK)/usr/src/*deb .
 kernel-module-chroot: create-dest-dir create-chroot kernel-module-chroot-real
 
