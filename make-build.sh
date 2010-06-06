@@ -66,8 +66,8 @@ while read package repositories ; do
     "") continue ;; # empty line
     *) # yes
       if [[ "$repositories" = *${TARGET_REP}* ]] ; then
-	if [[ $ARCH = i386 -a grep -qE "^Architecture:.*(any|all|$ARCH)" $package/debian/control ]] \
-           || [[ $ARCH = amd64 -a grep -qE "^Architecture:.*(any|$ARCH)" $package/debian/control ]]  ; then
+	if [[ $ARCH = i386 && grep -qE "^Architecture:.*(any|all|$ARCH)" $package/debian/control ]] \
+           || [[ $ARCH = amd64 && grep -qE "^Architecture:.*(any|$ARCH)" $package/debian/control ]]  ; then
 	  build_dirs[${#build_dirs[*]}]="$package"
 	fi
       fi ;;
