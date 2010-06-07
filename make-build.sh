@@ -67,8 +67,8 @@ while read package repositories ; do
     *) # yes
       if [[ "$repositories" = *${TARGET_REP}* ]] ; then
 	case $ARCH in
-          i386) pattern='(any|all|$ARCH)' ;;
-          amd64) pattern='(any|$ARCH)' ;;
+          i386) pattern="(any|all|$ARCH)" ;;
+          *) pattern="(any|$ARCH)" ;;
         esac
         if grep -qE "^Architecture:.*$pattern" $package/debian/control ; then
 	  build_dirs[${#build_dirs[*]}]="$package"
