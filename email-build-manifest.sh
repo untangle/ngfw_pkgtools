@@ -1,4 +1,4 @@
-#! /bin/bash -x
+#! /bin/bash
 
 usage() {
   echo "Usage: $0 <repository> <distribution> <emails>"
