@@ -20,8 +20,8 @@ git svn init -T $dir \
              -t tags/*/$dir \
              svn://$SVN_SERVER
 
-git show $GIT_BRANCH | awk '{print $2 ; exit}' >| $GIT_REMOTE_TRUNK
+git show $GIT_DEFAULT_BRANCH | awk '{print $2 ; exit}' >| $GIT_REMOTE_TRUNK
 
-git svn fetch -r HEAD
+git svn fetch -r 26543 # starting at 7.3 branching
 
 git remote rm origin
