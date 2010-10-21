@@ -132,9 +132,16 @@ class VersionedPackage(Package):
         self._section          = apt_pkg.ParseSection(self._record)
         self.version           = self._section['Version']
         self.arch              = self._section['Architecture']
-        self.isRequired        = self._section['Priority'] == 'required'
-        self.isImportant       = self._section['Priority'] == 'important'
-        self.isStandard        = self._section['Priority'] == 'standard'
+
+        try:
+          self.isRequired        = self._section['Priority'] == 'required'
+          self.isImportant       = self._section['Priority'] == 'important'
+          self.isStandard        = self._section['Priority'] == 'standard'
+        except KeyError:
+          # sub-optimal, but some packages don't seem to have a 'Priority' key
+          self.isRequired = self.isImportant = False
+          self.isStandard = True
+
         self.fileName          = self._sanitizeName(self._section["Filename"])
         self.fileNameWithEpoch = os.path.basename(self.fileName)
         try:
