@@ -163,7 +163,7 @@ elif options.mode == 'update-all':
     newPkg = aptchroot.VersionedPackage(pkg.name)
     if options.verbose:
       print "%s: local=%s remote=%s" % (pkg.name, pkg.version, newPkg.version)
-    if newPkg.version and not pkg.version.find('bpo') > 0 and not pkg.version.find('volatile') > 0 and apt_pkg.VersionCompare(pkg.version, newPkg.version):
+    if newPkg.version and not pkg.version.find('bpo') > 0 and not pkg.version.find('volatile') > 0 and apt_pkg.VersionCompare(pkg.version, newPkg.version) < 0:
       pkgPath = pkg.fileName
       newName = os.path.basename(newPkg.fileNameWithEpoch)
       newPath = os.path.join(os.path.dirname(pkgPath), newName)
