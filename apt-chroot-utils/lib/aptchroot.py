@@ -155,10 +155,12 @@ class VersionedPackage(Package):
         packageFile = self._versionedPackage.FileList[0][0]
         indexFile = cache._list.FindIndex(packageFile)
         self.url = indexFile.ArchiveURI(self.fileName)
-      except KeyError: # FIXME
+      except KeyError, AttributeError: # FIXME
 #        print "ooops, couldn't find package %s" % self.name
         self.isVirtual = True
-
+      except:
+        print self.name
+      
   def _sanitizeName(self, name):
     return name.replace('%3a', ':')
 
