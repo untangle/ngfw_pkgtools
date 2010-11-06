@@ -10,6 +10,7 @@ SVN_LOG = "svn log -r %s:%s svn://chef/%s"
 MSG1 = 'r%s,svn://chef/%s,%s,,\n'
 MSG2 = ',,,%s,http://bugzilla.untangle.com/show_bug.cgi?id=%s\n'
 reUntangle = re.compile(r'untangle')
+reKernel = re.compile(r'2\.6\.26')
 reSplitter = re.compile(r'\n?-+\n', re.MULTILINE)
 reExtract = re.compile(r'^r(\d+) \| (.*?) .*?closes:\s*(?:bug)?\s*\#\s*(\d+)(?:,\s*(?:bug)?\s*\#\s*(\d+))?.*?', re.MULTILINE | re.DOTALL | re.IGNORECASE)
 reRevision = re.compile('.+svn.+r(\d+)(.+)-\d[a-z]+$')
@@ -33,7 +34,7 @@ def getHighestRevisionAndBranchFromSource(source):
   # versions for all the untangle-* packages
   v = [ getVersion(name)
         for name in aptchroot.cache.keys()
-        if reUntangle.search(name) ]
+        if reUntangle.search(name) and not reKernel.search(name) ]
   return getRevisionAndBranchFromVersion(max(v))
 
 def getSVNLog(revs, name):
