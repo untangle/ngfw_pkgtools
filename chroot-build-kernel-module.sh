@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash -x
 
 PKG_NAME=${1/-source}-source
 
