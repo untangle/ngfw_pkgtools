@@ -123,7 +123,7 @@ cat <<EOF | update_external hades
 resources       ${BRANCH_PATH}/work/version/resources
 EOF
 
-cat <<EOF | update_external hades/rup
+cat <<EOF | update_external hades/src
 resources       ${BRANCH_PATH}/work/version/resources
 buildtools      ${BRANCH_PATH}/work/src/buildtools
 EOF
