@@ -5,6 +5,12 @@ if [ ! $# -eq 3 ] ; then
   echo "Usage: $0 distribution VERSION=[version] REPOSITORY=[repository]" && exit 1
 fi
 
+if [ -f .svn ] ; then
+  SVN="svn"
+else
+  SVN="git svn"
+fi
+
 rm -f debian/changelog.dch
 
 # CL args
@@ -31,16 +37,16 @@ if [ -z "$version" ] ; then
 
   # get some values from SVN: branch, last changed revision, timestamp for the
   # current directory
-  url=`svn info . | awk '/^URL:/{print $2}'`
+  url=`$SVN info . | awk '/^URL:/{print $2}'`
   case $url in
     *branch/prod/*) branch=`echo $url | perl -pe 's|.*/branch/prod/(.*?)/.*|\1| ; s/-//g'` ;;
     *) branch=main ;;
   esac
-  revision=`svn info --recursive . | awk '/Last Changed Rev: / { print $4 }' | sort -n | tail -1`
-  timestamp=`svn info --recursive . | awk '/Last Changed Date:/ { gsub(/-/, "", $4) ; print $4 }' | sort -n | tail -1`
+  revision=`$SVN info --recursive . | awk '/Last Changed Rev: / { print $4 }' | sort -n | tail -1`
+  timestamp=`$SVN info --recursive . | awk '/Last Changed Date:/ { gsub(/-/, "", $4) ; print $4 }' | sort -n | tail -1`
 
   # this is how we figure out if we're up-to-date or not
-  hasLocalChanges=`svn status | grep -v -E '^([X?]|Fetching external item into|Performing status on external item at|$)'`
+  hasLocalChanges=`$SVN status | grep -v -E '^([X?]|Fetching external item into|Performing status on external item at|$)'`
 
   # this is the base version; it will be tweaked a bit if need be:
   # - append a local modification marker is we're not up to date
@@ -90,5 +96,5 @@ dchargs="--preserve -v ${version} -D ${distribution}"
 echo "Setting version to \"${version}\", distribution to \"$distribution\""
 DEBEMAIL="${DEBEMAIL:-${USER}@untangle.com}" /tmp/dch $dchargs "auto build"
 # check changelog back in if version was forced; FIXME: disabled for now
-#[ -n "$versionGiven" ] && [ ! -f UNTANGLE-KEEP-UPSTREAM-VERSION ] && svn commit debian/changelog -m "Forcing version to $version"
+#[ -n "$versionGiven" ] && [ ! -f UNTANGLE-KEEP-UPSTREAM-VERSION ] && $SVN commit debian/changelog -m "Forcing version to $version"
 echo " done."
