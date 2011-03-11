@@ -5,7 +5,7 @@ if [ ! $# -eq 3 ] ; then
   echo "Usage: $0 distribution VERSION=[version] REPOSITORY=[repository]" && exit 1
 fi
 
-if [ -f .svn ] ; then
+if [ -d .svn ] ; then
   SVN="svn"
 else
   SVN="git svn"
