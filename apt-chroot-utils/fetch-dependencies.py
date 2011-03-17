@@ -88,7 +88,7 @@ Pin: release l=Untangle
 Pin-Priority: 900
 
 Package: *
-Pin: release a=stable, o=volatile.debian.org
+Pin: release a=oldstable, o=volatile.debian.org
 Pin-Priority: %s
 
 Package: *
