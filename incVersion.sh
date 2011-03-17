@@ -43,6 +43,7 @@ if [ -z "$version" ] ; then
     *) branch=main ;;
   esac
   revision=`$SVN info --recursive . | awk '/Last Changed Rev: / { print $4 }' | sort -n | tail -1`
+  [ -z "$revision" ] && revision=00000
   timestamp=`$SVN info --recursive . | awk '/Last Changed Date:/ { gsub(/-/, "", $4) ; print $4 }' | sort -n | tail -1`
 
   # this is how we figure out if we're up-to-date or not
