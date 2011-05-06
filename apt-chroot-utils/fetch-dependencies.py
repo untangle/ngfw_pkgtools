@@ -65,7 +65,7 @@ sources = '''deb http://%s/public/%s %s main premium upstream\n''' % (options.ho
 if options.useDebianMirrors:
   sources += '''
 # backports
-deb http://www.backports.org/debian %s-backports main contrib non-free
+deb http://backports.debian.org/debian-backports %s-backports main contrib non-free
 # volatile
 deb http://volatile.debian.org/debian-volatile %s/volatile main contrib non-free
 # main
