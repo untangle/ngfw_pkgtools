@@ -88,7 +88,7 @@ for directory in "${build_dirs[@]}" ; do
   pushd "$directory" > /dev/null
   output=$(make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot-files $VERSION_TARGET $CHECK_EXISTENCE)
   if [ -n "$CHECK_EXISTENCE" ] ; then
-    matches=$(echo "$output" | grep -q "is available in")
+    matches=$(echo "$output" | grep "is available in")
     if [ -n "$matches" ] ; then
       if echo "$matches" | grep -q $DISTRIBUTION ; then
         processResult 0 && continue
