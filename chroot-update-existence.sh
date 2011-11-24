@@ -1,4 +1,4 @@
-#! /bin/bash -x
+#! /bin/bash
 
 REPOSITORY=$1
 DISTRIBUTION=$2
