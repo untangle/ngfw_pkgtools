@@ -96,6 +96,7 @@ for directory in "${build_dirs[@]}" ; do
         distributionFrom=$(echo $matches | awk '{print $NF}')
         make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES DISTRIBUTION_FROM=$distributionFrom copy-src
         processResult $? && continue
+      fi
     fi
   fi
   make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES $DEFAULT_TARGETS $RELEASE
