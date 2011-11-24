@@ -1,4 +1,4 @@
-a# default shell
+# default shell
 SHELL := /bin/bash
 shell := /bin/bash
 
