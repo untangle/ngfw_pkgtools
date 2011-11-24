@@ -2,13 +2,20 @@
 
 PACKAGE_NAME=$1
 VERSION=$2
-MARKER=$3
+DISTRIBUTION=$3
 
-# highest version available
-output=`apt-cache show ${PACKAGE_NAME} | grep -E '^Version: ' | head -1`
+str="$PACKAGE_NAME is available in"
 
-if [ ! $? = 0 ] || echo "$output" | grep -vq "$VERSION" ; then
-  echo $MARKER
+# corresponding chaos distribution
+chaos=$(echo $DISTRIBUTION | perl -pe 's/nightly/chaos/')
+
+# all distributions containing that version
+output=$(apt-show-versions -p $PACKAGE_NAME -a | awk '/^'"$PACKAGE_NAME $VERSION"'/ {print $3}')
+
+if grep -q $DISTRIBUTION "$output" ; then
+  echo $str $DISTRIBUTION
+elif grep -q $chaos $output ; then
+  echo $str $chaos
 fi
 
 exit 0

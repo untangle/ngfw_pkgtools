@@ -1,4 +1,4 @@
-# default shell
+a# default shell
 SHELL := /bin/bash
 shell := /bin/bash
 
@@ -7,6 +7,7 @@ PKGTOOLS_DIR := $(shell dirname $(MAKEFILE_LIST))
 
 # overridables
 DISTRIBUTION ?= $(USER)
+DISTRIBUTION_FROM ?= $(DISTRIBUTION)
 PACKAGE_SERVER ?= mephisto
 REPOSITORY ?= $(shell $(PKGTOOLS_DIR)/getPlatform.sh)
 TIMESTAMP ?= $(shell date "+%Y-%m-%dT%H%M%S_%N")
@@ -47,9 +48,6 @@ CHROOT_BASE := $(CHROOT_DIR)/$(REPOSITORY)+untangle$(ARCH)
 CHROOT_ORIG := $(CHROOT_BASE).cow
 CHROOT_WORK := $(CHROOT_BASE)_$(TIMESTAMP).cow
 CHROOT_EXISTENCE := $(CHROOT_BASE)_$(TIMESTAMP)_existence.cow
-
-# used for checking existence of a package on the package server
-AVAILABILITY_MARKER := __NOT-AVAILABLE__
 
 ########################################################################
 # Rules
@@ -108,8 +106,7 @@ check-existence: create-existence-chroot
 	  dh_switch="-a" ; \
 	fi ; \
 	packageName=`dh_listpackages $${dh_switch} | head -1` ;\
-	output=`sudo chroot $(CHROOT_EXISTENCE) /$(shell basename $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT)) "$${packageName}" $(shell cat $(VERSION_FILE)) $(AVAILABILITY_MARKER)` ; \
-	echo "$${output}" | grep -q $(AVAILABILITY_MARKER) && echo "Version $(shell cat $(VERSION_FILE)) of $(SOURCE_NAME) is not available in $(REPOSITORY)/$(DISTRIBUTION)"
+	sudo chroot $(CHROOT_EXISTENCE) /$(shell basename $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT)) "$${packageName}" $(shell cat $(VERSION_FILE)) $(DISTRIBUTION)
 
 source: checkroot parse-changelog
 	tar cz --exclude="*stamp*" --exclude=".svn" --exclude="debian" \
@@ -155,3 +152,6 @@ release:
 
 release-deb:
 	$(PKGTOOLS_DIR)/release-binary-packages.sh -A `dpkg-architecture -qDEB_BUILD_ARCH` -r $(REPOSITORY) -d $(DISTRIBUTION) $(REC)
+
+copy-src:
+	$(PKGTOOLS_DIR)/copy-src-package.sh -A `dpkg-architecture -qDEB_BUILD_ARCH` -r $(REPOSITORY) -d $(DISTRIBUTION) -f $(DISTRIBUTION_FROM) -p $(SOURCE_NAME) -v $(shell cat $(VERSION_FILE))

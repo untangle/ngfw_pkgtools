@@ -86,9 +86,18 @@ for directory in "${build_dirs[@]}" ; do
   echo "# $directory"
   # cd into it, and attempt to build
   pushd "$directory" > /dev/null
-  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot-files $VERSION_TARGET $CHECK_EXISTENCE
-  result=$?      
-  [ $result = 2 ] && processResult 0 && continue
+  output=$(make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot-files $VERSION_TARGET $CHECK_EXISTENCE)
+  if [ -n "$CHECK_EXISTENCE" ] ; then
+    matches=$(echo "$output" | grep -q "is available in")
+    if [ -n "$matches" ] ; then
+      if echo "$matches" | grep -q $DISTRIBUTION ; then
+        processResult 0 && continue
+      else
+        distributionFrom=$(echo $matches | awk '{print $NF}')
+        make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES DISTRIBUTION_FROM=$distributionFrom copy-src
+        processResult $? && continue
+    fi
+  fi
   make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES $DEFAULT_TARGETS $RELEASE
   result=$?
   processResult $result
