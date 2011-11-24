@@ -11,5 +11,6 @@ if [ $chaos != $DISTRIBUTION ] ; then
   echo deb http://mephisto/public/$REPOSITORY $chaos main premium upstream internal >| /etc/apt/sources.list
 fi
 apt-get update
+apt-get install apt-show-versions
 
 exit 0
