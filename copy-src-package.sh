@@ -26,10 +26,10 @@ HOST=${HOST:-mephisto}
 [ -z "$REPOSITORY" ] || [ -z "$DISTRIBUTION" ] || [ -z "$DISTRIBUTION_FROM" ] && usage
 [ -z "$VERSION" ] || [ -z "$SOURCE" ] && usage
 
-echo "About to upload:"
-
 manifest="${SOURCE}_${VERSION}_${ARCH}.${REPOSITORY}_${DISTRIBUTION}.copy"
 echo "copysrc ${DISTRIBUTION} ${DISTRIBUTION_FROM} ${SOURCE}" > $manifest
+
+echo "About to upload: $(cat $manifest)"
 
 lftp -e "set net:max-retries 1 ; cd $REPOSITORY/incoming ; put $manifest ; exit" $HOST
 rm -f $manifest
