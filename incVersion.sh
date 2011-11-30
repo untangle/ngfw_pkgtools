@@ -93,9 +93,9 @@ dchargs="--preserve -v ${version} -D ${distribution}"
 #    dchargs="$dchargs --distributor Untangle"
 #fi
 
-/bin/cp -f /usr/bin/dch /tmp/dch && sed -i -e '/garbage/d' /tmp/dch 2> /dev/null
+/bin/cp -f /usr/bin/dch /tmp/dch && sed -i -e '/garbage/d' /tmp/dch
 echo "Setting version to \"${version}\", distribution to \"$distribution\""
-DEBEMAIL="${DEBEMAIL:-${USER}@untangle.com}" /tmp/dch $dchargs "auto build"
+DEBEMAIL="${DEBEMAIL:-${USER}@untangle.com}" /tmp/dch $dchargs "auto build" 2> /dev/null
 # check changelog back in if version was forced; FIXME: disabled for now
 #[ -n "$versionGiven" ] && [ ! -f UNTANGLE-KEEP-UPSTREAM-VERSION ] && $SVN commit debian/changelog -m "Forcing version to $version"
 echo " done."
