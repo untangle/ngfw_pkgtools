@@ -94,7 +94,7 @@ version: version-real parse-changelog
 create-existence-chroot:
 	if [ ! -d $(CHROOT_EXISTENCE) ] ; then \
           sudo cp -al $(CHROOT_ORIG) $(CHROOT_EXISTENCE) ; \
-          sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_EXISTENCE) -- $(CHROOT_UPDATE_EXISTENCE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
+          sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_EXISTENCE) -- $(CHROOT_UPDATE_EXISTENCE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) 2> /dev/null ; \
           sudo cp -f $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(CHROOT_EXISTENCE) ; \
         fi
 remove-existence-chroot:
