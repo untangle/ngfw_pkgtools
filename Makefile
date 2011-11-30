@@ -64,7 +64,7 @@ create-dest-dir:
 	echo $(DEST_DIR) >| $(DESTDIR_FILE)
 
 revert-changelog: # do not leave it locally modified
-	#svn revert debian/changelog > /dev/null || true
+	@svn revert debian/changelog > /dev/null || true
 
 parse-changelog: # store version so we can use that later for uploading
 	dpkg-parsechangelog | awk '/Version:/{print $$2}' >| $(VERSION_FILE)
