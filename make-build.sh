@@ -94,7 +94,7 @@ for directory in "${build_dirs[@]}" ; do
     matches=$(echo "$output" | grep "is available in")
     if [ -n "$matches" ] ; then
       if echo "$matches" | grep -q $DISTRIBUTION ; then
-        processResult 0 "already there" $seconds && continue
+        processResult 0 "already present in $DISTRIBUTION" $seconds && continue
       else
         distributionFrom=$(echo $matches | awk '{print $NF}')
         make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES DISTRIBUTION_FROM=$distributionFrom copy-src
