@@ -4,6 +4,11 @@ PACKAGE_NAME=$1
 VERSION=$2
 DISTRIBUTION=$3
 
+if [ $# != 3 ] ; then
+  echo "Usage: $0 <package> <version> <distribution>"
+  exit 1
+fi
+
 str="$PACKAGE_NAME is available in"
 
 # corresponding chaos distribution
