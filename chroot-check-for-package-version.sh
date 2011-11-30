@@ -15,7 +15,7 @@ str="$PACKAGE_NAME is available in"
 chaos=$(echo $DISTRIBUTION | perl -pe 's/nightly/chaos/')
 
 # all distributions containing that version
-output=$(apt-show-versions -p $PACKAGE_NAME -a | awk '/^'"$PACKAGE_NAME $VERSION"'/ {print $3}')
+output=$(apt-show-versions -p $PACKAGE_NAME -a | awk '/^'"$PACKAGE_NAME ${VERSION/+/\+}"'/ {print $3}')
 
 if echo "$output" | grep -q $DISTRIBUTION ; then
   echo $str $DISTRIBUTION
