@@ -42,8 +42,8 @@ processResult() {
   [ $result = 0 ] && resultString="SUCCESS" || resultString="ERROR"
   let results=results+result
   make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot-files
-  str="**** %7s (%40s) in %3ds: make in %40s exited with return code $result"
-  printf "$str" "${resultString}" "$action" "$seconds" "$directory"
+  str="**** %-7s %-40s in %3ds: make in %-40s exited with return code $result"
+  printf "$str" "(${resultString})" "$action" "$seconds" "$directory"
   echo
   echo "# ======================="
   popd > /dev/null
