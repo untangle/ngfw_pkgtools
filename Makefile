@@ -125,7 +125,7 @@ create-chroot:
           sudo rm -fr $(CHROOT_WORK) ; \
           sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK) ; \
           sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
-          touch .pbuilderrc \
+          touch .pbuilderrc ; \
         fi
 remove-chroot:
 	sudo rm -fr $(CHROOT_WORK)
