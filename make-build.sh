@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 CHROOT_BASE=
 
@@ -37,10 +37,11 @@ fi
 
 processResult() {
   result=$1
+  action=$2
   [ $result = 0 ] && resultString="SUCCESS" || resultString="ERROR"
   let results=results+result
   make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot-files
-  echo "**** ${resultString}: make in $directory exited with return code $result"
+  echo "**** ${resultString} ($action): make in $directory exited with return code $result"
   echo
   echo "# ======================="
   popd > /dev/null
@@ -91,17 +92,17 @@ for directory in "${build_dirs[@]}" ; do
     matches=$(echo "$output" | grep "is available in")
     if [ -n "$matches" ] ; then
       if echo "$matches" | grep -q $DISTRIBUTION ; then
-        processResult 0 && continue
+        processResult 0 "already there" && continue
       else
         distributionFrom=$(echo $matches | awk '{print $NF}')
         make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES DISTRIBUTION_FROM=$distributionFrom copy-src
-        processResult $? && continue
+        processResult $? "copied from $distributionFrom" && continue
       fi
     fi
   fi
   make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES $DEFAULT_TARGETS $RELEASE
   result=$?
-  processResult $result
+  processResult $result "actual build"
   # if we're building only arch-dependent pkgs, we need to give the IQD time to process uploads
   [ $ARCH = "i386" ] || sleep 31
 done
