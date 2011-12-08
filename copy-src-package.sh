@@ -3,8 +3,7 @@
 set -e
 
 usage() {
-  echo "Usage: $0 -r <repository> -d <distribution> -f <distributionFrom> -s <sourcePkg> -v <version> [-h host] [-A architecture]"
-  echo -e "\t-A <arch> : only act on architecture <arch>"
+  echo "Usage: $0 -r <repository> -d <distribution> -f <distributionFrom> -s <sourcePkg> -v <version> [-h host]"
   exit 1
 }
 
@@ -13,14 +12,14 @@ while getopts "r:d:f:s:A:v:h?" opt ; do
     r) REPOSITORY=$OPTARG ;;
     d) DISTRIBUTION=$OPTARG ;;
     h) HOST=$OPTARG ;;
-    A) ARCH="$OPTARG" ;;
     s) SOURCE=$OPTARG ;;
     v) VERSION=$OPTARG ;;
     f) DISTRIBUTION_FROM=$OPTARG ;;
     h|\?) usage ;;
   esac
 done
-ARCH=${ARCH:-i386}
+
+ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
 HOST=${HOST:-mephisto}
 
 [ -z "$REPOSITORY" ] || [ -z "$DISTRIBUTION" ] || [ -z "$DISTRIBUTION_FROM" ] && usage

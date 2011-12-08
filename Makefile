@@ -155,4 +155,4 @@ release-deb:
 	$(PKGTOOLS_DIR)/release-binary-packages.sh -A `dpkg-architecture -qDEB_BUILD_ARCH` -r $(REPOSITORY) -d $(DISTRIBUTION) $(REC)
 
 copy-src:
-	$(PKGTOOLS_DIR)/copy-src-package.sh -A `dpkg-architecture -qDEB_BUILD_ARCH` -r $(REPOSITORY) -d $(DISTRIBUTION) -f $(DISTRIBUTION_FROM) -s $(SOURCE_NAME) -v $(shell cat $(VERSION_FILE))
+	$(PKGTOOLS_DIR)/copy-src-package.sh -r $(REPOSITORY) -d $(DISTRIBUTION) -f $(DISTRIBUTION_FROM) -s $(SOURCE_NAME) -v $(shell cat $(VERSION_FILE))
