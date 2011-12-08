@@ -90,6 +90,7 @@ for directory in "${build_dirs[@]}" ; do
   # cd into it, and attempt to build
   pushd "$directory" > /dev/null
   seconds=$(date +%s)
+  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-build || true # try anyway
   output=$(make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot-files $VERSION_TARGET $CHECK_EXISTENCE)
   if [ -n "$CHECK_EXISTENCE" ] ; then
     matches=$(echo "$output" | grep "is available in")
