@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -x
+
 # usage...
 if [ ! $# -eq 3 ] ; then 
   echo "Usage: $0 distribution VERSION=[version] REPOSITORY=[repository]" && exit 1
@@ -10,6 +12,8 @@ if [ -d .svn ] ; then
 else
   SVN="git svn"
 fi
+
+DCH=/tmp/dch-$USER
 
 rm -f debian/changelog.dch
 
@@ -93,9 +97,10 @@ dchargs="--preserve -v ${version} -D ${distribution}"
 #    dchargs="$dchargs --distributor Untangle"
 #fi
 
-/bin/cp -f /usr/bin/dch /tmp/dch && sed -i -e '/garbage/d' /tmp/dch
+/bin/cp -f /usr/bin/dch $DCH && sed -i -e '/garbage/d' $DCH
 echo "Setting version to \"${version}\", distribution to \"$distribution\""
-DEBEMAIL="${DEBEMAIL:-${USER}@untangle.com}" /tmp/dch $dchargs "auto build" 2> /dev/null
+DEBEMAIL="${DEBEMAIL:-${USER}@untangle.com}" $DCH $dchargs "auto build" 2> /dev/null
 # check changelog back in if version was forced; FIXME: disabled for now
 #[ -n "$versionGiven" ] && [ ! -f UNTANGLE-KEEP-UPSTREAM-VERSION ] && $SVN commit debian/changelog -m "Forcing version to $version"
+rm -f $DCH
 echo " done."
