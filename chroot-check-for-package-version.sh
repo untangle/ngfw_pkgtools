@@ -1,4 +1,4 @@
-#! /bin/bash -x
+#! /bin/bash
 
 PACKAGE_NAME=$1
 VERSION=$2
@@ -17,7 +17,7 @@ chaos=$(echo $DISTRIBUTION | perl -pe 's/nightly/chaos/')
 nightly=$(echo $DISTRIBUTION | perl -pe 's/chaos/nightly/')
 
 # all distributions containing that version
-apt-show-versions -p $PACKAGE_NAME -a >&2
+#apt-show-versions -p $PACKAGE_NAME -a >&2
 output=$(apt-show-versions -p $PACKAGE_NAME -a | awk '/^'"$PACKAGE_NAME ${VERSION/+/\+}"'/ {print $3}')
 
 if echo "$output" | grep -q $DISTRIBUTION ; then
