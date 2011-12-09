@@ -59,22 +59,22 @@ checkroot:
 	fi
 
 create-dest-dir:
-	mkdir -p $(DEST_DIR)
-	rm -fr $(DEST_DIR)/*
-	echo $(DEST_DIR) >| $(DESTDIR_FILE)
+	@mkdir -p $(DEST_DIR)
+	@rm -fr $(DEST_DIR)/*
+	@echo $(DEST_DIR) >| $(DESTDIR_FILE)
 
 revert-changelog: # do not leave it locally modified
 	@svn revert debian/changelog > /dev/null || true
 
 parse-changelog: # store version so we can use that later for uploading
-	dpkg-parsechangelog | awk '/Version:/{print $$2}' >| $(VERSION_FILE)
+	@dpkg-parsechangelog | awk '/Version:/{print $$2}' >| $(VERSION_FILE)
 
 move-debian-files:
-	find .. -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(upload\|changes\|udeb\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec mv "{}" `cat $(DESTDIR_FILE)` \;
-	find .. -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec mv "{}" `cat $(DESTDIR_FILE)` \;
+	@find .. -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(upload\|changes\|udeb\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec mv "{}" `cat $(DESTDIR_FILE)` \;
+	@find .. -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec mv "{}" `cat $(DESTDIR_FILE)` \;
 
 clean-build: checkroot
-	fakeroot debian/rules clean
+	@fakeroot debian/rules clean
 clean-untangle-files: revert-changelog
 	@rm -fr `cat $(DESTDIR_FILE) 2> /dev/null`
 	@rm -f $(VERSION_FILE) $(DESTDIR_FILE)
