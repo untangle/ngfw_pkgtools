@@ -33,9 +33,12 @@ def parseCommandLineArgs(args):
   parser.add_option("-s", "--simulate", dest="simulate",
                     action="store_true", default=False,
                     help="Simulate, but do not download" )
-  parser.add_option("-u", "--use-debian-mirros", dest="useDebianMirrors",
+  parser.add_option("-u", "--use-debian-mirrors", dest="useDebianMirrors",
                     action="store_true", default=False,
                     help="Use Debian mirrors" )
+  parser.add_option("-x", "--security", dest="security",
+                    action="store_true", default=False,
+                    help="Security upgrades only" )
   parser.add_option("-v", "--verbose", dest="verbose",
                     action="store_true", default=False,
                     help="Verbose" )
@@ -73,6 +76,10 @@ deb http://volatile.debian.org/debian-volatile %(repo)s/volatile main contrib no
 deb http://ftp.debian.org/debian %(repo)s main contrib non-free main/debian-installer
 deb http://security.debian.org %(repo)s/updates main contrib non-free''' % {'repo' : options.repository}
 
+debianPin = 901
+if options.security:
+  debianPin = 101
+
 if options.backportsAndVolatile and options.mode == 'download-dependencies':
   volatilePin = 1001
   backportsPin = 1001
@@ -83,7 +90,7 @@ else:
 # FIXME? provide a command line way to specify pinning
 preferences = '''Package: *
 Pin: release l=Untangle
-Pin-Priority: 900
+Pin-Priority: 100
 
 Package: *
 Pin: release a=oldstable, o=volatile.debian.org
@@ -94,10 +101,15 @@ Pin: release a=%s-backports
 Pin-Priority: %s
 
 Package: *
+Pin: release o=security.debian.org
+Pin-Priority: 1500
+
+Package: *
 Pin: release o=Debian
-Pin-Priority: 901\n''' % (volatilePin,
-                          options.repository,
-                          backportsPin) # options.distribution)
+Pin-Priority: %s\n''' % (volatilePin,
+                         options.repository,
+                         backportsPin,
+                         debianPin)
 
 aptchroot.initializeChroot(TMP_DIR, sources, preferences)
 
