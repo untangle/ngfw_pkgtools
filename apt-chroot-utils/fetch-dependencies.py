@@ -69,12 +69,17 @@ if options.useDebianMirrors:
   sources += '''
 # backports
 deb http://backports.debian.org/debian-backports %(repo)s-backports main contrib non-free
-deb http://backports.debian.org/debian-backports %(repo)s-backports-sloppy main contrib non-free
-# volatile
-deb http://volatile.debian.org/debian-volatile %(repo)s/volatile main contrib non-free
 # main
 deb http://ftp.debian.org/debian %(repo)s main contrib non-free main/debian-installer
 deb http://security.debian.org %(repo)s/updates main contrib non-free''' % {'repo' : options.repository}
+
+  if options.distribution == "lenny":
+    sources += '''
+# backports-sloppy
+deb http://backports.debian.org/debian-backports %(repo)s-backports-sloppy main contrib non-free
+# volatile
+deb http://volatile.debian.org/debian-volatile %(repo)s/volatile main contrib non-free
+'''
 
 debianPin = 901
 if options.security:
