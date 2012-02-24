@@ -16,6 +16,8 @@ chaos=$(echo $DISTRIBUTION | perl -pe 's/nightly/chaos/')
 # corresponding nightly distribution
 nightly=$(echo $DISTRIBUTION | perl -pe 's/chaos/nightly/')
 
+apt-get install --yes --force-yes apt-show-versions
+
 # all distributions containing that version
 #apt-show-versions -p $PACKAGE_NAME -a >&2
 output=$(apt-show-versions -p $PACKAGE_NAME -a | awk '/^'"$PACKAGE_NAME ${VERSION/+/\+}"'/ {print $3}')
