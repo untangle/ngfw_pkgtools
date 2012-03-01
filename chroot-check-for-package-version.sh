@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash -x
 
 PACKAGE_NAME=$1
 VERSION=$2
