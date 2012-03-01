@@ -50,6 +50,23 @@ else
   grep -q "universe" $SOURCES || perl -i -pe 's/main\s*$/main universe multiverse\n/' $SOURCES
 fi
 
+cat >| /etc/apt/preferences <<EOF
+Explanation: main lenny archive
+Package: *
+Pin: release a=stable, o=Debian, l=Debian
+Pin-Priority: 101
+
+Explanation: security archive
+Package: *
+Pin: release a=stable, o=Debian, l=Debian-security
+Pin-Priority: 101
+
+Explanation: 00default-untangle.conf
+Package: *
+Pin: release o=Untangle
+Pin-Priority: 1001 
+EOF
+
 apt-get -q update
 
 # do not ever prompt the user, even if the distribution name doesn't
