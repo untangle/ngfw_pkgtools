@@ -28,7 +28,9 @@ endif
 
 # CC options
 CCACHE_DISABLE := true
+export CCACHE_DISABLE
 CCACHE_DIR := /tmp
+export CCACHE_DIR
 
 # cwd
 CUR_DIR := $(shell basename `pwd`)
