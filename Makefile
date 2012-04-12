@@ -26,6 +26,10 @@ else
   DPKGBUILDPACKAGE_OPTIONS += -B
 endif
 
+# CC options
+CCACHE_DISABLE := true
+CCACHE_DIR := /tmp
+
 # cwd
 CUR_DIR := $(shell basename `pwd`)
 
