@@ -66,20 +66,36 @@ sources = '''deb http://%s/public/%s %s main premium upstream\n''' % (options.ho
                                                                       options.distribution)
 
 if options.useDebianMirrors:
-  sources += '''
+  if options.repository == "lenny":
+    sources += '''
+# # backports
+# deb http://backports.debian.org/debian-backports %(repo)s-backports main contrib non-free
+# main
+deb http://archive.debian.org/debian %(repo)s main contrib non-free main/debian-installer
+deb http://archive.debian.org/debian-security %(repo)s/updates main contrib non-free''' % {'repo' : options.repository}
+
+    if options.backportsAndVolatile:
+      sources += '''
+# # backports-sloppy
+# deb http://backports.debian.org/debian-backports %(repo)s-backports-sloppy main contrib non-free
+# volatile
+deb http://archive.debian.org/debian-volatile %(repo)s/volatile main contrib non-free
+''' % {'repo' : options.repository}
+  else:
+    sources += '''
 # backports
 deb http://backports.debian.org/debian-backports %(repo)s-backports main contrib non-free
 # main
 deb http://ftp.debian.org/debian %(repo)s main contrib non-free main/debian-installer
 deb http://security.debian.org %(repo)s/updates main contrib non-free''' % {'repo' : options.repository}
 
-  if options.distribution == "lenny":
-    sources += '''
-# backports-sloppy
-deb http://backports.debian.org/debian-backports %(repo)s-backports-sloppy main contrib non-free
+    if options.backportsAndVolatile:
+      sources += '''
+# # backports-sloppy
+# deb http://backports.debian.org/debian-backports %(repo)s-backports-sloppy main contrib non-free
 # volatile
-deb http://volatile.debian.org/debian-volatile %(repo)s/volatile main contrib non-free
-'''
+deb http://volatile.debian.org/debian %(repo)s/volatile main contrib non-free
+''' % {'repo' : options.repository}
 
 debianPin = 901
 if options.security:
