@@ -5,7 +5,8 @@ import optparse
 
 from lib import aptchroot
 
-TMP_DIR    = '/tmp/foo'
+TMP_DIR = '/tmp/foo'
+NEVER_UPDATE = (r'^sun-java6',)
 
 # functions
 def parseCommandLineArgs(args):
@@ -190,7 +191,15 @@ if options.mode == 'download-dependencies':
     #  else:
     #    print "%s is in the store and satisfies the dependency" % lp.get(versionedPackage)
 elif options.mode == 'update-all':
-   for pkg in lp.getPkgs():
+  for pkg in lp.getPkgs():
+    ignored = False
+    for regex in NEVER_UPDATE:
+      if re.search(regex, pkg.name):
+        print "%s: on the 'NEVER UPDATE' list, so not touching" % (pkg.name,)
+        ignored = True
+        break
+    if ignored:
+      continue    
     newPkg = aptchroot.VersionedPackage(pkg.name)
     if options.verbose:
       print "%s: local=%s remote=%s" % (pkg.name, pkg.version, newPkg.version)
