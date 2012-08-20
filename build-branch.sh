@@ -1,5 +1,7 @@
 #!/bin/dash
 
+set -e
+
 read_user_input()
 {
     local t_validator
@@ -88,7 +90,7 @@ echo "[svn mkdir] ${BRANCH_PATH}"
 svn mkdir -m "${DESCRIPTION}" ${BRANCH_PATH}
 
 ## Create a temporary directory to check this out to.
-TEMP_DIST=`mktemp -d`
+TEMP_DIST="/localhome-for-branching"
 rm -rf "${TEMP_DIST}"
 svn checkout ${BRANCH_PATH} ${TEMP_DIST}
 
@@ -104,9 +106,13 @@ echo "[svn copy] ${BRANCH_REVISION} svn://chef/internal/pkgtools ${BRANCH_PATH}"
 svn copy ${BRANCH_REVISION} svn://chef/internal/pkgtools ${TEMP_DIST}
 echo "Copying pkgtools to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 
-echo "[svn copy] ${BRANCH_REVISION} svn://chef/internal/isotools ${BRANCH_PATH}"
-svn copy ${BRANCH_REVISION} svn://chef/internal/isotools ${TEMP_DIST}
-echo "Copying isotools to ${BRANCH_PATH}" >> ${CHANGE_LOG}
+echo "[svn copy] ${BRANCH_REVISION} svn://chef/internal/isotools-lenny ${BRANCH_PATH}"
+svn copy ${BRANCH_REVISION} svn://chef/internal/isotools-lenny ${TEMP_DIST}
+echo "Copying isotools-lenny to ${BRANCH_PATH}" >> ${CHANGE_LOG}
+
+echo "[svn copy] ${BRANCH_REVISION} svn://chef/internal/isotools-squeeze ${BRANCH_PATH}"
+svn copy ${BRANCH_REVISION} svn://chef/internal/isotools-squeeze ${TEMP_DIST}
+echo "Copying isotools-squeeze to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 
 echo "[svn copy] ${BRANCH_REVISION} svn://chef/upstream/pkgs ${BRANCH_PATH}"
 svn copy ${BRANCH_REVISION} svn://chef/upstream/pkgs ${TEMP_DIST}
