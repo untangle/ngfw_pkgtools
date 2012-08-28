@@ -138,7 +138,11 @@ cat <<EOF | update_external pkgtools
 resources       ${BRANCH_PATH}/work/version/resources
 EOF
 
-cat <<EOF | update_external isotools
+cat <<EOF | update_external isotools-lenny
+resources       ${BRANCH_PATH}/work/version/resources
+EOF
+
+cat <<EOF | update_external isotools-squeeze
 resources       ${BRANCH_PATH}/work/version/resources
 EOF
 
