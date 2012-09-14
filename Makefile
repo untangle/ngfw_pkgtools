@@ -81,6 +81,7 @@ move-debian-files:
 
 clean-build: checkroot
 	@fakeroot debian/rules clean
+	@quilt pop -a || true
 clean-untangle-files: revert-changelog
 	@rm -fr `cat $(DESTDIR_FILE) 2> /dev/null`
 	@rm -f $(VERSION_FILE) $(DESTDIR_FILE)
