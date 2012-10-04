@@ -1,14 +1,19 @@
 #! /bin/bash
 
+set -x
+set -e
+
 # usage...
 if [ ! $# -eq 3 ] ; then 
   echo "Usage: $0 distribution VERSION=[version] REPOSITORY=[repository]" && exit 1
 fi
 
 if [ -d .svn ] ; then
-  SVN="svn"
+  VCS_INFO="svn info --recursive"
+  VCS_STATUS="svn status"
 else
-  SVN="git svn"
+  VCS_INFO="git svn info"
+  VCS_STATUS="git status"
 fi
 
 DCH=/tmp/dch-$USER
@@ -39,17 +44,17 @@ if [ -z "$version" ] ; then
 
   # get some values from SVN: branch, last changed revision, timestamp for the
   # current directory
-  url=`$SVN info . | awk '/^URL:/{print $2}'`
+  url=`$VCS_INFO . | awk '/^URL:/{print $2}'`
   case $url in
     *branch/prod/*) branch=`echo $url | perl -pe 's|.*/branch/prod/(.*?)/.*|\1| ; s/-//g'` ;;
     *) branch=main ;;
   esac
-  revision=`$SVN info --recursive . | awk '/Last Changed Rev: / { print $4 }' | sort -n | tail -1`
+  revision=`$VCS_INFO . | awk '/Last Changed Rev: / { print $4 }' | sort -n | tail -1`
   [ -z "$revision" ] && revision=00000
-  timestamp=`$SVN info --recursive . | awk '/Last Changed Date:/ { gsub(/-/, "", $4) ; print $4 }' | sort -n | tail -1`
+  timestamp=`$VCS_INFO . | awk '/Last Changed Date:/ { gsub(/-/, "", $4) ; print $4 }' | sort -n | tail -1`
 
   # this is how we figure out if we're up-to-date or not
-  hasLocalChanges=`$SVN status | grep -v -E '^([X?]|Fetching external item into|Performing status on external item at|$)'`
+  hasLocalChanges=`$VCS_STATUS | grep -v -E '^([X?]|Fetching external item into|Performing status on external item at|$)'`
 
   # this is the base version; it will be tweaked a bit if need be:
   # - append a local modification marker is we're not up to date
