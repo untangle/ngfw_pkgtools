@@ -92,10 +92,10 @@ deb http://security.debian.org %(repo)s/updates main contrib non-free''' % {'rep
 
     if options.backportsAndVolatile:
       sources += '''
-# # backports-sloppy
-# deb http://backports.debian.org/debian-backports %(repo)s-backports-sloppy main contrib non-free
-# volatile
-deb http://volatile.debian.org/debian %(repo)s/volatile main contrib non-free
+# backports-sloppy
+deb http://backports.debian.org/debian-backports %(repo)s-backports main contrib non-free
+# # volatile
+# deb http://volatile.debian.org/debian %(repo)s/volatile main contrib non-free
 ''' % {'repo' : options.repository}
 
 debianPin = 901
