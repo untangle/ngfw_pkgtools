@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -x
+
 # usage...
 if [ ! $# -eq 3 ] ; then 
   echo "Usage: $0 distribution VERSION=[version] REPOSITORY=[repository]" && exit 1
