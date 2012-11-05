@@ -13,6 +13,7 @@ else
   VCS_STATUS="git status"
 fi
 
+USER=seb # FIXME
 DCH=/tmp/dch-$USER
 
 rm -f debian/changelog.dch
@@ -47,7 +48,7 @@ if [ -z "$version" ] ; then
     *) branch=main ;;
   esac
   revision=`$VCS_INFO . | awk '/Last Changed Rev: / { print $4 }' | sort -n | tail -1`
-  [ -z "$revision" ] && revision=00000
+  [ -z "$revision" ] && revision=50000
   timestamp=`$VCS_INFO . | awk '/Last Changed Date:/ { gsub(/-/, "", $4) ; print $4 }' | sort -n | tail -1`
 
   # this is how we figure out if we're up-to-date or not
