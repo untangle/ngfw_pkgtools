@@ -44,11 +44,11 @@ case $DISTRIBUTION in
     esac ;;
 esac
 
-if grep -q debian $SOURCES ; then
-  grep -q "non-free" $SOURCES || perl -i -pe 's/main\s*$/main contrib non-free\n/' $SOURCES
-else
-  grep -q "universe" $SOURCES || perl -i -pe 's/main\s*$/main universe multiverse\n/' $SOURCES
-fi
+# if grep -q debian $SOURCES ; then
+#   grep -q "non-free" $SOURCES || perl -i -pe 's/main\s*$/main contrib non-free\n/' $SOURCES
+# else
+#   grep -q "universe" $SOURCES || perl -i -pe 's/main\s*$/main universe multiverse\n/' $SOURCES
+# fi
 
 cat >| /etc/apt/preferences <<EOF
 Explanation: main lenny archive
