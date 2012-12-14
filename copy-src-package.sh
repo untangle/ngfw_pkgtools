@@ -20,7 +20,7 @@ while getopts "r:d:f:s:A:v:h?" opt ; do
 done
 
 ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
-HOST=${HOST:-mephisto}
+HOST=${HOST:-package-server}
 
 [ -z "$REPOSITORY" ] || [ -z "$DISTRIBUTION" ] || [ -z "$DISTRIBUTION_FROM" ] && usage
 [ -z "$VERSION" ] || [ -z "$SOURCE" ] && usage

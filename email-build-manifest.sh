@@ -14,7 +14,7 @@ EMAILS=$3
 pkgtools=$(dirname $0)
 . $pkgtools/release-constants.sh
 
-HOST=mephisto
+HOST=package-server
 SNAPSHOT=`date -d "-1day" "+%Y-%m-%d"`
 
 tmp_base=/tmp/manifest-$REPOSITORY-$DISTRIBUTION-`date -Iminutes`

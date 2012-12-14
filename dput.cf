@@ -1,5 +1,5 @@
-[mephisto_sarge]
-fqdn = mephisto
+[package-server_sarge]
+fqdn = package-server
 method = ftp
 login = anonymous
 incoming = /sarge/incoming
@@ -7,8 +7,8 @@ allow_unsigned_uploads = 1
 run_dinstall = 0
 run_lintian = 0
 check_version = 0
-[mephisto_etch]
-fqdn = mephisto
+[package-server_etch]
+fqdn = package-server
 method = ftp
 login = anonymous
 incoming = /etch/incoming
@@ -16,8 +16,8 @@ allow_unsigned_uploads = 1
 run_dinstall = 0
 run_lintian = 0
 check_version = 0
-[mephisto_lenny]
-fqdn = mephisto
+[package-server_lenny]
+fqdn = package-server
 method = ftp
 login = anonymous
 incoming = /lenny/incoming
@@ -25,8 +25,8 @@ allow_unsigned_uploads = 1
 run_dinstall = 0
 run_lintian = 0
 check_version = 0
-[mephisto_squeeze]
-fqdn = mephisto
+[package-server_squeeze]
+fqdn = package-server
 method = ftp
 login = anonymous
 incoming = /squeeze/incoming
@@ -34,8 +34,8 @@ allow_unsigned_uploads = 1
 run_dinstall = 0
 run_lintian = 0
 check_version = 0
-[mephisto_sid]
-fqdn = mephisto
+[package-server_sid]
+fqdn = package-server
 method = ftp
 login = anonymous
 incoming = /sid/incoming
@@ -43,8 +43,8 @@ allow_unsigned_uploads = 1
 run_dinstall = 0
 run_lintian = 0
 check_version = 0
-[mephisto_gutsy]
-fqdn = mephisto
+[package-server_gutsy]
+fqdn = package-server
 method = ftp
 login = anonymous
 incoming = /gutsy/incoming
@@ -52,8 +52,8 @@ allow_unsigned_uploads = 1
 run_dinstall = 0
 run_lintian = 0
 check_version = 0
-[mephisto_hardy]
-fqdn = mephisto
+[package-server_hardy]
+fqdn = package-server
 method = ftp
 login = anonymous
 incoming = /hardy/incoming
@@ -61,8 +61,8 @@ allow_unsigned_uploads = 1
 run_dinstall = 0
 run_lintian = 0
 check_version = 0
-[mephisto_intrepid]
-fqdn = mephisto
+[package-server_intrepid]
+fqdn = package-server
 method = ftp
 login = anonymous
 incoming = /intrepid/incoming

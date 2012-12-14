@@ -22,7 +22,7 @@ while getopts "r:d:A:ah?" opt ; do
   esac
 done
 ARCH=${ARCH:-i386}
-HOST=${HOST:-mephisto}
+HOST=${HOST:-package-server}
 
 [ -z "$REPOSITORY" ] || [ -z "$DISTRIBUTION" ] && usage
 

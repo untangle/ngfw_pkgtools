@@ -8,7 +8,7 @@ PKGTOOLS_DIR := $(shell dirname $(MAKEFILE_LIST))
 # overridables
 DISTRIBUTION ?= $(USER)
 DISTRIBUTION_FROM ?= $(DISTRIBUTION)
-PACKAGE_SERVER ?= mephisto
+PACKAGE_SERVER ?= package-server
 REPOSITORY ?= $(shell $(PKGTOOLS_DIR)/getPlatform.sh)
 TIMESTAMP ?= $(shell date "+%Y-%m-%dT%H%M%S_%N")
 
