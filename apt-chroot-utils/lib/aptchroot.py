@@ -13,12 +13,12 @@ try:
 except:
   error()
 
-for i, j in zip(map(int, apt.apt_pkg.Version.split('.')),
-                map(int, MINIMUM_VERSION.split('.'))):
-  if i < j:
-    error()
-  if i > j:
-    break
+# for i, j in zip(map(int, apt.apt_pkg.Version.split('.')),
+#                 map(int, MINIMUM_VERSION.split('.'))):
+#   if i < j:
+#     error()
+#   if i > j:
+#     break
 
 # constants
 ARCHITECTURE = commands.getoutput('dpkg-architecture -qDEB_BUILD_ARCH')
@@ -61,15 +61,15 @@ def initializeChroot(TMP_DIR, sources, preferences):
 
   apt_pkg.init()
 
-  apt_pkg.Config.Set("Dir", TMP_DIR)
-  apt_pkg.Config.Set("Dir::Etc", "etc/apt/")
-  apt_pkg.Config.Set("Dir::Etc::sourcelist", os.path.basename(SOURCES))
-  apt_pkg.Config.Set("Dir::Etc::preferences", os.path.basename(PREFS))
-  apt_pkg.Config.Set("Dir::Cache", "var/cache/apt")
-  apt_pkg.Config.Set("Dir::Cache::Archives", os.path.basename(ARCHIVES))
-  apt_pkg.Config.Set("Dir::State", "var/lib/apt/")
-  apt_pkg.Config.Set("Dir::State::Lists",  "lists/")
-  apt_pkg.Config.Set("Dir::State::status", STATUS)
+  apt_pkg.Config.set("Dir", TMP_DIR)
+  apt_pkg.Config.set("Dir::Etc", "etc/apt/")
+  apt_pkg.Config.set("Dir::Etc::sourcelist", os.path.basename(SOURCES))
+  apt_pkg.Config.set("Dir::Etc::preferences", os.path.basename(PREFS))
+  apt_pkg.Config.set("Dir::Cache", "var/cache/apt")
+  apt_pkg.Config.set("Dir::Cache::Archives", os.path.basename(ARCHIVES))
+  apt_pkg.Config.set("Dir::State", "var/lib/apt/")
+  apt_pkg.Config.set("Dir::State::Lists",  "lists/")
+  apt_pkg.Config.set("Dir::State::status", STATUS)
 
 #   apt_pkg.Config.Set("Debug::pkgPolicy","1");
 #   apt_pkg.Config.Set("Debug::pkgOrderList","1");
@@ -81,10 +81,10 @@ def initializeChroot(TMP_DIR, sources, preferences):
 
   cache = apt.Cache(rootdir=TMP_DIR)
   cache.update()
-  cache.open(apt.progress.OpTextProgress())
+  cache.open()
 
-  pkgCache      = apt_pkg.GetCache()
-  depcache      = apt_pkg.GetDepCache(pkgCache)
+  pkgCache      = apt_pkg.Cache()
+  depcache      = apt_pkg.DepCache(pkgCache)
 
 # classes
 class Package:
@@ -120,46 +120,43 @@ class VersionedPackage(Package):
     Package.__init__(self, name, version, arch, fileName)
 
     # FIXME
-    self.isVirtual               = False
-    self.foundDeps             = False
-    self.foundAllDeps          = False
+    self.isVirtual    = False
+    self.foundDeps    = False
+    self.foundAllDeps = False
 
     if not self.version:
       try:
-        self._package          = cache[name]
-        self._package._lookupRecord(True)
-        self._record           = self._package._records.Record
-        self._section          = apt_pkg.ParseSection(self._record)
-        self.version           = self._section['Version']
-        self.arch              = self._section['Architecture']
-
+        self._package       = cache[name]
+        self._versionObject = self._package.versions.get(0) # FIXME: JFC !!!
+        self.version        = self._versionObject.version
+        self.arch           = self._versionObject.architecture
+        self.priority       = self._versionObject.priority
         try:
-          self.isRequired        = self._section['Priority'] == 'required'
-          self.isImportant       = self._section['Priority'] == 'important'
-          self.isStandard        = self._section['Priority'] == 'standard'
+          self.isRequired  = self.priority == 'required'
+          self.isImportant = self.priority == 'important'
+          self.isStandard  = self.priority == 'standard'
         except KeyError:
           # sub-optimal, but some packages don't seem to have a 'Priority' key
           self.isRequired = self.isImportant = False
           self.isStandard = True
 
-        self.fileName          = self._sanitizeName(self._section["Filename"])
+        self.fileName          = self._sanitizeName(self._versionObject.filename)
         self.fileNameWithEpoch = os.path.basename(self.fileName)
         try:
           self.fileNameWithEpoch = re.sub(r'_(.*?)_', '_%s_' % (self.version,), self.fileNameWithEpoch)
         except:
           pass
 
-        self._versionedPackage = depcache.GetCandidateVer(\
-          pkgCache[self.name])
+        self._versionedPackage = depcache.get_candidate_ver(pkgCache[self.name])
             
-        packageFile = self._versionedPackage.FileList[0][0]
-        indexFile = cache._list.FindIndex(packageFile)
-        self.url = indexFile.ArchiveURI(self.fileName)
+        packageFile = self._versionedPackage.file_list[0][0]
+        indexFile = cache._list.find_index(packageFile)
+        self.url = indexFile.archive_uri(self.fileName)
       except KeyError, AttributeError: # FIXME
 #        print "ooops, couldn't find package %s" % self.name
         self.isVirtual = True
-      except:
-        print self.name
+      except Exception, e:
+        print "Exception while looking for %s: %s" % (self.name, e)
       
   def _sanitizeName(self, name):
     return name.replace('%3a', ':')
@@ -176,7 +173,7 @@ class VersionedPackage(Package):
     
     if self.isVirtual or self.isRequired: # or self.isImportant or self.isStandard:
       return []
-    deps = self._versionedPackage.DependsList
+    deps = self._versionedPackage.depends_list
     if self.dependsKey in deps:
 #      self.deps = [ DepPackage(self.name) ]
       self.deps = []
@@ -189,9 +186,9 @@ class VersionedPackage(Package):
           intermediate += deps[self.suggestsKey]
         
       for p in [ p[0] for p in intermediate ]:
-        name = p.TargetPkg.Name
+        name = p.target_pkg.name
         if not name in Package.basePackages:
-          self.deps.append(DepPackage(name, p.TargetVer, p.CompType))
+          self.deps.append(DepPackage(name, p.target_ver, p.comp_type))
 #      print "%s --> %s" % (self.name, [ str(p) for p in self.deps ])
     else:
       self.deps = []
@@ -245,8 +242,8 @@ class VersionedPackage(Package):
     if not name:
       name = self.fileNameWithEpoch
     print "%s --> %s" % (self.url, name)
-#    urllib.urlretrieve(self.url, name)
-    os.system("curl -o '%s' '%s'" % (name, self.url))
+    urllib.urlretrieve(self.url, name)
+#    os.system("curl -o '%s' '%s'" % (name, self.url))
     print "download succeeded"
 
 class DepPackage(Package):
