@@ -70,7 +70,7 @@ create-dest-dir:
 	@echo $(DEST_DIR) >| $(DESTDIR_FILE)
 
 revert-changelog: # do not leave it locally modified
-	@svn revert debian/changelog > /dev/null || true
+	@svn revert debian/changelog > /dev/null 2>&1 || git co -- debian/changelog 2>&1 || true
 
 parse-changelog: # store version so we can use that later for uploading
 	@dpkg-parsechangelog | awk '/Version:/{print $$2}' >| $(VERSION_FILE)
@@ -117,7 +117,7 @@ check-existence: create-existence-chroot
 
 source: checkroot parse-changelog
 	tar cz --exclude="*stamp*" --exclude=".svn" --exclude="debian" \
-	       --exclude="todo" --exclude="staging" \
+	       --exclude="todo" --exclude="staging" --exclude=".git" \
 	       -f ../$(SOURCE_NAME)_`dpkg-parsechangelog | awk '/^Version:/{gsub(/(^.+:|-.*)/, "", $$2) ; print $$2}'`.orig.tar.gz ../$(CUR_DIR)
 
 pkg-real: checkroot parse-changelog
