@@ -69,8 +69,6 @@ sources = '''deb http://%s/public/%s %s main premium upstream\n''' % (options.ho
 if options.useDebianMirrors:
   if options.repository == "lenny":
     sources += '''
-# # backports
-# deb http://backports.debian.org/debian-backports %(repo)s-backports main contrib non-free
 # main
 deb http://archive.debian.org/debian %(repo)s main contrib non-free main/debian-installer
 deb http://archive.debian.org/debian-security %(repo)s/updates main contrib non-free''' % {'repo' : options.repository}
@@ -84,8 +82,6 @@ deb http://archive.debian.org/debian-volatile %(repo)s/volatile main contrib non
 ''' % {'repo' : options.repository}
   else:
     sources += '''
-# backports
-deb http://backports.debian.org/debian-backports %(repo)s-backports main contrib non-free
 # main
 deb http://ftp.debian.org/debian %(repo)s main contrib non-free main/debian-installer
 deb http://security.debian.org %(repo)s/updates main contrib non-free''' % {'repo' : options.repository}
