@@ -164,11 +164,13 @@ if options.mode == 'download-dependencies':
           if not lp.get(versionedPackage).satisfies(p):
             if options.verbose:
               print "Version of %s doesn't satisfy dependency (%s)" % (versionedPackage.name, p)
-              print "Downloading new one, but you probably want to remove the older one (%s)" % lp.getByName(p.name)
+              print "Downloading new one, and removing old version (%s)" % lp.getByName(p.name)
+              os.system("svn rm %s" % (lp.getByName(p.name).fileName,))
           elif lp.get(versionedPackage).version < versionedPackage.version:
             if options.verbose:
               print "New version of %s available (%s)" % (versionedPackage.name, versionedPackage.version)
-              print "Downloading new one, but you probably want to remove the older one (%s)" % lp.getByName(p.name)
+              print "Downloading new one, and removing old version (%s)" % lp.getByName(p.name)
+              os.system("svn rm %s" % (lp.getByName(p.name).fileName,))
           else:
             if options.verbose:
               print "Download of %s (version %s) explicitely requested, but we already have that package" % (versionedPackage.name, versionedPackage.version)
