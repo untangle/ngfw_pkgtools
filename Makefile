@@ -116,6 +116,7 @@ check-existence: create-existence-chroot
 	sudo chroot $(CHROOT_EXISTENCE) /$(shell basename $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT)) "$${packageName}" $(shell cat $(VERSION_FILE)) $(DISTRIBUTION)
 
 source: checkroot parse-changelog
+	quilt pop -a || true
 	tar cz --exclude="*stamp*" --exclude=".svn" --exclude="debian" \
 	       --exclude="todo" --exclude="staging" --exclude=".git" \
 	       -f ../$(SOURCE_NAME)_`dpkg-parsechangelog | awk '/^Version:/{gsub(/(^.+:|-.*)/, "", $$2) ; print $$2}'`.orig.tar.gz ../$(CUR_DIR)
