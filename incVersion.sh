@@ -52,7 +52,7 @@ if [ -z "$version" ] ; then
   timestamp=`$VCS_INFO . | awk '/Last Changed Date:/ { gsub(/-/, "", $4) ; print $4 }' | sort -n | tail -1`
 
   # this is how we figure out if we're up-to-date or not
-  hasLocalChanges=`$VCS_STATUS | grep -v -E '^([X?]|Fetching external item into|Performing status on external item at|$)'`
+  hasLocalChanges=`$VCS_STATUS | grep -v -E '^([X?!]|Fetching external item into|Performing status on external item at|$)'`
 
   # this is the base version; it will be tweaked a bit if need be:
   # - append a local modification marker is we're not up to date
