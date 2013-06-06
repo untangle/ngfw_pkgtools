@@ -283,7 +283,7 @@ class LocalPackages:
       for f in files:
         m = LocalPackages.reObj.match(f)
         if m and m.group(3) in ('all', ARCHITECTURE):
-#          print "Found in store: %s (%s for %s)" % (m.group(1), m.group(2), m.group(3))
+          print "Found in store: %s (%s for %s)" % (m.group(1), m.group(2), m.group(3))
           self.pkgs[m.group(1)] = VersionedPackage(m.group(1),
                                                    m.group(2),
                                                    m.group(3),
