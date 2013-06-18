@@ -66,6 +66,11 @@ build_dirs=()
 while read package repositories ; do
   case $package in
     \#*) continue ;; # comment
+    \$*) #command
+      command=${package/\$}
+      echo "Running $command ${repositories//,/ }"
+      eval "$command ${repositories//,/ }"
+      ;;
     "") continue ;; # empty line
     *) # yes
       if [[ "$repositories" = *${TARGET_REP}* ]] ; then
