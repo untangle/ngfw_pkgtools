@@ -67,9 +67,7 @@ while read package repositories ; do
   case $package in
     \#*) continue ;; # comment
     \$*) #command
-      command=${package/\$}
-      echo "Running $command ${repositories//,/ }"
-      eval "$command ${repositories//,/ }"
+      build_dirs[${#build_dirs[*]}]="$package ${repositories//,/ }"
       ;;
     "") continue ;; # empty line
     *) # yes
@@ -91,6 +89,13 @@ done < $FILE_IN
 # now cd into each dir in build_dirs and make
 for directory in "${build_dirs[@]}" ; do
   echo 
+  case $directory in
+    \$*) # command
+      echo "Running $directory"
+      eval "${directory/\$}"
+      continue
+      ;;
+  esac
   echo "# $directory"
   # cd into it, and attempt to build
   pushd "$directory" > /dev/null
