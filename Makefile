@@ -139,10 +139,11 @@ remove-chroot:
 	sudo rm -fr $(CHROOT_WORK)
 pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	# if we depend on an untangle-* package, or on
-	# libdebconfclient0-dev, we want to apt-get update to get the
-	# latest available version (that might have been uploaded
-	# during the current make-build.sh run)
-	if grep -E '^Build-Depends:.*(untangle|libdebconfclient0-dev)' debian/control ; then \
+	# libdebconfclient0-dev, or on libpixman-1-dev, we want to
+	# apt-get update to get the latest available version (that
+	# might have been uploaded during the current make-build.sh
+	# run)
+	if grep -E '^Build-Depends:.*(untangle|libdebconfclient0-dev|libpixman-1-dev)' debian/control ; then \
           sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
         fi
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
