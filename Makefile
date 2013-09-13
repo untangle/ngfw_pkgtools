@@ -50,7 +50,7 @@ CHROOT_UPDATE_SCRIPT := $(PKGTOOLS_DIR)/chroot-update.sh
 CHROOT_UPDATE_EXISTENCE_SCRIPT := $(PKGTOOLS_DIR)/chroot-update-existence.sh
 CHROOT_CHECK_PACKAGE_VERSION_SCRIPT := $(PKGTOOLS_DIR)/chroot-check-for-package-version.sh
 DPKG_ARCH := $(shell dpkg-architecture -qDEB_BUILD_ARCH)
-ifeq ($(DPKG_ARCH), i686)
+ifeq ($(DPKG_ARCH), i386)
   ARCH :=
 else
   ARCH := "_$(DPKG_ARCH)"
