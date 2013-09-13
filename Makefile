@@ -53,7 +53,7 @@ DPKG_ARCH := $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 ifeq ($(DPKG_ARCH), i686)
   ARCH :=
 else
-  ARCH := $(DPKG_ARCH)
+  ARCH := "_$(DPKG_ARCH)"
 endif
 CHROOT_BASE := $(CHROOT_DIR)/$(REPOSITORY)+untangle$(ARCH)
 CHROOT_ORIG := $(CHROOT_BASE).cow
