@@ -49,7 +49,12 @@ CHROOT_BUILD_KERNEL_MODULE := $(PKGTOOLS_DIR)/chroot-build-kernel-module.sh
 CHROOT_UPDATE_SCRIPT := $(PKGTOOLS_DIR)/chroot-update.sh
 CHROOT_UPDATE_EXISTENCE_SCRIPT := $(PKGTOOLS_DIR)/chroot-update-existence.sh
 CHROOT_CHECK_PACKAGE_VERSION_SCRIPT := $(PKGTOOLS_DIR)/chroot-check-for-package-version.sh
-ARCH := $(shell uname -m | grep -q 64 && echo _amd64)
+DPKG_ARCH := $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+ifeq ($(DPKG_ARCH), i686)
+  ARCH :=
+else
+  ARCH := $(DPKG_ARCH)
+endif
 CHROOT_BASE := $(CHROOT_DIR)/$(REPOSITORY)+untangle$(ARCH)
 CHROOT_ORIG := $(CHROOT_BASE).cow
 CHROOT_WORK := $(CHROOT_BASE)_$(TIMESTAMP).cow
@@ -162,7 +167,7 @@ release:
 	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER)_$(REPOSITORY) `cat $(DESTDIR_FILE)`/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
 
 release-deb:
-	$(PKGTOOLS_DIR)/release-binary-packages.sh -A `dpkg-architecture -qDEB_BUILD_ARCH` -r $(REPOSITORY) -d $(DISTRIBUTION) $(REC)
+	$(PKGTOOLS_DIR)/release-binary-packages.sh -A $(DPKG_ARCH) -r $(REPOSITORY) -d $(DISTRIBUTION) $(REC)
 
 copy-src:
 	$(PKGTOOLS_DIR)/copy-src-package.sh -r $(REPOSITORY) -d $(DISTRIBUTION) -f $(DISTRIBUTION_FROM) -s $(SOURCE_NAME) -v $(shell cat $(VERSION_FILE))
