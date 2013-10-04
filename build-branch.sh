@@ -138,16 +138,8 @@ cat <<EOF | update_external pkgtools
 resources       ${BRANCH_PATH}/work/version/resources
 EOF
 
-cat <<EOF | update_external isotools-lenny
-resources       ${BRANCH_PATH}/work/version/resources
-EOF
-
 cat <<EOF | update_external isotools-squeeze
 resources       ${BRANCH_PATH}/work/version/resources
-EOF
-
-cat <<EOF | update_external work/pkgs/untangle-net-alpaca/files/var/lib/rails/untangle-net-alpaca
-version       ${BRANCH_PATH}/work/version/resources
 EOF
 
 svn commit -F "${CHANGE_LOG}" ${TEMP_DIST}
