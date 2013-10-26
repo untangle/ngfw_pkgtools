@@ -29,7 +29,7 @@ case DISTRIBUTION in
 esac
 
 # for our own build-deps
-addSource "http://package-server/public/$REPOSITORY $DISTRIBUTION main premium upstream"
+addSource "http://package-server/public/$REPOSITORY $DISTRIBUTION main main/debian-installer premium upstream"
 case "$HOME" in # to sign packages with the real untangle java keystore
   *buildbot|seb*) addSource "http://package-server/public/$REPOSITORY $DISTRIBUTION internal"
 esac
@@ -40,7 +40,7 @@ case $DISTRIBUTION in
   *)
     case "$HOME" in
       *buildbot*) ;;
-      *) addSource "http://package-server/public/$REPOSITORY nightly${branch} main premium upstream"
+      *) addSource "http://package-server/public/$REPOSITORY nightly${branch} main main/debian-installer premium upstream"
     esac ;;
 esac
 
