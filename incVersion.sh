@@ -44,7 +44,7 @@ if [ -z "$version" ] ; then
   # current directory
   url=`$VCS_INFO . | awk '/^URL:/{print $2}'`
   case $url in
-    *branch/prod/*) branch=`echo $url | perl -pe 's|.*/branch/prod/(.*?)/.*|\1| ; s/-//g'` ;;
+    *branch/*) branch=`echo $url | perl -pe 's|.*/branch/prod/(.*?)/.*|\1| ; s/-//g'` ;;
     *) branch=main ;;
   esac
   revision=`$VCS_INFO . | awk '/Last Changed Rev: / { print $4 }' | sort -n | tail -1`

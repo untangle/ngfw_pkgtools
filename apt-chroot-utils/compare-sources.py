@@ -102,7 +102,7 @@ elif len(branches) == 2:
 
 branch = branches.pop()
 if not branch == "":
-  branch = "branch/prod/%s" % (branch,)
+  branch = "branch/%s" % (branch,)
 branch = "%s/" % (branch,)
 
 # FIXME: this is so fucked-up...

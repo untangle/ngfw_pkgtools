@@ -16,7 +16,7 @@ case $module in
 esac
 
 git svn init -T $dir \
-             -b branch/prod/*/$dir \
+             -b branch/*/$dir \
              -t tags/*/$dir \
              svn://$SVN_SERVER
 
