@@ -93,7 +93,7 @@ clean-untangle-files: revert-changelog
 clean-debian-files:
 	@if [ -f $(DESTDIR_FILE) ] && [ -d `cat $(DESTDIR_FILE)` ] ; then \
 	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec rm -f "{}" \; ; \
- 	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec rm -f "{}" \; ; \
+	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec rm -f "{}" \; ; \
 	fi
 clean-chroot-files: clean-debian-files clean-untangle-files
 
@@ -105,8 +105,8 @@ version: version-real parse-changelog
 
 create-existence-chroot:
 	if [ ! -d $(CHROOT_EXISTENCE) ] ; then \
-          sudo cp -al $(CHROOT_ORIG) $(CHROOT_EXISTENCE) ; \
-          sudo cp -f $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(CHROOT_EXISTENCE) ; \
+	  sudo cp -al $(CHROOT_ORIG) $(CHROOT_EXISTENCE) ; \
+	  sudo cp -f $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(CHROOT_EXISTENCE) ; \
         fi
 remove-existence-chroot:
 	sudo rm -fr $(CHROOT_EXISTENCE)
