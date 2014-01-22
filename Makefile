@@ -131,13 +131,13 @@ pkg-real: checkroot parse-changelog
 pkg: create-dest-dir pkg-real move-debian-files
 
 upgrade-base-chroot:
-	sudo cowbuilder --execute --basepath $(CHROOT_ORIG) --save-after-exec -- $(CHROOT_UPDATE_SCRIPT)
+	sudo /usr/sbin/cowbuilder --execute --basepath $(CHROOT_ORIG) --save-after-exec -- $(CHROOT_UPDATE_SCRIPT)
 
 create-chroot:
 	@if [ ! -d $(CHROOT_WORK) ] ; then \
           sudo rm -fr $(CHROOT_WORK) ; \
           sudo cp -al $(CHROOT_ORIG) $(CHROOT_WORK) ; \
-          sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
+          sudo /usr/sbin/cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
           touch ~/.pbuilderrc ; \
         fi
 remove-chroot:
@@ -149,7 +149,7 @@ pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	# might have been uploaded during the current make-build.sh
 	# run)
 	if grep -E '^Build-Depends:.*(untangle|libdebconfclient0-dev|libpixman-1-dev)' debian/control ; then \
-          sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
+          sudo /usr/sbin/cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
         fi
 	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
 		 --buildresult `cat $(DESTDIR_FILE)` \
@@ -159,7 +159,7 @@ pkg-chroot-real: checkroot parse-changelog create-dest-dir
 pkg-chroot: create-dest-dir create-chroot pkg-chroot-real move-debian-files
 
 kernel-module-chroot-real: checkroot parse-changelog create-dest-dir
-	sudo cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_BUILD_KERNEL_MODULE) $(SOURCE_NAME)
+	sudo /usr/sbin/cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_BUILD_KERNEL_MODULE) $(SOURCE_NAME)
 	cp -f $(CHROOT_WORK)/usr/src/*deb .
 kernel-module-chroot: create-dest-dir create-chroot kernel-module-chroot-real
 
