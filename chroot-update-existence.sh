@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -x
+
 REPOSITORY=$1
 DISTRIBUTION=$2
 
