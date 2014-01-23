@@ -3,6 +3,8 @@
 REPOSITORY=$1
 DISTRIBUTION=$2
 
+echo "[update-existence] Called with REPOSITORY=$REPOSITORY and DISTRIBUTION=$DISTRIBUTION" >&2
+
 # corresponding chaos distribution
 chaos=$(echo $DISTRIBUTION | perl -pe 's/nightly/chaos/')
 # corresponding nightly distribution
@@ -14,6 +16,10 @@ if [ $chaos != $DISTRIBUTION ] ; then
 elif [ $nightly != $DISTRIBUTION ] ; then
   echo deb http://package-server/public/$REPOSITORY $nightly main main/debian-installer premium upstream internal >> /etc/apt/sources.list
 fi
+
+echo "[update-existence] sources.list is :" >&2
+cat /etc/apt/sources.list >&2
+
 apt-get update
 apt-get install --yes --force-yes apt-show-versions
 
