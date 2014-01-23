@@ -66,6 +66,8 @@ BRANCH_PATH=$1
 DESCRIPTION="$2"
 BRANCH_REVISION="${3:+-r $3}"
 
+SVN_BASE_URL="https://untangle.svn.beanstalkapp.com/ngfw"
+
 NEW_VERSION_NAME=""
 NEW_VERSION_NUMBER=""
 
@@ -94,25 +96,25 @@ TEMP_DIST="/localhome-for-branching"
 rm -rf "${TEMP_DIST}"
 svn checkout ${BRANCH_PATH} ${TEMP_DIST}
 
-echo "[svn copy] ${BRANCH_REVISION} svn://chef/work ${BRANCH_PATH}"
-svn copy ${BRANCH_REVISION} svn://chef/work ${TEMP_DIST}
+echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/work ${BRANCH_PATH}"
+svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/work ${TEMP_DIST}
 echo "Copying work to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 
-echo "[svn copy] ${BRANCH_REVISION} svn://chef/hades ${BRANCH_PATH}"
-svn copy ${BRANCH_REVISION} svn://chef/hades ${TEMP_DIST}
+echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/hades ${BRANCH_PATH}"
+svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/hades ${TEMP_DIST}
 echo "Copying hades to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 
-echo "[svn copy] ${BRANCH_REVISION} svn://chef/internal/pkgtools ${BRANCH_PATH}"
-svn copy ${BRANCH_REVISION} svn://chef/internal/pkgtools ${TEMP_DIST}
+echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/pkgtools ${BRANCH_PATH}"
+svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/pkgtools ${TEMP_DIST}
 echo "Copying pkgtools to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 
-echo "[svn copy] ${BRANCH_REVISION} svn://chef/internal/isotools-squeeze ${BRANCH_PATH}"
-svn copy ${BRANCH_REVISION} svn://chef/internal/isotools-squeeze ${TEMP_DIST}
+echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/isotools-squeeze ${BRANCH_PATH}"
+svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/isotools-squeeze ${TEMP_DIST}
 echo "Copying isotools-squeeze to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 
-echo "[svn copy] ${BRANCH_REVISION} svn://chef/upstream/pkgs ${BRANCH_PATH}"
-svn copy ${BRANCH_REVISION} svn://chef/upstream/pkgs ${TEMP_DIST}
-echo "Copying svn://chef/upstream/pkgs to ${BRANCH_PATH}" >> ${CHANGE_LOG}
+echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/upstream/pkgs ${BRANCH_PATH}"
+svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/upstream/pkgs ${TEMP_DIST}
+echo "Copying ${SVN_BASE_URL}/upstream/pkgs to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 
 # Update all of the externals, this will no longer be necessary when we move to subversion 1.5
 SVN_EXTERNALS=`mktemp`
@@ -146,7 +148,7 @@ rm -rf "${TEMP_DIST}"
 
 if [ -n "${NEW_VERSION_NUMBER}" ] &&  [ -n "${NEW_VERSION_NAME}" ] ; then
     echo "Updating the version number in the mainline"
-    svn checkout svn://chef/work/version/resources ${TEMP_DIST}
+    svn checkout ${SVN_BASE_URL}/work/version/resources ${TEMP_DIST}
     
     echo "${NEW_VERSION_NUMBER}.0" >| "${TEMP_DIST}/VERSION"
     echo "${NEW_VERSION_NUMBER}" >| "${TEMP_DIST}/PUBVERSION"
