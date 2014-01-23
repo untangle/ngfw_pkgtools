@@ -151,7 +151,7 @@ pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	if grep -E '^Build-Depends:.*(untangle|libdebconfclient0-dev|libpixman-1-dev)' debian/control ; then \
           sudo /usr/sbin/cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
         fi
-	pdebuild --pbuilder cowbuilder --use-pdebuild-internal \
+	pdebuild --pbuilder /usr/sbin/cowbuilder --use-pdebuild-internal \
 		 --buildresult `cat $(DESTDIR_FILE)` \
 	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
 	         --basepath $(CHROOT_WORK)
