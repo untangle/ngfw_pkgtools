@@ -28,6 +28,11 @@ case DISTRIBUTION in
   *) branch="" ;;
 esac
 
+# reset sources.list to start with: we don't want to use package from
+# the official repositories to get our build-dependencies, as this may
+# impact us when there is a Debian point release
+echo >| $SOURCES
+
 # for our own build-deps
 addSource "http://package-server/public/$REPOSITORY $DISTRIBUTION main main/debian-installer premium upstream"
 case "$HOME" in # to sign packages with the real untangle java keystore
