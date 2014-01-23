@@ -106,10 +106,6 @@ echo "[svn copy] ${BRANCH_REVISION} svn://chef/internal/pkgtools ${BRANCH_PATH}"
 svn copy ${BRANCH_REVISION} svn://chef/internal/pkgtools ${TEMP_DIST}
 echo "Copying pkgtools to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 
-echo "[svn copy] ${BRANCH_REVISION} svn://chef/internal/isotools-lenny ${BRANCH_PATH}"
-svn copy ${BRANCH_REVISION} svn://chef/internal/isotools-lenny ${TEMP_DIST}
-echo "Copying isotools-lenny to ${BRANCH_PATH}" >> ${CHANGE_LOG}
-
 echo "[svn copy] ${BRANCH_REVISION} svn://chef/internal/isotools-squeeze ${BRANCH_PATH}"
 svn copy ${BRANCH_REVISION} svn://chef/internal/isotools-squeeze ${TEMP_DIST}
 echo "Copying isotools-squeeze to ${BRANCH_PATH}" >> ${CHANGE_LOG}
