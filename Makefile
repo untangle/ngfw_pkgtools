@@ -105,7 +105,7 @@ version: version-real parse-changelog
 
 create-existence-chroot:
 	if [ ! -d $(CHROOT_EXISTENCE) ] ; then \
-	  sudo cp -r $(CHROOT_ORIG) $(CHROOT_EXISTENCE) ; \
+	  sudo cp -a $(CHROOT_ORIG) $(CHROOT_EXISTENCE) ; \
 	  sudo /usr/sbin/cowbuilder --execute --save-after-exec --basepath $(CHROOT_EXISTENCE) -- $(CHROOT_UPDATE_EXISTENCE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
 	  sudo cp -f $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT) $(CHROOT_EXISTENCE) ; \
         fi
@@ -136,7 +136,7 @@ upgrade-base-chroot:
 create-chroot:
 	if [ ! -d $(CHROOT_WORK) ] ; then \
           sudo rm -fr $(CHROOT_WORK) ; \
-          sudo cp -r $(CHROOT_ORIG) $(CHROOT_WORK) ; \
+          sudo cp -a $(CHROOT_ORIG) $(CHROOT_WORK) ; \
           sudo /usr/sbin/cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
           touch ~/.pbuilderrc ; \
         fi
