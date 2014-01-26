@@ -117,7 +117,7 @@ check-existence: create-existence-chroot
 	else \
 	  dh_switch="-a" ; \
 	fi ; \
-	packageName=`dh_listpackages $${dh_switch} | head -1` ;\
+	packageName=`dh_listpackages $${dh_switch} | tail -1` ;\
 	sudo /usr/sbin/chroot $(CHROOT_EXISTENCE) /$(shell basename $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT)) "$${packageName}" $(shell cat $(VERSION_FILE)) $(DISTRIBUTION)
 
 source: checkroot parse-changelog
