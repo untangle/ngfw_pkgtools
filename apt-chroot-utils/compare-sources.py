@@ -6,14 +6,14 @@ from lib import aptchroot
 # constants
 TMP_DIR = os.tmpnam()
 SOURCE = "deb http://%s/public/%s %s main premium non-free upstream"
-SVN_LOG = "svn log -r %s:%s svn://chef/%s"
-MSG1 = 'r%s,svn://chef/%s,%s,,\n'
+SVN_LOG = "svn log -r %s:%s https://untangle.svn.beanstalkapp.com/ngfw/%s"
+MSG1 = 'r%s,https://untangle.svn.beanstalkapp.com/ngfw/%s,%s,,\n'
 MSG2 = ',,,%s,http://bugzilla.untangle.com/show_bug.cgi?id=%s\n'
 reUntangle = re.compile(r'untangle')
-reKernel = re.compile(r'2\.6\.26')
+reKernel = re.compile(r'2\.6\.32')
 reSplitter = re.compile(r'\n?-+\n', re.MULTILINE)
 reExtract = re.compile(r'^r(\d+) \| (.*?) .*?closes:\s*(?:bug)?\s*\#\s*(\d+)(?:,\s*(?:bug)?\s*\#\s*(\d+))?.*?', re.MULTILINE | re.DOTALL | re.IGNORECASE)
-reRevision = re.compile('.+svn.+r(\d+)(.+)-\d.+$')
+reRevision = re.compile('svn\d+r(\d+)(.+)-\d.+$')
 
 # functions
 def usage():
@@ -24,19 +24,18 @@ def getVersion(name):
   return aptchroot.VersionedPackage(name).version
 
 def getRevisionAndBranchFromVersion(version):
-  print version
-  rev, branch = reRevision.match(version).groups()
+  rev, branch = reRevision.search(version).groups()
   if branch in ('trunk', 'main'):
     branch = ''
   return rev, branch
 
 def getHighestRevisionAndBranchFromSource(source):
   aptchroot.initializeChroot(TMP_DIR, source, "")
-  # versions for all the untangle-* packages
-  v = [ getVersion(name)
+  # (rev, branch) for all the untangle-* packages
+  l = [ getRevisionAndBranchFromVersion(getVersion(name))
         for name in aptchroot.cache.keys()
         if reUntangle.search(name) and not reKernel.search(name) ]
-  return getRevisionAndBranchFromVersion(max(v))
+  return sorted(l, key=lambda e: e[0])[-1]
 
 def getSVNLog(revs, name):
   output = ""
