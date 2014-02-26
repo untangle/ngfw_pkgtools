@@ -28,7 +28,7 @@ case DISTRIBUTION in
   *) branch="" ;;
 esac
 
-# reset sources.list to start with: we don't want to use package from
+# reset sources.list to start with: we don't want to use packages from
 # the official repositories to get our build-dependencies, as this may
 # impact us when there is a Debian point release
 echo >| $SOURCES
