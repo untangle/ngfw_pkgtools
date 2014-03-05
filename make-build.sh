@@ -24,16 +24,16 @@ while getopts r:b:d:v:a:uencmhk option ; do
     a) ARCH="$OPTARG" ;;
     e) CHECK_EXISTENCE="check-existence" ;;
     m) DEFAULT_TARGETS="kernel-module-chroot" ;;
-    k) DEFAULT_TARGETS="patch binary-arch" ;;
+    k) DEFAULT_TARGETS="patch kpkg-arch" ;;
     h) usage ;;
     \?) usage ;;
   esac
 done
 [[ -z "$ARCH" ]] && ARCH=i386
 
-if [[ $ARCH == i386 ]] && [[ $DEFAULT_TARGETS = "binary-arch" ]] ; then
+if [[ $ARCH == i386 ]] && [[ $DEFAULT_TARGETS = "kpkg-arch" ]] ; then
   # also build source, doc, etc
-  DEFAULT_TARGETS="$DEFAULT_TARGETS binary-indep"
+  DEFAULT_TARGETS="$DEFAULT_TARGETS kpkg-indep"
 fi
 MAKE_VARIABLES="DISTRIBUTION=${DISTRIBUTION} REPOSITORY=${TARGET_REP} ${BINARY_UPLOAD} TIMESTAMP=`date +%Y-%m-%dT%H%M%S_%N`"
 if [ -n "$VERSION" ] ; then
@@ -87,7 +87,7 @@ while read package repositories architectures ; do
         i386) pattern="(any|all|$ARCH)" ;;
         *) pattern="(any|$ARCH)" ;;
       esac
-      if [[ "$DEFAULT_TARGETS" = "kernel-module-chroot" ]] || [[ "$DEFAULT_TARGETS" == *binary-arch* ]] || grep -qE "^Architecture:.*$pattern" $package/debian/control ; then
+      if [[ "$DEFAULT_TARGETS" = "kernel-module-chroot" ]] || [[ "$DEFAULT_TARGETS" == *kpkg-arch* ]] || grep -qE "^Architecture:.*$pattern" $package/debian/control ; then
 	build_dirs[${#build_dirs[*]}]="$package"
       fi ;;
   esac
@@ -108,7 +108,7 @@ for directory in "${build_dirs[@]}" ; do
   pushd "$directory" > /dev/null
   seconds=$(date +%s)
   make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-build || true # try anyway
-  if [[ "$DEFAULT_TARGETS" != *binary-arch* ]] ; then
+  if [[ "$DEFAULT_TARGETS" != *kpkg-arch* ]] ; then
     output=$(make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot-files $VERSION_TARGET $CHECK_EXISTENCE)
     if [ -n "$CHECK_EXISTENCE" ] ; then
       matches=$(echo "$output" | grep "is available in")
