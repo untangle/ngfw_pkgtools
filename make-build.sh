@@ -108,16 +108,18 @@ for directory in "${build_dirs[@]}" ; do
   pushd "$directory" > /dev/null
   seconds=$(date +%s)
   make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-build || true # try anyway
-  output=$(make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot-files $VERSION_TARGET $CHECK_EXISTENCE)
-  if [ -n "$CHECK_EXISTENCE" ] ; then
-    matches=$(echo "$output" | grep "is available in")
-    if [ -n "$matches" ] ; then
-      if echo "$matches" | grep -q $DISTRIBUTION ; then
-        processResult 0 "already present in $DISTRIBUTION" $seconds && continue
-      else
-        distributionFrom=$(echo $matches | awk '{print $NF}')
-        make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES DISTRIBUTION_FROM=$distributionFrom copy-src
-        processResult $? "copied from $distributionFrom" $seconds && continue
+  if [[ "$DEFAULT_TARGETS" != *binary-arch* ]] ; then
+    output=$(make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot-files $VERSION_TARGET $CHECK_EXISTENCE)
+    if [ -n "$CHECK_EXISTENCE" ] ; then
+      matches=$(echo "$output" | grep "is available in")
+      if [ -n "$matches" ] ; then
+        if echo "$matches" | grep -q $DISTRIBUTION ; then
+          processResult 0 "already present in $DISTRIBUTION" $seconds && continue
+        else
+          distributionFrom=$(echo $matches | awk '{print $NF}')
+          make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES DISTRIBUTION_FROM=$distributionFrom copy-src
+          processResult $? "copied from $distributionFrom" $seconds && continue
+        fi
       fi
     fi
   fi
