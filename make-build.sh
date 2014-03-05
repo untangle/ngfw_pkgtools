@@ -24,7 +24,7 @@ while getopts r:b:d:v:a:uencmhk option ; do
     a) ARCH="$OPTARG" ;;
     e) CHECK_EXISTENCE="check-existence" ;;
     m) DEFAULT_TARGETS="kernel-module-chroot" ;;
-    k) DEFAULT_TARGETS="patch kpkg-arch" ;;
+    k) DEFAULT_TARGETS="clean patch kpkg-arch" ;;
     h) usage ;;
     \?) usage ;;
   esac
