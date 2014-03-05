@@ -31,7 +31,7 @@ while getopts r:b:d:v:a:uencmhk option ; do
 done
 [[ -z "$ARCH" ]] && ARCH=i386
 
-if [[ $ARCH == i386 ]] && [[ $DEFAULT_TARGETS = "kpkg-arch" ]] ; then
+if [[ $ARCH == i386 ]] && [[ $DEFAULT_TARGETS == *kpkg-arch* ]] ; then
   # also build source, doc, etc
   DEFAULT_TARGETS="$DEFAULT_TARGETS kpkg-indep"
 fi
