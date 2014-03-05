@@ -85,7 +85,7 @@ while read package repositories architectures ; do
         i386) pattern="(any|all|$ARCH)" ;;
         *) pattern="(any|$ARCH)" ;;
       esac
-      if [[ "$DEFAULT_TARGETS" = "kernel-module-chroot" ]] || [[ "$DEFAULT_TARGETS" = "binary-arch" ]] || grep -qE "^Architecture:.*$pattern" $package/debian/control ; then
+      if [[ "$DEFAULT_TARGETS" = "kernel-module-chroot" ]] || [[ "$DEFAULT_TARGETS" = *binary-arch* ]] || grep -qE "^Architecture:.*$pattern" $package/debian/control ; then
 	build_dirs[${#build_dirs[*]}]="$package"
       fi ;;
   esac
