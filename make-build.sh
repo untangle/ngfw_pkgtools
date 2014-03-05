@@ -122,8 +122,10 @@ for directory in "${build_dirs[@]}" ; do
         fi
       fi
     fi
+    make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES $DEFAULT_TARGETS $RELEASE
+  else
+    make -f ./Makefile $MAKE_VARIABLES $DEFAULT_TARGETS $RELEASE
   fi
-  make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES $DEFAULT_TARGETS $RELEASE
   result=$?
   processResult $result "actual build" $seconds
   # if we're building only arch-dependent pkgs, we need to give the IQD time to process uploads
