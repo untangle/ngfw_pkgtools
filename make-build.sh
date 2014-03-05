@@ -3,14 +3,14 @@
 CHROOT_BASE=
 
 usage() {
-  echo "$0 -r <repository> -d <distribution> -b <builddir> [-n] [-a <arch>] [-v <version>] [-u] [-e] [-c] [-m]"
+  echo "$0 -r <repository> -d <distribution> -b <builddir> [-n] [-a <arch>] [-v <version>] [-u] [-e] [-c] [-m] [-k]"
   exit 1
 }
 
 DEFAULT_TARGETS="source pkg-chroot"
 
 ### CLI args
-while getopts r:b:d:v:a:uencmh option ; do
+while getopts r:b:d:v:a:uencmhk option ; do
   case "$option" in
     r) TARGET_REP="$OPTARG" ;;
     b) BUILD_DIR="$OPTARG" ;;
@@ -22,6 +22,7 @@ while getopts r:b:d:v:a:uencmh option ; do
     a) ARCH="$OPTARG" ;;
     e) CHECK_EXISTENCE="check-existence" ;;
     m) DEFAULT_TARGETS="kernel-module-chroot" ;;
+    k) DEFAULT_TARGETS="pkgs" ;;
     h) usage ;;
     \?) usage ;;
   esac
@@ -63,28 +64,27 @@ cd "${BUILD_DIR}" 2> /dev/null
 
 # grab the content of the build-order.txt file
 build_dirs=()
-while read package repositories ; do
+while read package repositories architectures ; do
   case $package in
     \#*) continue ;; # comment
     \$*) #command
       build_dirs[${#build_dirs[*]}]="$package ${repositories//,/ }"
       ;;
     "") continue ;; # empty line
-    *) # yes
-      if [[ "$repositories" = *${TARGET_REP}* ]] ; then
-	case $ARCH in
-          i386) pattern="(any|all|$ARCH)" ;;
-          *) pattern="(any|$ARCH)" ;;
-        esac
-        if [ "$DEFAULT_TARGETS" = "kernel-module-chroot" ] || grep -qE "^Architecture:.*$pattern" $package/debian/control ; then
-	  build_dirs[${#build_dirs[*]}]="$package"
-	fi
+    *) # valid line
+      # do we build this package for this arch ?
+      [[ -n "$architectures" ]] && [[ "$architectures" != *${ARCH}* ]] && continue
+      # do we build this package for this repository ?
+      [[ "$repositories" != *${TARGET_REP}* ]] && continue
+      case $ARCH in
+        i386) pattern="(any|all|$ARCH)" ;;
+        *) pattern="(any|$ARCH)" ;;
+      esac
+      if [ "$DEFAULT_TARGETS" = "kernel-module-chroot" ] || grep -qE "^Architecture:.*$pattern" $package/debian/control ; then
+	build_dirs[${#build_dirs[*]}]="$package"
       fi ;;
   esac
 done < $FILE_IN
-
-# # do this only once, instead of for each package
-# [ -n "$CHECKROOT_UPGRADE" ] && make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES upgrade-base-chroot
 
 # now cd into each dir in build_dirs and make
 for directory in "${build_dirs[@]}" ; do
