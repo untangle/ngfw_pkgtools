@@ -22,12 +22,16 @@ while getopts r:b:d:v:a:uencmhk option ; do
     a) ARCH="$OPTARG" ;;
     e) CHECK_EXISTENCE="check-existence" ;;
     m) DEFAULT_TARGETS="kernel-module-chroot" ;;
-    k) DEFAULT_TARGETS="pkgs" ;;
+    k) DEFAULT_TARGETS="binary-arch" ;;
     h) usage ;;
     \?) usage ;;
   esac
 done
-[ -z "$ARCH" ] && ARCH=i386
+[[ -z "$ARCH" ]] && ARCH=i386
+
+if [[ $ARCH != i386 ]] && [[ $DEFAULT_TARGETS = "binary-arch" ]] ; then
+  DEFAULT_TARGETS="$DEFAULT_TARGETS binary-indep"
+fi
 MAKE_VARIABLES="DISTRIBUTION=${DISTRIBUTION} REPOSITORY=${TARGET_REP} ${BINARY_UPLOAD} TIMESTAMP=`date +%Y-%m-%dT%H%M%S_%N`"
 if [ -n "$VERSION" ] ; then
   MAKE_VARIABLES="$MAKE_VARIABLES VERSION=\"${VERSION}\""
