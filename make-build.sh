@@ -58,6 +58,7 @@ processResult() {
 }
 
 ### a few variables
+export PATH=/sbin:/usr/sbin:${PATH}
 FILE_IN="build-order.txt"
 PKGTOOLS_HOME=`dirname $(readlink -f $0)`
 results=0
