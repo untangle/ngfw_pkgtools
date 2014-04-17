@@ -5,7 +5,7 @@ from lib import aptchroot
 
 # constants
 TMP_DIR = os.tmpnam()
-SOURCE = "deb http://%s/public/%s %s main premium non-free upstream"
+SOURCE = "deb http://%s/public/%s %s main premium non-free non-free upstream"
 SVN_LOG = "svn log -r %s:%s https://untangle.svn.beanstalkapp.com/ngfw/%s"
 MSG1 = 'r%s,https://untangle.svn.beanstalkapp.com/ngfw/%s,%s,,\n'
 MSG2 = ',,,%s,http://bugzilla.untangle.com/show_bug.cgi?id=%s\n'

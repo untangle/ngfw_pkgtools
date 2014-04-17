@@ -51,10 +51,10 @@ if [ -z "$simulate" ] ; then
   date="`date`"
   repreproRemote --noskipold update ${DISTRIBUTION} || exit 1
 
-  # also remove source packages for premium; this is really just a
+  # also remove source packages for premium non-free; this is really just a
   # safety measure now, as the update process itself is smarter and
-  # knows not to pull sources for premium.
-#  $SSH_COMMAND ./remove-packages.sh -r ${REPOSITORY} -d ${DISTRIBUTION} -t dsc -c premium
+  # knows not to pull sources for premium non-free.
+#  $SSH_COMMAND ./remove-packages.sh -r ${REPOSITORY} -d ${DISTRIBUTION} -t dsc -c premium non-free
 
   repreproRemote export ${DISTRIBUTION} || exit 1
 
@@ -78,7 +78,7 @@ EOF
 #  $SSH_COMMAND /etc/init.d/untangle-gpg-agent stop
 else
   repreproRemote "checkupdate $DISTRIBUTION 2>&1 | grep upgraded | sort -u"
-  remoteCommand ./remove-packages.sh -r ${REPOSITORY} -d ${DISTRIBUTION} -T dsc -C premium -s
+  remoteCommand ./remove-packages.sh -r ${REPOSITORY} -d ${DISTRIBUTION} -T dsc -C premium non-free -s
 fi
 
 # remove remote pkgtools

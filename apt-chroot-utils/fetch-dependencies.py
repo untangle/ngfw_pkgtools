@@ -62,7 +62,7 @@ def parseCommandLineArgs(args):
 
 # main
 pkgs, options = parseCommandLineArgs(sys.argv[1:])
-sources = '''deb http://%s/public/%s %s main premium upstream\n''' % (options.host,
+sources = '''deb http://%s/public/%s %s main premium non-free upstream\n''' % (options.host,
                                                                       options.repository,
                                                                       options.distribution)
 
