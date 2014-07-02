@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -x
+
 PKG_NAME=${1/-source}-source
 
 rm -f /usr/src/*deb
