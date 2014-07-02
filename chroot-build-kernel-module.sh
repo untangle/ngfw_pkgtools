@@ -4,6 +4,10 @@ set -x
 
 PKG_NAME=${1/-source}-source
 
+case $PKG_NAME in
+  openswan) PKG_NAME="openswan-modules-source" ;; # upstream package
+esac
+
 rm -f /usr/src/*deb
 
 apt-get install --yes --force-yes module-assistant untangle-keyring
