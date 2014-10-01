@@ -108,6 +108,10 @@ echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/pkgtools ${BRANCH_P
 svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/pkgtools ${TEMP_DIST}
 echo "Copying pkgtools to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 
+echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/isotools-wheezy ${BRANCH_PATH}"
+svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/isotools-wheezy ${TEMP_DIST}
+echo "Copying isotools-squeeze to ${BRANCH_PATH}" >> ${CHANGE_LOG}
+
 echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/upstream/pkgs ${BRANCH_PATH}"
 svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/upstream/pkgs ${TEMP_DIST}
 echo "Copying ${SVN_BASE_URL}/upstream/pkgs to ${BRANCH_PATH}" >> ${CHANGE_LOG}
@@ -132,7 +136,7 @@ cat <<EOF | update_external pkgtools
 resources       ${BRANCH_PATH}/work/version/resources
 EOF
 
-cat <<EOF | update_external isotools-squeeze
+cat <<EOF | update_external isotools-wheezy
 resources       ${BRANCH_PATH}/work/version/resources
 EOF
 
