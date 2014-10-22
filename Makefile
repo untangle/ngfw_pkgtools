@@ -95,6 +95,8 @@ clean-debian-files:
 	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec rm -f "{}" \; ; \
 	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec rm -f "{}" \; ; \
 	fi
+	find . -regex '\(.*\.deb|core\)' -exec rm -f "{}" \;
+
 clean-chroot-files: clean-debian-files clean-untangle-files
 
 clean: clean-chroot-files clean-build remove-chroot remove-existence-chroot
