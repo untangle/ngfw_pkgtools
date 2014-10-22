@@ -87,6 +87,9 @@ move-debian-files:
 clean-build: checkroot
 	@fakeroot debian/rules clean
 	@quilt pop -a || true
+	@echo "Attempting to remove older *.deb files"
+	find . -regex '\(.*-module-3.2.0-4.*\.deb\|core\)' -exec rm -f "{}" \;
+
 clean-untangle-files: revert-changelog
 	@rm -fr `cat $(DESTDIR_FILE) 2> /dev/null`
 	@rm -f $(VERSION_FILE) $(DESTDIR_FILE)
@@ -95,8 +98,6 @@ clean-debian-files:
 	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec rm -f "{}" \; ; \
 	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec rm -f "{}" \; ; \
 	fi
-	echo "Attempting to remove older *.deb files"
-	find . -regex '\(.*-module-3.2.0-4.*\.deb\|core\)' -exec rm -f "{}" \;
 
 clean-chroot-files: clean-debian-files clean-untangle-files
 
