@@ -9,7 +9,7 @@ case $PKG_NAME in
 esac
 
 rm -f /usr/src/*deb
-find . -name "*.deb" | xargs rm
+find .. -name "*.deb" | xargs rm
 
 apt-get install --yes --force-yes module-assistant untangle-keyring
 apt-get update
