@@ -2,7 +2,8 @@
 
 grep -q Debian /etc/issue && i=3 || i=2
 case `head -1 /etc/issue | awk "{ print \\$$i }"` in
-  jessie/sid) repository=sid ;;
+  *sid) repository=sid ;;
+  8.0) repository=jessie ;; 
   7.0) repository=wheezy ;; 
   6.0) repository=squeeze ;; 
   5.0) repository=lenny ;; 
