@@ -5,7 +5,7 @@ if [ ! $# -eq 3 ] ; then
   echo "Usage: $0 distribution VERSION=[version] REPOSITORY=[repository]" && exit 1
 fi
 
-if [ -d .svn ] ; then
+if svn list > /dev/null 2>&1 ; then
   VCS_INFO="svn info --recursive"
   VCS_STATUS="svn status"
 else
