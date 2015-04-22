@@ -28,7 +28,7 @@ apt-get install --yes --force-yes apt-show-versions
 echo "[existence] apt-show-versions result:" >&2
 apt-show-versions -p '^'$PACKAGE_NAME'$' -a -R >&2
 
-output=$(apt-show-versions -p '^'$PACKAGE_NAME'$' -a -R | awk '/^'"$PACKAGE_NAME(:[a-z0-9]+)? ${VERSION//+/\+}"'/ {print $3}')
+output=$(apt-show-versions -p '^'$PACKAGE_NAME'$' -a -R | gawk '/^'"$PACKAGE_NAME(:[a-z0-9]+)? ${VERSION//+/\+}"'/ {print $3}')
 echo "[existence] Matching line:" >&2
 echo $output >&2
 
