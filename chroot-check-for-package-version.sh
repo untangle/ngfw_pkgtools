@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -x
+
 PACKAGE_NAME=$1
 VERSION=$2
 DISTRIBUTION=$3
