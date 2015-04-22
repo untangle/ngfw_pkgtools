@@ -24,9 +24,9 @@ apt-get install --yes --force-yes apt-show-versions
 
 # all distributions containing that version
 echo "[existence] apt-show-versions result:" >&2
-apt-show-versions -p $PACKAGE_NAME -a >&2
+apt-show-versions -p '^'$PACKAGE_NAME'$' -a -R >&2
 
-output=$(apt-show-versions -p $PACKAGE_NAME -a | awk '/^'"$PACKAGE_NAME ${VERSION//+/\+}"'/ {print $3}')
+output=$(apt-show-versions -p '^'$PACKAGE_NAME'$' -a -R | awk '/^'"$PACKAGE_NAME ${VERSION//+/\+}"'/ {print $3}')
 echo "[existence] Matching line:" >&2
 echo $output >&2
 
