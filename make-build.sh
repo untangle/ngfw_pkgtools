@@ -76,6 +76,7 @@ while read package repositories architectures ; do
   case $package in
     \#*) continue ;; # comment
     \$*) #command
+      [[ "$repositories" != *${TARGET_REP}* ]] && continue
       build_dirs[${#build_dirs[*]}]="$package ${repositories//,/ }"
       ;;
     "") continue ;; # empty line
