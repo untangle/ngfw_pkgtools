@@ -21,6 +21,6 @@ echo "[update-existence] sources.list is :" >&2
 cat /etc/apt/sources.list >&2
 
 apt-get update
-apt-get install --yes --force-yes apt-show-versions
+apt-get install --yes --force-yes apt-show-versions gawk
 
 exit 0
