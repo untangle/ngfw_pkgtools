@@ -92,8 +92,9 @@ echo "[svn mkdir] ${BRANCH_PATH}"
 svn mkdir -m "${DESCRIPTION}" ${BRANCH_PATH}
 
 ## Create a temporary directory to check this out to.
-TEMP_DIST="/localhome-for-branching"
+TEMP_DIST="/localhome/for-branching"
 rm -rf "${TEMP_DIST}"
+mkdir -p /localhome
 svn checkout ${BRANCH_PATH} ${TEMP_DIST}
 
 echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/work ${BRANCH_PATH}"
