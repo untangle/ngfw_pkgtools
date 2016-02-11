@@ -109,10 +109,6 @@ echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/pkgtools ${BRANCH_P
 svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/pkgtools ${TEMP_DIST}
 echo "Copying pkgtools to ${BRANCH_PATH}" >> ${CHANGE_LOG}
 
-echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/isotools-wheezy ${BRANCH_PATH}"
-svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/isotools-wheezy ${TEMP_DIST}
-echo "Copying isotools-wheezy to ${BRANCH_PATH}" >> ${CHANGE_LOG}
-
 echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/isotools-jessie ${BRANCH_PATH}"
 svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/isotools-jessie ${TEMP_DIST}
 echo "Copying isotools-jessie to ${BRANCH_PATH}" >> ${CHANGE_LOG}
@@ -138,10 +134,6 @@ buildtools      ${BRANCH_PATH}/work/src/buildtools
 EOF
 
 cat <<EOF | update_external pkgtools
-resources       ${BRANCH_PATH}/work/version/resources
-EOF
-
-cat <<EOF | update_external isotools-wheezy
 resources       ${BRANCH_PATH}/work/version/resources
 EOF
 
