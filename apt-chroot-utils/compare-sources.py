@@ -10,7 +10,7 @@ SVN_LOG = "svn log -r %s:%s https://untangle.svn.beanstalkapp.com/ngfw/%s"
 MSG1 = 'r%s,https://untangle.svn.beanstalkapp.com/ngfw/%s,%s,,\n'
 MSG2 = ',,,%s,http://bugzilla.untangle.com/show_bug.cgi?id=%s\n'
 reUntangle = re.compile(r'untangle')
-reKernel = re.compile(r'2\.6\.32')
+reKernel = re.compile(r'(2\.6\.32|3\.2\.0|3\.16\.0)')
 reSplitter = re.compile(r'\n?-+\n', re.MULTILINE)
 reExtract = re.compile(r'^r(\d+) \| (.*?) .*?closes:\s*(?:bug)?\s*\#\s*(\d+)(?:,\s*(?:bug)?\s*\#\s*(\d+))?.*?', re.MULTILINE | re.DOTALL | re.IGNORECASE)
 reRevision = re.compile('svn\d+r(\d+)(.+)-\d.+$')
