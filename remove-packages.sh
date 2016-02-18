@@ -15,7 +15,7 @@ while getopts "r:d:A:C:T:e:n:hs" opt ; do
   case "$opt" in
     r) REPOSITORY=$OPTARG ;;
     d) DISTRIBUTION=$OPTARG ;;
-    e) REGEX="-E $OPTARG" ;;
+    e) REGEX="-P $OPTARG" ;;
     n) NREGEX="-v -E $OPTARG" ;;
     s) SIMULATE=true ;;
     C) COMPONENT="$OPTARG" && EXTRA_ARGS="$EXTRA_ARGS -C $COMPONENT" ;;
