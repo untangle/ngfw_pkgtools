@@ -88,7 +88,7 @@ clean-build: checkroot
 	@fakeroot debian/rules clean
 	@quilt pop -a || true
 	@echo "Attempting to remove older *.deb files"
-	find . -type f -regex '\(.*-module-3.\(2\|16\).0-4.*\.deb\|core\)' -exec rm -f "{}" \;
+	find . -type f -regex '\(.*-modules?-3.\(2\|16\).0-4.*\.deb\|core\)' -exec rm -f "{}" \;
 
 clean-untangle-files: revert-changelog
 	@rm -fr `cat $(DESTDIR_FILE) 2> /dev/null`
