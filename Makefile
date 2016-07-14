@@ -160,7 +160,7 @@ pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	         --debbuildopts "$(DPKGBUILDPACKAGE_OPTIONS)" -- \
 	         --basepath $(CHROOT_WORK)
 
-pkg-chroot: create-dest-dir create-chroot pkg-chroot-real move-debian-files
+pkg-chroot: create-dest-dir create-chroot pkg-chroot-real # move-debian-files
 
 kernel-module-chroot-real: checkroot parse-changelog create-dest-dir
 	sudo /usr/sbin/cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_BUILD_KERNEL_MODULE) $(SOURCE_NAME)
