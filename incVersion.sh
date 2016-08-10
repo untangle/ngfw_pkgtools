@@ -49,7 +49,7 @@ if [ -z "$version" ] ; then
   esac
   revision=`$VCS_INFO . | awk '/Last Changed Rev: / { print $4 }' | sort -n | tail -1`
   [ -z "$revision" ] && revision=50000
-  timestamp=`$VCS_INFO . | awk '/Last Changed Date:/ { gsub(/-/, "", $4) ; print $4 }' | sort -n | tail -1`
+  timestamp=`$VCS_INFO . | awk '/Last Changed Date:/ { gsub(/-/, "", $4) ; gsub(/:/, "", $5) ; print $4 "T" $5 }' | sort -n | tail -1`
 
   # this is how we figure out if we're up-to-date or not
   hasLocalChanges=`$VCS_STATUS | grep -v -E '^([X?!]|Fetching external item into|Performing status on external item at|$)'`
@@ -57,7 +57,7 @@ if [ -z "$version" ] ; then
   # this is the base version; it will be tweaked a bit if need be:
   # - append a local modification marker is we're not up to date
   # - prepend the upstream version if UNTANGLE-KEEP-UPSTREAM-VERSION exists
-  baseVersion=`cat $versionFile`~svn${timestamp}r${revision}${branch}
+  baseVersion=`cat $versionFile`~vcs${timestamp}.${revision}.${branch}
 
   if [ -f UNTANGLE-KEEP-UPSTREAM-VERSION ] ; then
     baseVersion=${previousUpstreamVersion}+${baseVersion}
