@@ -6,11 +6,9 @@ if [ ! $# -eq 3 ] ; then
 fi
 
 if svn list > /dev/null 2>&1 ; then
-  VCS_INFO="svn info --recursive"
-  VCS_STATUS="svn status"
+  VCS="svn"
 else
-  VCS_INFO="git svn info"
-  VCS_STATUS="git status"
+  VCS="git"
 fi
 
 USER=seb # FIXME
@@ -32,27 +30,44 @@ case $repository in
   feisty|gutsy|intrepid|hardy) osdist=ubuntu ;;
 esac
 
-previousVersion=`dpkg-parsechangelog | awk '/Version: / { print $2 }'`
-previousUpstreamVersion=`dpkg-parsechangelog | awk '/Version: / { gsub(/-.*/, "", $2) ; print $2 }'`
+previousVersion=`dpkg-parsechangelog 2> /dev/null | awk '/Version: / { print $2 }'`
+previousUpstreamVersion=`dpkg-parsechangelog 2> /dev/null | awk '/Version: / { gsub(/-.*/, "", $2) ; print $2 }'`
 
 if [ -z "$version" ] ; then
   # not exactly kosher, but I'll contend that incVersion.sh is only
   # called from the Makefile :>
   versionFile=`dirname $0`/resources/VERSION
 
-  # get some values from SVN: branch, last changed revision, timestamp for the
-  # current directory
-  url=`$VCS_INFO . | awk '/^URL:/{print $2}'`
-  case $url in
-    *branch/*) branch=`echo $url | perl -pe 's|.*/branch/(.*?)/.*|\1| ; s/-//g'` ;;
-    *) branch=main ;;
-  esac
-  revision=`$VCS_INFO . | awk '/Last Changed Rev: / { print $4 }' | sort -n | tail -1`
-  [ -z "$revision" ] && revision=50000
-  timestamp=`$VCS_INFO . | awk '/Last Changed Date:/ { gsub(/-/, "", $4) ; gsub(/:/, "", $5) ; print $4 "T" $5 }' | sort -n | tail -1`
+  # get some values from VCS: branch, last changed revision, timestamp
+  # for the current directory
+  case $VCS in
+    svn)
+      VCS_INFO="svn info --recursive"
+      VCS_STATUS="svn status"
+      url=`$VCS_INFO . | awk '/^URL:/{print $2}'` #FIXME
+      case $url in
+	*branch/*) branch=`echo $url | perl -pe 's|.*/branch/(.*?)/.*|\1| ; s/-//g'` ;;
+	*) branch=main ;;
+      esac
+      revision=`$VCS_INFO . | awk '/Last Changed Rev: / { print $4 }' | sort -n | tail -1`
+      [ -z "$revision" ] && revision=100000
+      timestamp=`$VCS_INFO . | awk '/Last Changed Date:/ { gsub(/-/, "", $4) ; gsub(/:/, "", $5) ; print $4 "T" $5 }' | sort -n | tail -1`
 
-  # this is how we figure out if we're up-to-date or not
-  hasLocalChanges=`$VCS_STATUS | grep -v -E '^([X?!]|Fetching external item into|Performing status on external item at|$)'`
+      # this is how we figure out if we're up-to-date or not
+      hasLocalChanges=`$VCS_STATUS | grep -v -E '^([X?!]|Fetching external item into|Performing status on external item at|$)'`
+      ;;
+    git)
+      branch=$(git symbolic-ref --short HEAD | perl -pe 's|.*/branch/(.*?)/.*|\1| ; s/-//g')
+      # this yields something like "6f16478 2016-08-10T22:09:51-00:00"
+      revisionAndTimestamp=$(git log -n 1 --format="%h %aI")
+      set $revisionAndTimestamp
+      revision=$1
+      echo $2
+      timestamp=$(echo $2 | perl -pe 's/\-\d\d:\d\d$// ; s/://g ; s/-//g')
+      echo $timestamp
+      hasLocalChanges=$(git diff-index --name-only HEAD --)
+      ;;
+  esac
 
   # this is the base version; it will be tweaked a bit if need be:
   # - append a local modification marker is we're not up to date
