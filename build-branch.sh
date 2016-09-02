@@ -66,7 +66,7 @@ BRANCH_PATH=$1
 DESCRIPTION="$2"
 BRANCH_REVISION="${3:+-r $3}"
 
-SVN_BASE_URL="https://untangle.svn.beanstalkapp.com/ngfw"
+SVN_BASE_URL="https://ut.svn.beanstalkapp.com/ngfw"
 
 NEW_VERSION_NAME=""
 NEW_VERSION_NUMBER=""
