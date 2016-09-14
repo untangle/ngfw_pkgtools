@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+#set -x
 
 CHROOT_BASE=
 
