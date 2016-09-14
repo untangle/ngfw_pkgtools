@@ -62,7 +62,7 @@ if [ -z "$version" ] ; then
       # older git versions don't have --date=iso-strict-local, so we
       # use --date=local (to convert to local timezone) with %ad,
       # which yields something like "Tue Sep 13 23:46:56 PDT 2016"
-      timestamp="$(git log -n 1 --date=local --format='%ad')"
+      timestamp="$(git log -n 1 --date=local --format='%ad' -- .)"
       # ... then we convert that to something like
       # "2016-09-13T23:46:56-0700"
       timestamp=$(date -d"$timestamp" --iso-8601=seconds)
