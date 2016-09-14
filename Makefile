@@ -75,7 +75,7 @@ create-dest-dir:
 	@echo $(DEST_DIR) >| $(DESTDIR_FILE)
 
 revert-changelog: # do not leave it locally modified
-	@svn revert debian/changelog > /dev/null 2>&1 || git co -- debian/changelog 2>&1 || true
+	@svn revert debian/changelog > /dev/null 2>&1 || git checkout -- debian/changelog 2>&1 || true
 
 parse-changelog: # store version so we can use that later for uploading
 	@dpkg-parsechangelog | awk '/Version:/{print $$2}' >| $(VERSION_FILE)
@@ -104,7 +104,7 @@ clean-chroot-files: clean-debian-files clean-untangle-files
 clean: clean-chroot-files clean-build remove-chroot remove-existence-chroot
 
 version-real: checkroot
-	bash $(PKGTOOLS_DIR)/incVersion.sh $(DISTRIBUTION) VERSION=$(VERSION) REPOSITORY=$(REPOSITORY)
+	bash -x $(PKGTOOLS_DIR)/incVersion.sh $(DISTRIBUTION) VERSION=$(VERSION) REPOSITORY=$(REPOSITORY)
 version: version-real parse-changelog
 
 create-existence-chroot:
