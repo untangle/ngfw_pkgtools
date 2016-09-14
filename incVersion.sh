@@ -58,10 +58,10 @@ if [ -z "$version" ] ; then
       ;;
     git)
       branch=$(git symbolic-ref --short HEAD | perl -pe 's|.*/branch/(.*?)/.*|\1| ; s/-//g')
-      revision=$(git log -n 1 --format="%h")
+      revision=$(git log -n 1 --format="%h" -- .)
       # older git versions don't have %aI, so we use %ai which yields
       # something like "2016-09-01 15:46:51 +0000"
-      timestamp=$(git log -n 1 --format="%ai" | perl -pe 's/\s[-+]\d{4}$// ; s/[-:]//g ; s/\s/T/')
+      timestamp=$(git log -n 1 --format="%ai" -- . | perl -pe 's/\s[-+]\d{4}$// ; s/[-:]//g ; s/\s/T/')
       hasLocalChanges=$(git diff-index --name-only HEAD --)
       ;;
   esac
