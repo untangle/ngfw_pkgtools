@@ -68,7 +68,7 @@ if [ -z "$version" ] ; then
       timestamp=$(date -d"$timestamp" --iso-8601=seconds)
       # ... and finally to "20160913T234656"
       timestamp=$(echo $timestamp | perl -pe 's/[-+]\d{4}$// ; s/[-:]//g')
-      hasLocalChanges=$(git diff-index --name-only HEAD --)
+      hasLocalChanges=$(git diff-index --name-only HEAD -- .)
       ;;
   esac
 
