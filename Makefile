@@ -152,7 +152,7 @@ pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	# libnetfilter-queue-dev, we want to apt-get update to get the
 	# latest available version (that might have been uploaded
 	# during the current make-build.sh run)
-	if grep -E '^Build-Depends:.*(untangle|libdebconfclient0-dev|libpixman-1-dev|libnetfilter-queue-dev|libdaq-dev)' debian/control ; then \
+	if grep-dctrl -s Build-Depends -e '(untangle|libdebconfclient0-dev|libpixman-1-dev|libnetfilter-queue-dev|libdaq-dev)' debian/control ; then \
           sudo /usr/sbin/cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
         fi
 	pdebuild --pbuilder /usr/sbin/cowbuilder \
