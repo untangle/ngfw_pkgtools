@@ -114,15 +114,16 @@ for directory in "${build_dirs[@]}" ; do
   make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-build || true # try anyway
   if [[ "$DEFAULT_TARGETS" != *kpkg-arch* ]] ; then
     output=$(make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-chroot-files $VERSION_TARGET $CHECK_EXISTENCE)
+    version=$(cat debian/version)
     if [ -n "$CHECK_EXISTENCE" ] ; then
       matches=$(echo "$output" | grep "is available in")
       if [ -n "$matches" ] ; then
         if echo "$matches" | grep -q $DISTRIBUTION ; then
-          processResult 0 "already present in $DISTRIBUTION" $seconds && continue
+          processResult 0 "$version already present in $DISTRIBUTION" $seconds && continue
         else
           distributionFrom=$(echo $matches | awk '{print $NF}')
           make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES DISTRIBUTION_FROM=$distributionFrom copy-src
-          processResult $? "copied from $distributionFrom" $seconds && continue
+          processResult $? "$version copied from $distributionFrom" $seconds && continue
         fi
       fi
     fi
@@ -131,7 +132,7 @@ for directory in "${build_dirs[@]}" ; do
     make -f ./Makefile $MAKE_VARIABLES $DEFAULT_TARGETS $RELEASE
   fi
   result=$?
-  processResult $result "actual build" $seconds
+  processResult $result "$version actual build" $seconds
   # if we're building only arch-dependent pkgs, we need to give the IQD time to process uploads
   [ $ARCH = "i386" ] || sleep 31
 done
