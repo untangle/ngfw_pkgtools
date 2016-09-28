@@ -109,7 +109,10 @@ for directory in "${build_dirs[@]}" ; do
   echo "# $directory"
   # cd into it, and attempt to build
   pushd "$directory" > /dev/null
+  # clean up a bit
   find . -type f -name core -exec rm {} \;
+  # bring resources/ from pkgtools into the source directory we cd'ed in
+  cp -r $PKGTOOLS_HOME/resources ./
   seconds=$(date +%s)
   make -f $PKGTOOLS_HOME/Makefile $MAKE_VARIABLES clean-build || true # try anyway
   if [[ "$DEFAULT_TARGETS" != *kpkg-arch* ]] ; then
