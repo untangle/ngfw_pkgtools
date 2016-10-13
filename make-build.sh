@@ -134,6 +134,7 @@ for directory in "${build_dirs[@]}" ; do
   else
     make -f ./Makefile $MAKE_VARIABLES $DEFAULT_TARGETS $RELEASE
   fi
+  rm -fr ./resources
   result=$?
   processResult $result "$version actual build" $seconds
   # if we're building only arch-dependent pkgs, we need to give the IQD time to process uploads
