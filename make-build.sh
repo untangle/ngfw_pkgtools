@@ -137,8 +137,8 @@ for directory in "${build_dirs[@]}" ; do
   rm -fr ./resources
   result=$?
   processResult $result "$version actual build" $seconds
-  # if we're building only arch-dependent pkgs, we need to give the IQD time to process uploads
-  [ $ARCH = "i386" ] || sleep 31
+  # # if we're building only arch-dependent pkgs, we need to give the IQD time to process uploads
+  # [ $ARCH = "i386" ] || sleep 31
 done
 
 # do this last
