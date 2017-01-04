@@ -50,117 +50,49 @@ get_new_version_string()
     NEW_VERSION_NUMBER=${t_version_number}
 }
 
-update_external()
-{
-    local t_directory=$1
-    cat >| "${SVN_EXTERNALS}"
+##### start of script
 
-    echo "[svn propset] svn:externals ${BRANCH_PATH}/${t_directory}"
-    svn propset svn:externals -F "${SVN_EXTERNALS}" ${TEMP_DIST}/${t_directory}
-    echo "Updating svn:externals on ${BRANCH_PATH}/${t_directory}" >> ${CHANGE_LOG}
-}
+BRANCH_NAME=$1
 
-##### start of script.
-
-BRANCH_PATH=$1
-DESCRIPTION="$2"
-BRANCH_REVISION="${3:+-r $3}"
-
-SVN_BASE_URL="https://ut.svn.beanstalkapp.com/ngfw"
+GIT_BASE_URL="git@github.com:untangle/"
 
 NEW_VERSION_NAME=""
 NEW_VERSION_NUMBER=""
 
-if [ -z "${DESCRIPTION}" ] || [ -z "${BRANCH_PATH}" ]; then
-    echo "Usage: $0 <svn path> <branch description> [<branch revision>]"
-    exit 1
+if [ -z "${BRANCH_NAME}" ]; then
+  echo "Usage: $0 <branch name>"
+  exit 1
 fi
-
-svn list "${BRANCH_PATH}" > /dev/null 2>&1 && {
-    echo "The path ${BRANCH_PATH} already exists, cowardly refusing to replace the branch."
-    exit 2
-}
 
 get_new_version_string
 
-CHANGE_LOG=`mktemp`
-
-echo "${DESCRIPTION}" >> ${CHANGE_LOG}
-
-## Copy in all of the components that make up a release
-echo "[svn mkdir] ${BRANCH_PATH}"
-svn mkdir -m "${DESCRIPTION}" ${BRANCH_PATH}
-
-## Create a temporary directory to check this out to.
+## Create a temporary directory to clone everything
 TEMP_DIST="/localhome/for-branching"
 rm -rf "${TEMP_DIST}"
-mkdir -p /localhome
-svn checkout ${BRANCH_PATH} ${TEMP_DIST}
+mkdir -p "$TEMP_DIST"
+pushd $TEMP_DIST
 
-echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/work ${BRANCH_PATH}"
-svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/work ${TEMP_DIST}
-echo "Copying work to ${BRANCH_PATH}" >> ${CHANGE_LOG}
-
-echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/hades ${BRANCH_PATH}"
-svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/hades ${TEMP_DIST}
-echo "Copying hades to ${BRANCH_PATH}" >> ${CHANGE_LOG}
-
-echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/pkgtools ${BRANCH_PATH}"
-svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/pkgtools ${TEMP_DIST}
-echo "Copying pkgtools to ${BRANCH_PATH}" >> ${CHANGE_LOG}
-
-echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/isotools-jessie ${BRANCH_PATH}"
-svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/internal/isotools-jessie ${TEMP_DIST}
-echo "Copying isotools-jessie to ${BRANCH_PATH}" >> ${CHANGE_LOG}
-
-echo "[svn copy] ${BRANCH_REVISION} ${SVN_BASE_URL}/upstream/pkgs ${BRANCH_PATH}"
-svn copy ${BRANCH_REVISION} ${SVN_BASE_URL}/upstream/pkgs ${TEMP_DIST}
-echo "Copying ${SVN_BASE_URL}/upstream/pkgs to ${BRANCH_PATH}" >> ${CHANGE_LOG}
-
-# Update all of the externals, this will no longer be necessary when we move to subversion 1.5
-SVN_EXTERNALS=`mktemp`
-
-cat <<EOF | update_external work/src
-version         ${BRANCH_PATH}/work/version
-EOF
-
-cat <<EOF | update_external hades
-resources       ${BRANCH_PATH}/work/version/resources
-EOF
-
-cat <<EOF | update_external hades/src
-resources       ${BRANCH_PATH}/work/version/resources
-buildtools      ${BRANCH_PATH}/work/src/buildtools
-EOF
-
-cat <<EOF | update_external pkgtools
-resources       ${BRANCH_PATH}/work/version/resources
-EOF
-
-cat <<EOF | update_external isotools-jessie
-resources       ${BRANCH_PATH}/work/version/resources
-EOF
-
-svn commit -F "${CHANGE_LOG}" ${TEMP_DIST}
-
-rm -f "${SVN_EXTERNALS}"
-rm -f "${CHANGE_LOG}"
-rm -rf "${TEMP_DIST}"
+for component in src pkgs hades-src hades-pkgs pkgtools isotools-jessie upstream ; do
+  component="ngfw_$component"
+  url="${GIT_BASE_URL}$component"
+  git clone $url
+  pushd $component
+  git branch $BRANCH_NAME
+  git push origin ${BRANCH_NAME}:$BRANCH_NAME
+  popd
+done
 
 if [ -n "${NEW_VERSION_NUMBER}" ] &&  [ -n "${NEW_VERSION_NAME}" ] ; then
-    echo "Updating the version number in the mainline"
-    svn checkout ${SVN_BASE_URL}/work/version/resources ${TEMP_DIST}
-    
-    echo "${NEW_VERSION_NUMBER}.0" >| "${TEMP_DIST}/VERSION"
-    echo "${NEW_VERSION_NUMBER}" >| "${TEMP_DIST}/PUBVERSION"
-    echo "${NEW_VERSION_NAME}" >| "${TEMP_DIST}/RELEASE_CODENAME"
-    
-    ## Need this sleep, otherwise SVN doesn't detect the files changed.
-    ## this was tested svn 1.4.2 several times without success.
-    sleep 1
-
-    touch "${TEMP_DIST}"/*
-    
-    svn commit -m "Updating the version string to ${NEW_VERSION_NUMBER}" "${TEMP_DIST}"
-    rm -rf ${TEMP_DIST}
+  echo "Updating the version number in the mainline"
+  pushd ngfw_pkgtools/resources
+  git checkout master
+  echo "${NEW_VERSION_NUMBER}.0" >| VERSION
+  echo "${NEW_VERSION_NUMBER}" >| PUBVERSION
+  echo "${NEW_VERSION_NAME}" >| RELEASE_CODENAME
+  git commit -a -m "Updating the version string to ${NEW_VERSION_NUMBER}"
+  git push
+  popd
 fi
+
+popd
+ rm -rf "${TEMP_DIST}"
