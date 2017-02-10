@@ -35,7 +35,7 @@ if [[ $ARCH == i386 ]] && [[ $DEFAULT_TARGETS == *kpkg-arch* ]] ; then
   # also build source, doc, etc
   DEFAULT_TARGETS="$DEFAULT_TARGETS kpkg-indep"
 fi
-MAKE_VARIABLES="DISTRIBUTION=${DISTRIBUTION} REPOSITORY=${TARGET_REP} ${BINARY_UPLOAD} TIMESTAMP=`date +%Y-%m-%dT%H%M%S_%N`"
+MAKE_VARIABLES="DISTRIBUTION=${DISTRIBUTION} REPOSITORY=${TARGET_REP} ${BINARY_UPLOAD} TIMESTAMP=$(date +%Y-%m-%dT%H%M%S_%N)"
 if [ -n "$VERSION" ] ; then
   MAKE_VARIABLES="$MAKE_VARIABLES VERSION=\"${VERSION}\""
   VERSION_TARGET=""
@@ -60,7 +60,7 @@ processResult() {
 ### a few variables
 export PATH=/sbin:/usr/sbin:${PATH}
 FILE_IN="build-order.txt"
-PKGTOOLS_HOME=`dirname $(readlink -f $0)`
+PKGTOOLS_HOME=$(dirname $(readlink -f $0))
 results=0
 
 ### main
