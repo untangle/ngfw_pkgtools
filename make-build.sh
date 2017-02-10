@@ -96,6 +96,10 @@ while read package repositories architectures ; do
   esac
 done < $FILE_IN
 
+if ! [[ -f $FILE_IN ]] ; then # build in the current dir no matter what
+  build_dirs[${#build_dirs[*]}]="."
+fi
+
 # now cd into each dir in build_dirs and make
 for directory in "${build_dirs[@]}" ; do
   echo 
