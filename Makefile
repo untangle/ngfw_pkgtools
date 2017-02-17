@@ -8,6 +8,7 @@ PKGTOOLS_DIR := $(shell dirname $(MAKEFILE_LIST))
 # overridables
 DISTRIBUTION ?= $(USER)
 DISTRIBUTION_FROM ?= $(DISTRIBUTION)
+ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 PACKAGE_SERVER ?= package-server
 REPOSITORY ?= $(shell $(PKGTOOLS_DIR)/getPlatform.sh)
 TIMESTAMP ?= $(shell date "+%Y-%m-%dT%H%M%S_%N")
@@ -49,13 +50,7 @@ CHROOT_BUILD_KERNEL_MODULE := $(PKGTOOLS_DIR)/chroot-build-kernel-module.sh
 CHROOT_UPDATE_SCRIPT := $(PKGTOOLS_DIR)/chroot-update.sh
 CHROOT_UPDATE_EXISTENCE_SCRIPT := $(PKGTOOLS_DIR)/chroot-update-existence.sh
 CHROOT_CHECK_PACKAGE_VERSION_SCRIPT := $(PKGTOOLS_DIR)/chroot-check-for-package-version.sh
-DPKG_ARCH := $(shell dpkg-architecture -qDEB_BUILD_ARCH)
-ifeq ($(DPKG_ARCH), i386)
-  ARCH :=
-else
-  ARCH := "_$(DPKG_ARCH)"
-endif
-CHROOT_BASE := $(CHROOT_DIR)/$(REPOSITORY)+untangle$(ARCH)
+CHROOT_BASE := $(CHROOT_DIR)/$(REPOSITORY)+untangle_$(ARCH)
 CHROOT_ORIG := $(CHROOT_BASE).cow
 CHROOT_WORK := $(CHROOT_BASE)_$(TIMESTAMP).cow
 CHROOT_EXISTENCE := $(CHROOT_BASE)_$(TIMESTAMP)_existence.cow
@@ -116,7 +111,7 @@ create-existence-chroot:
 remove-existence-chroot:
 	sudo rm -fr $(CHROOT_EXISTENCE)
 check-existence: create-existence-chroot
-	if [ -z "$(ARCH)" ] ; then \
+	if [ $(ARCH) = "i386" ] ; then \
 	  dh_switch="" ; \
 	else \
 	  dh_switch="-a" ; \
@@ -171,7 +166,7 @@ release:
 	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER)_$(REPOSITORY) `cat $(DESTDIR_FILE)`/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
 
 release-deb:
-	$(PKGTOOLS_DIR)/release-binary-packages.sh -A $(DPKG_ARCH) -r $(REPOSITORY) -d $(DISTRIBUTION) $(REC)
+	$(PKGTOOLS_DIR)/release-binary-packages.sh -A $(ARCH) -r $(REPOSITORY) -d $(DISTRIBUTION) $(REC)
 
 copy-src:
 	$(PKGTOOLS_DIR)/copy-src-package.sh -r $(REPOSITORY) -d $(DISTRIBUTION) -f $(DISTRIBUTION_FROM) -s $(SOURCE_NAME) -v $(shell cat $(VERSION_FILE))
