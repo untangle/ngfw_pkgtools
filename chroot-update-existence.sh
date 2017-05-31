@@ -6,7 +6,7 @@ DISTRIBUTION=$2
 echo "[update-existence] Called with REPOSITORY=$REPOSITORY and DISTRIBUTION=$DISTRIBUTION" >&2
 
 # corresponding current distribution
-current=$(echo $DISTRIBUTION | perl -pe 's/nightly/chaos/')
+current=$(echo $DISTRIBUTION | perl -pe 's/nightly/current/')
 # corresponding nightly distribution
 nightly=$(echo $DISTRIBUTION | perl -pe 's/current/nightly/')
 

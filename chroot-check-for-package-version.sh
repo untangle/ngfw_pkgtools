@@ -16,7 +16,7 @@ cat /etc/apt/sources.list >&2
 str="$PACKAGE_NAME is available in"
 
 # corresponding current distribution
-current=$(echo $DISTRIBUTION | perl -pe 's/nightly/chaos/')
+current=$(echo $DISTRIBUTION | perl -pe 's/nightly/current/')
 # corresponding nightly distribution
 nightly=$(echo $DISTRIBUTION | perl -pe 's/current/nightly/')
 
