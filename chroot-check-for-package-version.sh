@@ -15,11 +15,6 @@ cat /etc/apt/sources.list >&2
 
 str="$PACKAGE_NAME is available in"
 
-# corresponding current distribution
-current=$(echo $DISTRIBUTION | perl -pe 's/nightly/current/')
-# corresponding nightly distribution
-nightly=$(echo $DISTRIBUTION | perl -pe 's/current/nightly/')
-
 apt-get install --yes --force-yes apt-show-versions
 
 # all distributions containing that version
@@ -32,10 +27,6 @@ echo $output >&2
 
 if echo "$output" | grep -q $DISTRIBUTION ; then
   echo $str $DISTRIBUTION
-elif echo "$output" | grep -q $current ; then
-  echo $str $current
-elif echo "$output" | grep -q $nightly ; then
-  echo $str $nightly
 fi
 
 exit 0

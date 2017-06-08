@@ -17,7 +17,7 @@ def parseCommandLineArgs(args):
                     action="store_true", default=False,
                     help="Force download of all dependencies" )
   parser.add_option("-d", "--distribution", dest="distribution",
-                    action="store", default="nightly",
+                    action="store", default="current",
                     help="Set target distribution" )
   parser.add_option("-i", "--include-only-regex", dest="regex",
                     action="store", default=".",
