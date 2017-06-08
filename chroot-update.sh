@@ -39,13 +39,13 @@ case "$HOME" in # to sign packages with the real untangle java keystore
   *buildbot|seb*) addSource "http://package-server/public/$REPOSITORY $DISTRIBUTION internal"
 esac
 
-# also search in nightly-$branch if not buildbot
+# also search in current-$branch if not buildbot
 case $DISTRIBUTION in
-  nightly*) ;;
+  current*) ;;
   *)
     case "$HOME" in
       *buildbot*) ;;
-      *) addSource "http://package-server/public/$REPOSITORY nightly${branch} main main/debian-installer premium non-free upstream"
+      *) addSource "http://package-server/public/$REPOSITORY current${branch} main main/debian-installer premium non-free upstream"
     esac ;;
 esac
 

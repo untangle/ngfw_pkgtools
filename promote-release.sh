@@ -33,7 +33,6 @@ FROM_DISTRIBUTION=$1
 TO_DISTRIBUTION=$2
 
 [ -z "$REPOSITORY" -o -z "$FROM_DISTRIBUTION" -o -z "$TO_DISTRIBUTION" ] && usage && exit 1
-#[ "$FROM_DISTRIBUTION" = "nightly" ] && echo "You really do not want to promote nightly" && exit 2
 
 pkgtools=`dirname $0`
 tmp_base=/tmp/promotion-$REPOSITORY-$FROM_DISTRIBUTION-to-$TO_DISTRIBUTION-`date -Iminutes`
