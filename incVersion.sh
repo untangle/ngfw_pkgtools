@@ -12,7 +12,7 @@ else
 fi
 
 USER=seb # FIXME
-DCH=/tmp/dch-$USER
+DCH=$(mktemp /tmp/dch-XXXXX)
 
 rm -f debian/changelog.dch
 
