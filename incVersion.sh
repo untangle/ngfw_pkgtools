@@ -1,5 +1,6 @@
 #! /bin/bash
 
+
 # usage...
 if [ ! $# -eq 3 ] ; then 
   echo "Usage: $0 distribution VERSION=[version] REPOSITORY=[repository]" && exit 1
@@ -116,7 +117,9 @@ dchargs="--preserve -v ${version} -D ${distribution}"
 #    dchargs="$dchargs --distributor Untangle"
 #fi
 
-/bin/cp -f /usr/bin/dch $DCH && sed -i -e '/garbage/d' $DCH
+/bin/cp -f /usr/bin/dch $DCH
+chmod 755 $DCH
+sed -i -e '/garbage/d' $DCH
 echo "Setting version to \"${version}\", distribution to \"$distribution\""
 DEBEMAIL="${DEBEMAIL:-${USER}@untangle.com}" $DCH $dchargs "auto build" 2> /dev/null
 # check changelog back in if version was forced; FIXME: disabled for now
