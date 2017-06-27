@@ -5,15 +5,15 @@ from lib import aptchroot
 
 # constants
 TMP_DIR = os.tmpnam()
-SOURCE = "deb http://%s/public/%s %s main premium non-free upstream"
+SOURCE = "deb http://%s/public/%s %s main non-free"
 SVN_LOG = "svn log -r %s:%s https://untangle.svn.beanstalkapp.com/ngfw/%s"
 MSG1 = 'r%s,https://untangle.svn.beanstalkapp.com/ngfw/%s,%s,,\n'
 MSG2 = ',,,%s,http://bugzilla.untangle.com/show_bug.cgi?id=%s\n'
 reUntangle = re.compile(r'untangle') # .+svn\d+r\d+')
-reKernel = re.compile(r'(2\.6\.32|3\.2\.0|3\.16\.0)')
+reKernel = re.compile(r'(3\.16\.0|untangle-linux-image)')
 reSplitter = re.compile(r'\n?-+\n', re.MULTILINE)
 reExtract = re.compile(r'^r(\d+) \| (.*?) .*?closes:\s*(?:bug)?\s*\#\s*(\d+)(?:,\s*(?:bug)?\s*\#\s*(\d+))?.*?', re.MULTILINE | re.DOTALL | re.IGNORECASE)
-reRevision = re.compile('svn\d+r(\d+)(.+)-\d.+$')
+reRevision = re.compile('(\d+\.\d+\.\d+)\.(\d+\T\d+.[0-9a-f]+)-.+$')
 
 # functions
 def usage():
@@ -24,15 +24,20 @@ def getVersion(name):
   return aptchroot.VersionedPackage(name).version
 
 def validatePackage(name):
+  print name
+  # print (reUntangle.search(name) and not reKernel.search(name))
   return (reUntangle.search(name) and not reKernel.search(name))
 
 def getRevisionAndBranchFromVersion(version):
   match = reRevision.search(version)
   if not match:
+    print version
+    sys.exit(1)
     return None, None
-  rev, branch = match.groups()
-  if branch in ('trunk', 'main'):
+  branch, rev = match.groups()
+  if branch in ('master', 'main'):
     branch = ''
+  print rev, branch
   return rev, branch
 
 def getHighestRevisionAndBranchFromSource(source):
@@ -44,6 +49,7 @@ def getHighestRevisionAndBranchFromSource(source):
   return sorted(l, key=lambda e: e[0])[-1]
 
 def getSVNLog(revs, name):
+  return "" # FIXME
   output = ""
   if revs[0] != revs[1]:
     revs = map(int, revs)
