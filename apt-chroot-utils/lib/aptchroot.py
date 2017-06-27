@@ -13,7 +13,7 @@ try:
 except:
   error()
 
-for i, j in zip(map(int, apt.apt_pkg.VERSION.split('.')),
+for i, j in zip(map(int, apt.apt_pkg.VERSION.replace('~rc','').split('.')),
                 map(int, MINIMUM_VERSION.split('.'))):
   if i < j:
     error()
@@ -60,16 +60,23 @@ def initializeChroot(TMP_DIR, sources, preferences):
   open(PREFS, 'w').write(preferences)
 
   apt_pkg.init()
+  apt_pkg.init_config()
 
-  apt_pkg.Config.set("Dir", TMP_DIR)
-  apt_pkg.Config.set("Dir::Etc", "etc/apt/")
-  apt_pkg.Config.set("Dir::Etc::sourcelist", os.path.basename(SOURCES))
-  apt_pkg.Config.set("Dir::Etc::preferences", os.path.basename(PREFS))
-  apt_pkg.Config.set("Dir::Cache", "var/cache/apt")
-  apt_pkg.Config.set("Dir::Cache::Archives", os.path.basename(ARCHIVES))
-  apt_pkg.Config.set("Dir::State", "var/lib/apt/")
-  apt_pkg.Config.set("Dir::State::Lists",  "lists/")
-  apt_pkg.Config.set("Dir::State::status", STATUS)
+  apt_pkg.config.set("Dir", TMP_DIR)
+  apt_pkg.config.set("Dir::Etc", "etc/apt/")
+  apt_pkg.config.set("Dir::Etc::sourcelist", os.path.basename(SOURCES))
+  apt_pkg.config.set("Dir::Etc::preferences", os.path.basename(PREFS))
+  apt_pkg.config.set("Dir::Cache", "var/cache/apt")
+  apt_pkg.config.set("Dir::Cache::Archives", os.path.basename(ARCHIVES))
+  apt_pkg.config.set("Dir::State", "var/lib/apt/")
+  apt_pkg.config.set("Dir::State::Lists",  "lists/")
+  apt_pkg.config.set("Dir::State::status", STATUS)
+
+  apt_pkg.config.set("Acquire::AllowInsecureRepositories", "true")
+
+  # apt_pkg.config.set("APT::Get::AllowUnauthenticated", "true")
+  # apt_pkg.config.set("APT::Get::Assume-Yes", "true")
+  # apt_pkg.config.set("APT::Get::Force-Yes", "true")
 
 #   apt_pkg.Config.Set("Debug::pkgPolicy","1");
 #   apt_pkg.Config.Set("Debug::pkgOrderList","1");
