@@ -33,10 +33,15 @@ parser.add_argument('--log-level', dest='logLevel',
                     choices=['debug', 'info', 'warning'],
                     default='warning',
                     help='level at which to log')
-parser.add_argument('--create-tags', dest='createTags', action='store',
+parser.add_argument('--tag-type', dest='tagType', action='store',
                     choices=('promotion','sync'),
                     default=None,
+                    required=True,
                     metavar="TAG-TYPE",
+                    help='tag type')
+parser.add_argument('--create-tags', dest='createTags',
+                    action='store_true',
+                    default=False,
                     help='create new tags (default=no tag creation)')
 parser.add_argument('--version', dest='version',
                     action='store',
@@ -75,10 +80,13 @@ def updateRepo(name):
 
   return r, o
 
-def findMostRecentTag(repo):
-  tags = repo.tags
+def findMostRecentTag(repo, tagType):
+  tags = [ t for t in repo.tags if t.name.find(tagType) > 0 ]
   tags = sorted(tags, key = lambda x: x.name)
   logging.info("found tags: {}".format(tags))
+  if not tags:
+    logging.error("no tags found, aborting")
+    sys.exit(2)
   old = tags[0]
   logging.info("most recent tag: {}".format(old.name))
   return old
@@ -121,7 +129,7 @@ changelogCommits = []
 allCommits = []
 
 # create tag name and message anyway
-tagName = generateTag(args.version, args.createTags)
+tagName = generateTag(args.version, args.tagType)
 tagMsg = "Automated tag creation: version={}, branch={}".format(args.version, new)
 
 # create tmp dir
@@ -132,7 +140,7 @@ if not osp.isdir(BASE_DIR):
 for name in REPOSITORIES:
   repo, origin = updateRepo(name)
 
-  old = findMostRecentTag(repo)
+  old = findMostRecentTag(repo, args.tagType)
 
   for commit in listCommits(repo, old, new):
     logging.info(" {}".format(formatCommit(commit, name)))
