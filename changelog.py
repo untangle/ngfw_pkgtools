@@ -117,7 +117,13 @@ def formatCommitList(l, sep = '\n'):
 args = parser.parse_args()
 
 # logging
-l = logging.getLogger().setLevel(getattr(logging,args.logLevel.upper()))
+logging.getLogger().setLevel(getattr(logging, args.logLevel.upper()))
+console = logging.StreamHandler(sys.stderr)
+formatter = logging.Formatter('[%(asctime)s] changelog: %(levelname)-7s %(message)s')
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
+
+# go
 logging.info("started with {}".format(" ".join(sys.argv[1:])))
 
 # derive remote branch name from version
@@ -158,8 +164,7 @@ for name in REPOSITORIES:
 allCommits = sortCommitListByDateAuthored(allCommits)
 changelogCommits = sortCommitListByDateAuthored(changelogCommits)
 
-logging.info("all commits:")
-logging.info(format(formatCommitList(allCommits,"\n  ")))
-logging.info("------------")
+logging.info("all commits:\n  {}".format(formatCommitList(allCommits,"\n  ")))
+logging.info("done")
 
 print(formatCommitList(changelogCommits))

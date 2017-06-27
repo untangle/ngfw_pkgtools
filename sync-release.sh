@@ -28,7 +28,7 @@ pkgtools=`dirname $0`
 . $pkgtools/release-constants.sh
 
 changelog_file=$(mktemp "promotion-$REPOSITORY-$FROM_DISTRIBUTION-to-$TO_DISTRIBUTION-$(date -Iminutes)-XXXXXXX.txt")
-diffCommand="python3 $pkgtools/changelog.py.py --version $VERSION --tag-type sync --create-tags"
+diffCommand="python3 $pkgtools/changelog.py.py --log-level info --version $VERSION --tag-type sync --create-tags"
 
 # MAIN
 copyRemotePkgtools
