@@ -58,6 +58,15 @@ def getSVNLog(revs, name):
     output = commands.getoutput(command)
   return output
 
+def getGitLog(revs, name):
+  output = ""
+  if revs[0] != revs[1]:
+    revs = map(int, revs)
+    revs.sort()
+    command = GIT_LOG % (revs[0], revs[1], name)
+    output = commands.getoutput(command)
+  return output
+
 def getClosedBugs(st, name):
   result = ""
   for log in reSplitter.split(st):
