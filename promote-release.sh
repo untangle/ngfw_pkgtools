@@ -1,17 +1,20 @@
 #! /bin/bash
 
 usage() {
-  echo "Usage: $0 [-s] [-w]  [-A architecture] [-C <component>] [-T (dsc|udeb|deb)] -r <repository> <fromDistribution> <toDistribution> <version>"
+  echo "Usage: $0 [-s] [-w]  [-A architecture] [-C <component>] [-T (dsc|udeb|deb)] -r <repository> -f <fromDistribution> -d <toDistribution> -v <version>"
   echo "-s : simulate"
   echo "-w : wipe out <toDistribution> first"
   echo "-C <component>    : only act on component <component>"
   echo "-T (dsc,udeb,deb) : only act on source/udeb/deb packages"
   echo "-A <arch>         : only act on architecture <arch>"
-  echo "please note that <version> needs to be a full x.y.z"
+  echo "-r : repository to use"
+  echo "-f : source distribution to promote from"
+  echo "-d : target distribution to promote to"
+  echo "-v : version (needs to be a full x.y.z)"
   exit 1
 }
 
-while getopts "A:T:C:shwr:d:m" opt ; do
+while getopts "A:T:C:shwr:f:d:v:" opt ; do
   case "$opt" in
     s) simulate=1 && EXTRA_ARGS="$EXTRA_ARGS -s" ;;
     r) REPOSITORY=$OPTARG ;;
@@ -19,30 +22,29 @@ while getopts "A:T:C:shwr:d:m" opt ; do
     A) ARCHITECTURE="$OPTARG" && EXTRA_ARGS="$EXTRA_ARGS -A $ARCHITECTURE" ;;
     T) TYPE="$OPTARG" && EXTRA_ARGS="$EXTRA_ARGS -T $TYPE" ;;
     w) WIPE_OUT_TARGET=1 ;;
+    f) FROM_DISTRIBUTION=$OPTARG ;;
+    d) TO_DISTRIBUTION=$OPTARG ;;
+    v) VERSION=$OPTARG ;;
     h) usage ;;
     \?) usage ;;
   esac
 done
 shift $(($OPTIND - 1))
-if [ ! $# = 3 ] ; then
+if [ ! $# = 0 ] ; then
   usage
 fi
-
-FROM_DISTRIBUTION=$1
-TO_DISTRIBUTION=$2
-VERSION=$3
 
 [ -z "$REPOSITORY" -o -z "$FROM_DISTRIBUTION" -o -z "$TO_DISTRIBUTION" ] && usage && exit 1
 
 pkgtools=`dirname $0`
 changelog_file=$(mktemp "promotion-$REPOSITORY-$FROM_DISTRIBUTION-to-$TO_DISTRIBUTION-$(date -Iminutes)-XXXXXXX.txt")
-diffCommand="python3 $pkgtools/changelog.py.py --log-level info --version $VERSION --tag-type promotion --create-tags"
+diffCommand="python3 $pkgtools/changelog.py --log-level info --version $VERSION --tag-type promotion --create-tags"
 
 . $pkgtools/release-constants.sh
 
 ##########
 # MAIN
-python $diffCommand >| $changelog_file
+$diffCommand >| $changelog_file
 
 # wipe out target distribution first
 [ -n "$WIPE_OUT_TARGET" ] && $pkgtools/remove-packages.sh $EXTRA_ARGS -r $REPOSITORY -d $TO_DISTRIBUTION
