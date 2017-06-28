@@ -33,12 +33,6 @@ parser.add_argument('--log-level', dest='logLevel',
                     choices=['debug', 'info', 'warning'],
                     default='warning',
                     help='level at which to log')
-parser.add_argument('--tag-type', dest='tagType', action='store',
-                    choices=('promotion','sync'),
-                    default=None,
-                    required=True,
-                    metavar="TAG-TYPE",
-                    help='tag type')
 parser.add_argument('--create-tags', dest='createTags',
                     action='store_true',
                     default=False,
@@ -50,6 +44,16 @@ parser.add_argument('--version', dest='version',
                     metavar="VERSION",
                     type=fullVersion,
                     help='the version on which to base the diff. It needs to be of the form x.y.z, that means including the bugfix revision')
+mode = parser.add_mutually_exclusive_group(required=True)
+mode.add_argument('--tag-type', dest='tagType', action='store',
+                  choices=('promotion','sync'),
+                  default=None,
+                  metavar="TAG-TYPE",
+                  help='tag type')
+mode.add_argument('--manual-boundaries', dest='manualBoundaries', nargs=2,
+                  default=None,
+                  metavar="TAG_N",
+                  help='specify 2 arbitrary tags to diff between, instead of using <latest-type>..HEAD')
 
 ## functions
 def formatCommit(commit, repo, tickets = None):
@@ -92,7 +96,7 @@ def findMostRecentTag(repo, tagType):
   return old
 
 def listCommits(repo, old, new):
-  sl = "{}...{}".format(old.name, new)
+  sl = "{}...{}".format(old, new)
   logging.info("running git log {}".format(sl))
   yield from repo.iter_commits(sl)
 
@@ -128,7 +132,10 @@ logging.info("started with {}".format(" ".join(sys.argv[1:])))
 
 # derive remote branch name from version
 majorMinor = '.'.join(args.version.split(".")[0:2]) # FIXME
-new = BRANCH_TPL.format(majorMinor)
+if not args.manualBoundaries:
+  new = BRANCH_TPL.format(majorMinor)
+else:
+  old, new = args.manualBoundaries
 
 # to store final results
 changelogCommits = []
@@ -146,7 +153,8 @@ if not osp.isdir(BASE_DIR):
 for name in REPOSITORIES:
   repo, origin = updateRepo(name)
 
-  old = findMostRecentTag(repo, args.tagType)
+  if not args.manualBoundaries:
+    old = findMostRecentTag(repo, args.tagType).name
 
   for commit in listCommits(repo, old, new):
     logging.info(" {}".format(formatCommit(commit, name)))
