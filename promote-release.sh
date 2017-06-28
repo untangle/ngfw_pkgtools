@@ -34,7 +34,7 @@ if [ ! $# = 0 ] ; then
   usage
 fi
 
-[ -z "$REPOSITORY" -o -z "$FROM_DISTRIBUTION" -o -z "$TO_DISTRIBUTION" ] && usage && exit 1
+[ -z "$REPOSITORY" -o -z "$FROM_DISTRIBUTION" -o -z "$TO_DISTRIBUTION" -o -z "$VERSION" ] && usage && exit 1
 
 pkgtools=`dirname $0`
 changelog_file=$(mktemp "promotion-$REPOSITORY-$FROM_DISTRIBUTION-to-$TO_DISTRIBUTION-$(date -Iminutes)-XXXXXXX.txt")

@@ -26,7 +26,7 @@ if [ ! $# = 0 ] ; then
   usage
 fi
 
-[ -z "$REPOSITORY" -o -z "$DISTRIBUTION" - o -z "$VERSION" ] && usage && exit 1
+[ -z "$REPOSITORY" -o -z "$DISTRIBUTION" -o -z "$VERSION" ] && usage && exit 1
 
 pkgtools=`dirname $0`
 . $pkgtools/release-constants.sh
