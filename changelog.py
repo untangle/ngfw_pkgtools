@@ -14,7 +14,7 @@ REMOTE_TPL = "git@github.com:untangle/{}_{}.git".format(PROJECT.lower(),'{}')
 BRANCH_TPL = "origin/release-{}"
 REPOSITORIES = ("src", "pkgs", "hades-pkgs", "isotools-jessie")
 JIRA_FILTER = re.compile(r'{}-\d+'.format(PROJECT))
-CHANGELOG_FILTER = re.compile(r'#changelog')
+CHANGELOG_FILTER = re.compile(r'@changelog')
 
 ## CL options
 parser = argparse.ArgumentParser(description='''List changelog entries
