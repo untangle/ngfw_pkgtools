@@ -102,7 +102,7 @@ def listCommits(repo, old, new):
 
 def filterCommit(commit):
   tickets = JIRA_FILTER.findall(commit.message)
-  cl = CHANGELOG_FILTER.findall(commit.summary)
+  cl = CHANGELOG_FILTER.search(commit.message)
   if tickets or cl:
     # only attach those tickets that are not directly mentioned in
     # the subject
