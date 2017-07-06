@@ -5,7 +5,7 @@
 PKGTOOLS=`dirname $0`
 
 MUTT_CONF_FILE=$PKGTOOLS/mutt.conf
-RECIPIENT="ngfw-engineering@untangle.com"
+RECIPIENT="engineering@untangle.com"
 
 REMOTE_USER="root"
 REMOTE_SERVER="updates.untangle.com"
