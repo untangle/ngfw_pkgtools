@@ -15,10 +15,11 @@ BRANCH_TPL = "origin/release-{}"
 REPOSITORIES = ("src", "pkgs", "hades-pkgs", "isotools-jessie")
 JIRA_FILTER = re.compile(r'{}-\d+'.format(PROJECT))
 CHANGELOG_FILTER = re.compile(r'@changelog')
+CHANGELOG_EXCLUDE_FILTER = re.compile(r'@exclude')
 
 ## CL options
 parser = argparse.ArgumentParser(description='''List changelog entries
-between tags accross multiple repositories.
+between tags across multiple repositories.
 
 It can also optionally create and push additional tags, of the form
 X.Y.Z-YYYYmmddTHHMM-(promotion|sync)''')
@@ -103,7 +104,8 @@ def listCommits(repo, old, new):
 def filterCommit(commit):
   tickets = JIRA_FILTER.findall(commit.message)
   cl = CHANGELOG_FILTER.search(commit.message)
-  if tickets or cl:
+  exclude = CHANGELOG_EXCLUDE_FILTER.search(commit.message)
+  if (tickets or cl) and not exclude:
     # only attach those tickets that are not directly mentioned in
     # the subject
     tickets = [ t for t in tickets if commit.summary.find(t) < 0 ]
