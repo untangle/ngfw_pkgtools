@@ -52,6 +52,15 @@ allow_unsigned_uploads = 1
 run_dinstall = 0
 run_lintian = 0
 check_version = 0
+[package-server_stretch]
+fqdn = package-server
+method = ftp
+login = anonymous
+incoming = /stretch/incoming
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
 [package-server_sid]
 fqdn = package-server
 method = ftp
