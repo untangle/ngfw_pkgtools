@@ -98,7 +98,7 @@ clean-debian-files:
 	fi
 
 get-upstream-source:
-	rm -fr $${package}*/ ; 
+	rm -fr $${package}* ; \
 	source $(SOURCE_CONF) ; \
 	apt-get source $${package} ; \
 	dir=$$(ls -d */) ; \
