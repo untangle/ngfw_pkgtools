@@ -98,7 +98,7 @@ while read package repositories architectures ; do
 	popd
 	dir="$(ls -d ${package}/*/ | grep -v patches)"
 	cp $package/patches/*.patch $dir/debian/patches
-	cat $package/patches/series >> $dir/debian/series
+	cat $package/patches/series >> $dir/debian/patches/series
 	build_dirs[${#build_dirs[*]}]=$dir
       fi ;;
   esac
