@@ -100,7 +100,7 @@ clean-debian-files:
 get-upstream-source:
 	source $(SOURCE_CONF) ; \
 	rm -fr $${package}* ; \
-	apt-get source $${package} ; \
+	apt-get source $${binary_package} ; \
 	dir=$$(ls -d $${package}*/) ; \
 	touch $${dir}/$${versioning}
 
