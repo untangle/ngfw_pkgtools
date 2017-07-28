@@ -98,6 +98,7 @@ while read package repositories architectures ; do
 	popd
 	dir="$(ls -d ${package}/*/ | grep -v patches)"
 	# copy patches against upstream code to debian/patches/
+	mkdir -p $dir/debian/patches
 	cp $package/upstream-patches/*.patch $dir/debian/patches
 	cat $package/upstream-patches/series >> $dir/debian/patches/series
 	# apply patches against Debian packaging directly to debian/
