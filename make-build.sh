@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+# set -x
 
 CHROOT_BASE=
 
@@ -96,7 +96,7 @@ while read package repositories architectures ; do
 	pushd $package
 	make -f $PKGTOOLS_HOME/Makefile get-upstream-source
 	popd
-	dir="$(ls -d ${package}/*/)"
+	dir="$(ls -d ${package}/*/ | grep -v patches)"
 	cp $package/patches/*.patch $dir/debian/patches
 	cat $package/patches/series >> $dir/debian/series
 	build_dirs[${#build_dirs[*]}]=$dir
