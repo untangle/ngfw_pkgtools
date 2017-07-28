@@ -44,6 +44,9 @@ SOURCE_NAME := $(shell dpkg-parsechangelog 2> /dev/null | awk '/^Source:/{print 
 VERSION_FILE := debian/version
 DESTDIR_FILE := debian/destdir
 
+# new-style source package
+SOURCE_CONF := source.conf
+
 # chroot stuff
 CHROOT_DIR := /var/cache/pbuilder
 CHROOT_BUILD_KERNEL_MODULE := $(PKGTOOLS_DIR)/chroot-build-kernel-module.sh
@@ -93,6 +96,11 @@ clean-debian-files:
 	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec rm -f "{}" \; ; \
 	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec rm -f "{}" \; ; \
 	fi
+
+get-upstream-source:
+	source $(SOURCE_CONF) ; \
+	apt-get source $${package} ; \
+	touch $${dir}/$${versioning}
 
 clean-chroot-files: clean-debian-files clean-untangle-files
 

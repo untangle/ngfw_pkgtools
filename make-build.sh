@@ -90,8 +90,16 @@ while read package repositories architectures ; do
         i386) pattern="(any|all|$ARCH)" ;;
         *) pattern="(any|$ARCH)" ;;
       esac
-      if [[ "$DEFAULT_TARGETS" = "kernel-module-chroot" ]] || [[ "$DEFAULT_TARGETS" == *kpkg-arch* ]] || grep -qE "^Architecture:.*$pattern" $package/debian/control ; then
+      if [[ "$DEFAULT_TARGETS" = "kernel-module-chroot" ]] || [[ "$DEFAULT_TARGETS" == *kpkg-arch* ]] || grep -qE "^Architecture:.*$pattern" $package/debian/control 2> /dev/null ; then
 	build_dirs[${#build_dirs[*]}]="$package"
+      elif [[ -f $package/source.conf ]] ; then # new-style source
+	pushd $package
+	make -f $PKGTOOLS_HOME/Makefile get-upstream-source
+	dir="$(ls -d ${package}/*/)"
+	cp $package/patches/*.patch $dir/debian/patches
+	cat $package/patches/series >> $dir/debian/series
+	build_dirs[${#build_dirs[*]}]=$dir
+	popd
       fi ;;
   esac
 done < $FILE_IN
