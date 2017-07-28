@@ -1,6 +1,6 @@
 #! /bin/bash
 
-set -x
+# set -x
 
 # usage...
 if [ ! $# -eq 3 ] ; then 
@@ -59,12 +59,14 @@ if [ -z "$version" ] ; then
       hasLocalChanges=`$VCS_STATUS | grep -v -E '^([X?!]|Fetching external item into|Performing status on external item at|$)'`
       ;;
     git)
-      branch=$(git symbolic-ref --short HEAD | perl -pe 's|.*/branch/(.*?)/.*|\1| ; s/-//g')
-      revision=$(git log -n 1 --format="%h" -- .)
+      # new-style source package are not directly under version
+      # control, but their parent dir is
+      [[ -d .git ]] && d=. || d=..
+      revision=$(git log -n 1 --format="%h" -- $d)
       # older git versions don't have --date=iso-strict-local, so we
       # use --date=local (to convert to local timezone) with %ad,
       # which yields something like "Tue Sep 13 23:46:56 PDT 2016"
-      timestamp="$(git log -n 1 --date=local --format='%ad' -- .)"
+      timestamp="$(git log -n 1 --date=local --format='%ad' -- $d)"
       # ... then we convert that to something like
       # "2016-09-13T23:46:56-0700"
       timestamp=$(date -d"$timestamp" --iso-8601=seconds)
