@@ -101,7 +101,7 @@ get-upstream-source:
 	source $(SOURCE_CONF) ; \
 	rm -fr $${package}* ; \
 	apt-get source $${package} ; \
-	dir=$$(ls -d ${{package}}*/) ; \
+	dir=$$(ls -d $${package}*/) ; \
 	touch $${dir}/$${versioning}
 
 clean-chroot-files: clean-debian-files clean-untangle-files
