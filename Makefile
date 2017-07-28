@@ -98,8 +98,8 @@ clean-debian-files:
 	fi
 
 get-upstream-source:
-	rm -fr $${package}* ; \
 	source $(SOURCE_CONF) ; \
+	rm -fr $${package}* ; \
 	apt-get source $${package} ; \
 	dir=$$(ls -d */) ; \
 	touch $${dir}/$${versioning}
