@@ -97,8 +97,13 @@ while read package repositories architectures ; do
 	make -f $PKGTOOLS_HOME/Makefile get-upstream-source
 	popd
 	dir="$(ls -d ${package}/*/ | grep -v patches)"
-	cp $package/patches/*.patch $dir/debian/patches
-	cat $package/patches/series >> $dir/debian/patches/series
+	# copy patches against upstream code to debian/patches/
+	cp $package/upstream-patches/*.patch $dir/debian/patches
+	cat $package/upstream-patches/series >> $dir/debian/patches/series
+	# apply patches against Debian packaging directly to debian/
+	while read p ; do
+	  patch -d $dir -p0 < debian-patches/$p
+	done < $package/debian-patches/series
 	build_dirs[${#build_dirs[*]}]=$dir
       fi ;;
   esac

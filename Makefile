@@ -60,7 +60,7 @@ CHROOT_EXISTENCE := $(CHROOT_BASE)_$(TIMESTAMP)_existence.cow
 
 ########################################################################
 # Rules
-.PHONY: checkroot create-dest-dir revert-changelog parse-changelog move-debian-files clean-debian-files clean-chroot-files clean-build clean version-real version check-existence source pkg-real pkg pkg-chroot-real pkg-chroot release release-deb create-existence-chroot remove-existence-chroot remove-chroot create-chroot upgrade-base-chroot
+.PHONY: checkroot create-dest-dir revert-changelog parse-changelog move-debian-files clean-debian-files clean-chroot-files clean-build clean version-real version check-existence source pkg-real pkg pkg-chroot-real pkg-chroot release release-deb create-existence-chroot remove-existence-chroot remove-chroot create-chroot upgrade-base-chroot get-upstream-source
 
 checkroot:
 	@if [ "$$UID" = "0" ] ; then \
