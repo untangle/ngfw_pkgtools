@@ -1,5 +1,6 @@
 #! /bin/bash
 
+set -x
 
 # usage...
 if [ ! $# -eq 3 ] ; then 
