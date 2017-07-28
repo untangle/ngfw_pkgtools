@@ -102,7 +102,7 @@ while read package repositories architectures ; do
 	cat $package/upstream-patches/series >> $dir/debian/patches/series
 	# apply patches against Debian packaging directly to debian/
 	while read p ; do
-	  patch -d $dir -p0 < debian-patches/$p
+	  patch -d $dir -p0 < $package/debian-patches/$p
 	done < $package/debian-patches/series
 	build_dirs[${#build_dirs[*]}]=$dir
       fi ;;
