@@ -95,11 +95,11 @@ while read package repositories architectures ; do
       elif [[ -f $package/source.conf ]] ; then # new-style source
 	pushd $package
 	make -f $PKGTOOLS_HOME/Makefile get-upstream-source
+	popd
 	dir="$(ls -d ${package}/*/)"
 	cp $package/patches/*.patch $dir/debian/patches
 	cat $package/patches/series >> $dir/debian/series
 	build_dirs[${#build_dirs[*]}]=$dir
-	popd
       fi ;;
   esac
 done < $FILE_IN
