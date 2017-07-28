@@ -98,8 +98,10 @@ clean-debian-files:
 	fi
 
 get-upstream-source:
+	rm -fr $${package}*/ ; 
 	source $(SOURCE_CONF) ; \
 	apt-get source $${package} ; \
+	dir=$$(ls -d */) ; \
 	touch $${dir}/$${versioning}
 
 clean-chroot-files: clean-debian-files clean-untangle-files
