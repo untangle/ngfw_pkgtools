@@ -61,7 +61,7 @@ if [ -z "$version" ] ; then
     git)
       # new-style source package are not directly under version
       # control, but their parent dir is
-      [[ -d .git ]] && d=. || d=..
+      [[ $(pwd) == */ngfw_upstream/* ]] && d=.. || d=.
       revision=$(git log -n 1 --format="%h" -- $d)
       # older git versions don't have --date=iso-strict-local, so we
       # use --date=local (to convert to local timezone) with %ad,
