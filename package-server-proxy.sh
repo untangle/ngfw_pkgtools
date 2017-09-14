@@ -8,9 +8,13 @@ REMOTE_HOST="package-server.untangle.int"
 SSH_OPTIONS="-o StrictHostKeyChecking=no"
 TMP_DIR=/tmp/package-server-proxy_$$
 
+LOCAL_TARGET_SCRIPT=$1
+shift
+REMOTE_TARGET_SCRIPT=$(basename $LOCAL_TARGET_SCRIPT)
+
 ssh $SSH_OPTIONS $REMOTE_HOST "rm -fr $TMP_DIR ; mkdir $TMP_DIR"
-scp $SSH_OPTIONS -q $PKGTOOLS_DIR/$1 $REMOTE_HOST:$TMP_DIR
-ssh $SSH_OPTIONS $REMOTE_HOST "cd $TMP_DIR ; $@"
+scp $SSH_OPTIONS -q $LOCAL_TARGET_SCRIPT $REMOTE_HOST:$TMP_DIR
+ssh $SSH_OPTIONS $REMOTE_HOST "cd $TMP_DIR ; $REMOTE_TARGET_SCRIPT $@"
 rc=$?
 ssh $SSH_OPTIONS $REMOTE_HOST rm -fr $TMP_DIR
 
