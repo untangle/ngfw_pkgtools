@@ -85,8 +85,8 @@ def updateRepo(name):
 
   return r, o
 
-def findMostRecentTag(repo, tagType):
-  tags = [ t for t in repo.tags if t.name.find(tagType) > 0 ]
+def findMostRecentTag(repo, version, tagType):
+  tags = [ t for t in repo.tags if t.name.find(tagType) >= 0 and t.name.find(version) >= 0 ]
   tags = sorted(tags, key = lambda x: x.name)
   logging.info("found tags: {}".format(tags))
   if not tags:
@@ -163,7 +163,7 @@ for name in REPOSITORIES:
   repo, origin = updateRepo(name)
 
   if not args.manualBoundaries:
-    old = findMostRecentTag(repo, args.tagType).name
+    old = findMostRecentTag(repo, args.version, args.tagType).name
 
   for commit in listCommits(repo, old, new):
     allCommits.append((commit, name, None))
