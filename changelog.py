@@ -188,4 +188,5 @@ changelogCommits = sortCommitListByDateAuthored(changelogCommits)
 logging.debug("all commits:\n  {}".format(formatCommitList(allCommits,"\n  ")))
 logging.info("done")
 
-print(formatCommitList(changelogCommits))
+if changelogCommits:
+  print(formatCommitList(changelogCommits))
