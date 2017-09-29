@@ -97,6 +97,13 @@ def findMostRecentTag(repo, tagType):
   return old
 
 def listCommits(repo, old, new):
+  # origin/release-X.Y doesn't exist for some non-branched repositories like
+  # kernels.git; in that cas, use origin/master instead
+  try:
+    repo.commit(new)
+  except git.exc.BadName:
+    new = "origin/master"
+
   sl = "{}...{}".format(old, new)
   logging.info("running git log {}".format(sl))
   yield from repo.iter_commits(sl)
