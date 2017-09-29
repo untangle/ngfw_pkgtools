@@ -86,13 +86,18 @@ def updateRepo(name):
   return r, o
 
 def findMostRecentTag(repo, version, tagType):
-  tags = [ t for t in repo.tags if t.name.find(tagType) >= 0 and t.name.find(version) >= 0 ]
+  # filter tags by type first
+  tags = [ t for t in repo.tags if t.name.find(tagType) >= 0]
+  # let's see if some of those are about the current version
+  versionTags = [ t for t in tags if t.name.find(version) >= 0 ]
+  if versionTags:
+    tags = versionTags
   tags = sorted(tags, key = lambda x: x.name)
   logging.info("found tags: {}".format(tags))
   if not tags:
     logging.error("no tags found, aborting")
     sys.exit(2)
-  old = tags[0]
+  old = tags[-1]
   logging.info("most recent tag: {}".format(old.name))
   return old
 
