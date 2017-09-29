@@ -166,7 +166,6 @@ for name in REPOSITORIES:
     old = findMostRecentTag(repo, args.tagType).name
 
   for commit in listCommits(repo, old, new):
-    logging.info(" {}".format(formatCommit(commit, name)))
     allCommits.append((commit, name, None))
     
     clCommit, tickets = filterCommit(commit)
@@ -181,7 +180,7 @@ for name in REPOSITORIES:
 allCommits = sortCommitListByDateAuthored(allCommits)
 changelogCommits = sortCommitListByDateAuthored(changelogCommits)
 
-logging.info("all commits:\n  {}".format(formatCommitList(allCommits,"\n  ")))
+logging.debug("all commits:\n  {}".format(formatCommitList(allCommits,"\n  ")))
 logging.info("done")
 
 print(formatCommitList(changelogCommits))
