@@ -28,17 +28,18 @@ fi
 
 [ -z "$REPOSITORY" -o -z "$DISTRIBUTION" -o -z "$VERSION" ] && usage && exit 1
 
-pkgtools=`dirname $0`
-. $pkgtools/release-constants.sh
-
-changelog_file=$(mktemp "sync-$REPOSITORY-$DISTRIBUTION_$(date -Iminutes)-XXXXXXX.txt")
-diffCommand="python3 $pkgtools/changelog.py --log-level info --version $VERSION --tag-type sync --create-tags"
-
+#########
 # MAIN
+
+# include common variables
+. $(dirname $0)/release-constants.sh
+
 copyRemotePkgtools
 
 if [ -z "$simulate" ] ; then
 #  $SSH_COMMAND /etc/init.d/untangle-gpg-agent start
+  changelog_file=$(mktemp "sync-$REPOSITORY-$DISTRIBUTION_$(date -Iminutes)-XXXXXXX.txt")
+  diffCommand="python3 $pkgtools/changelog.py --log-level info --version $VERSION --tag-type sync --create-tags"
   $diffCommand >| $changelog_file
 
   # wipe out target distribution first
@@ -64,8 +65,7 @@ the following command:
 
     $diffCommand
 
---ReleaseMaster ($USER@$(hostname))
-
+--ReleaseMaster ($USER@$(hostname)), version $VERSION
 EOF
 
   /bin/rm -f ${changelog_file}

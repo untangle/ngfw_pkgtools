@@ -36,20 +36,23 @@ fi
 
 [ -z "$REPOSITORY" -o -z "$FROM_DISTRIBUTION" -o -z "$TO_DISTRIBUTION" -o -z "$VERSION" ] && usage && exit 1
 
-pkgtools=`dirname $0`
-changelog_file=$(mktemp "promotion-$REPOSITORY-$FROM_DISTRIBUTION-to-$TO_DISTRIBUTION_$(date -Iminutes)-XXXXXXX.txt")
-diffCommand="python3 $pkgtools/changelog.py --log-level info --version $VERSION --tag-type promotion --create-tags"
-
-. $pkgtools/release-constants.sh
-
 ##########
 # MAIN
-$diffCommand >| $changelog_file
+
+# include common variables
+. $(dirname $0)/release-constants.sh
+
+# generate changelog
+if [ -z "$simulate" ] ; then
+  changelog_file=$(mktemp "promotion-$REPOSITORY-$FROM_DISTRIBUTION-to-$TO_DISTRIBUTION_$(date -Iminutes)-XXXXXXX.txt")
+  diffCommand="python3 ${PKGTOOLS}/changelog.py --log-level info --version $VERSION --tag-type promotion --create-tags"
+  $diffCommand >| $changelog_file
+fi
 
 # wipe out target distribution first
-[ -n "$WIPE_OUT_TARGET" ] && $pkgtools/remove-packages.sh $EXTRA_ARGS -r $REPOSITORY -d $TO_DISTRIBUTION
+[ -n "$WIPE_OUT_TARGET" ] && ${PKGTOOLS}/remove-packages.sh $EXTRA_ARGS -r $REPOSITORY -d $TO_DISTRIBUTION
 
-$pkgtools/copy-packages.sh $EXTRA_ARGS -r $REPOSITORY $FROM_DISTRIBUTION $TO_DISTRIBUTION
+${PKGTOOLS}/copy-packages.sh $EXTRA_ARGS -r $REPOSITORY $FROM_DISTRIBUTION $TO_DISTRIBUTION
 
 if [ -z "$simulate" ] ; then
   attachments="-a ${changelog_file}"
@@ -61,7 +64,7 @@ the following command:
 
     $diffCommand
 
---ReleaseMaster ($USER@`hostname`)
+--ReleaseMaster ($USER@$(hostname)), version $VERSION
 EOF
 fi
 

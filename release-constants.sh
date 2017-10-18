@@ -2,7 +2,8 @@
 
 [ -z "$REPOSITORY" ] && echo "REPOSITORY has to be set" && exit 1
 
-PKGTOOLS=`dirname $0`
+PKGTOOLS=$(dirname $0)
+VERSION=$(git rev-parse --short HEAD)
 
 MUTT_CONF_FILE=$PKGTOOLS/mutt.conf
 RECIPIENT="engineering@untangle.com"
