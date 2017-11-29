@@ -4,31 +4,43 @@ set -x
 
 PACKAGE_NAME=$1
 VERSION=$2
-DISTRIBUTION=$3
+REPOSITORY=$3
+DISTRIBUTION=$4
 
-if [ $# != 3 ] ; then
-  echo "Usage: $0 <package> <version> <distribution>"
+if [ $# != 4 ] ; then
+  echo "Usage: $0 <package> <version> <distribution> <repository>"
   exit 1
 fi
 
-echo "[existence] Looking for $PACKAGE_NAME version $VERSION for $DISTRIBUTION" >&2
-echo "[existence] sources.list is :" >&2
-cat /etc/apt/sources.list >&2
+echo "[existence] Looking for $PACKAGE_NAME version $VERSION for $DISTRIBUTION"
+echo "[existence] sources.list is :"
+cat /etc/apt/sources.list
 
 str="$PACKAGE_NAME is available in"
 
 apt-get install --yes --force-yes apt-show-versions
 
 # all distributions containing that version
-echo "[existence] apt-show-versions result:" >&2
-apt-show-versions -p '^'$PACKAGE_NAME'$' -a -R >&2
+tmpFile=$(mktemp /tmp/${PACKAGE_NAME}-${REPOSITORY}-${DISTRIBUTION}-XXXXXX)
+apt-show-versions -p '^'$PACKAGE_NAME'$' -a -R > $tmpFile
 
-output=$(apt-show-versions -p '^'$PACKAGE_NAME'$' -a -R | gawk '/^'"$PACKAGE_NAME(:[a-z0-9]+)? ${VERSION//+/.}"'/ {print $3}')
-echo "[existence] Matching line:" >&2
-echo $output >&2
+echo "[existence] apt-show-versions output:"
+cat $tmpFile
 
-if echo "$output" | grep -q $DISTRIBUTION ; then
-  echo $str $DISTRIBUTION
-fi
+output=$(gawk '/^'"$PACKAGE_NAME(:[a-z0-9]+)? ${VERSION//+/.}"'/ {print $3 ; exit}' < $tmpFile)
+echo "[existence] 1st distribution matching this version:" $output
+
+case $output in
+  $DISTRIBUTION)
+    echo $str $DISTRIBUTION ;;
+  $REPOSITORY)
+    # current has a $repository alias (that is, current in the jessie
+    # repository has a suite name of jessie, current in the stretch
+    # repository has a suite name of stretch, etc), so let's reply
+    # "present in current"
+    echo $str "current" ;;
+esac
+
+rm $tmpFile
 
 exit 0
