@@ -39,7 +39,7 @@ copyRemotePkgtools
 if [ -z "$simulate" ] ; then
 #  $SSH_COMMAND /etc/init.d/untangle-gpg-agent start
   changelog_file=$(mktemp "sync-$REPOSITORY-$DISTRIBUTION_$(date -Iminutes)-XXXXXXX.txt")
-  diffCommand="python3 $pkgtools/changelog.py --log-level info --version $VERSION --tag-type sync --create-tags"
+  diffCommand="python3 ${PKGTOOLS}/changelog.py --log-level info --version $VERSION --tag-type sync --create-tags"
   $diffCommand >| $changelog_file
 
   # wipe out target distribution first
