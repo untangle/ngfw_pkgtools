@@ -65,7 +65,7 @@ the following command:
 
     $diffCommand
 
---ReleaseMaster ($USER@$(hostname)), version $VERSION
+--ReleaseMaster ($USER@$(hostname)), version $PKGTOOLS_VERSION
 EOF
 
   /bin/rm -f ${changelog_file}
