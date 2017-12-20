@@ -67,7 +67,7 @@ rm -rf "${TEMP_DIST}"
 mkdir -p "$TEMP_DIST"
 pushd $TEMP_DIST
 
-for component in src pkgs hades-pkgs kernel pkgtools isotools-jessie isotools-stretch upstream ; do
+for component in src pkgs hades-pkgs pkgtools isotools-jessie isotools-stretch upstream ; do
   component="ngfw_$component"
   url="${GIT_BASE_URL}$component"
   git clone $url
