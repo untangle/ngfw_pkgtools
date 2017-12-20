@@ -102,13 +102,6 @@ def findMostRecentTag(repo, version, tagType):
   return old
 
 def listCommits(repo, old, new):
-  # origin/release-X.Y doesn't exist for some non-branched repositories like
-  # kernels.git; in that cas, use origin/master instead
-  try:
-    repo.commit(new)
-  except git.exc.BadName:
-    new = "origin/master"
-
   sl = "{}...{}".format(old, new)
   logging.info("running git log {}".format(sl))
   yield from repo.iter_commits(sl)
@@ -146,7 +139,7 @@ logging.info("started with {}".format(" ".join(sys.argv[1:])))
 
 # derive remote branch name from version
 majorMinor = '.'.join(args.version.split(".")[0:2]) # FIXME
-if not args.manualBoundaries:
+if not args.manualBoundaries:    
   new = BRANCH_TPL.format(majorMinor)
 else:
   old, new = args.manualBoundaries
@@ -169,6 +162,13 @@ for name in REPOSITORIES:
 
   if not args.manualBoundaries:
     old = findMostRecentTag(repo, args.version, args.tagType).name
+    # origin/release-X.Y may not have been created already (promoting
+    # from "current" for instance); in that case, use origin/master
+    # instead
+    try:
+      repo.commit(new)
+    except git.exc.BadName:
+      new = "origin/master"
 
   for commit in listCommits(repo, old, new):
     allCommits.append((commit, name, None))
