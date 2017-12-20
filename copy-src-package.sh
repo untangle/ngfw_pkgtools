@@ -1,34 +1,26 @@
 #! /bin/bash
 
-set -e
-
 usage() {
-  echo "Usage: $0 -r <repository> -d <distribution> -f <distributionFrom> -s <sourcePkg> -v <version> [-h host]"
-  exit 1
+  echo "Usage: $0 -r <repository> -p <sourcePkg <distributionFrom> <distributionTo>"
 }
 
-while getopts "r:d:f:s:A:v:h?" opt ; do
+while getopts "r:p:" opt ; do
   case "$opt" in
     r) REPOSITORY=$OPTARG ;;
-    d) DISTRIBUTION=$OPTARG ;;
-    h) HOST=$OPTARG ;;
-    s) SOURCE=$OPTARG ;;
-    v) VERSION=$OPTARG ;;
-    f) DISTRIBUTION_FROM=$OPTARG ;;
+    p) SOURCE_PKG=$OPTARG ;;
     h|\?) usage ;;
   esac
 done
+shift $(($OPTIND - 1))
 
-ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
-HOST=${HOST:-package-server}
+FROM_DISTRIBUTION=$1
+TO_DISTRIBUTION=$2
 
-[ -z "$REPOSITORY" ] || [ -z "$DISTRIBUTION" ] || [ -z "$DISTRIBUTION_FROM" ] && usage
-[ -z "$VERSION" ] || [ -z "$SOURCE" ] && usage
+HOST="package-server"
 
-manifest="${SOURCE}_${VERSION}_${ARCH}.${REPOSITORY}_${DISTRIBUTION}.copy"
-echo "copysrc ${DISTRIBUTION} ${DISTRIBUTION_FROM} ${SOURCE}" > $manifest
+[ -z "$REPOSITORY" -o -z "$FROM_DISTRIBUTION" -o -z "$TO_DISTRIBUTION" -o -z "$SOURCE_PKG" ] && usage && exit 1
 
-echo "About to upload: $(cat $manifest)"
+. $(dirname $0)/release-constants.sh
 
-lftp -e "set net:max-retries 1 ; cd $REPOSITORY/incoming ; put $manifest ; exit" $HOST
-rm -f $manifest
+$PKGTOOLS/${REPREPRO_COMMAND} copysrc ${FROM_DISTRIBUTION} ${TO_DISTRIBUTION} ${SOURCE_PKG}
+
