@@ -33,7 +33,6 @@ read_user_input()
 get_new_version_string()
 {
     local t_input
-    local t_version_name
     local t_version_number
 
     read_user_input "Do you want to update the version string in the mainline[y/N]: " t_input "^[yYnN]\?$"
@@ -41,12 +40,9 @@ get_new_version_string()
         return
     fi
 
-    read_user_input "New version name (eg, corvette): " t_version_name "^[a-zA-Z]\+$"
-
     echo "Since minor revisions are done off of branches, only the major release number should be specified."
     read_user_input "New version number (eg, 6.0): " t_version_number "[0-9]\.[0-9]"
     
-    NEW_VERSION_NAME=${t_version_name}
     NEW_VERSION_NUMBER=${t_version_number}
 }
 
@@ -56,7 +52,6 @@ BRANCH_NAME=$1
 
 GIT_BASE_URL="git@github.com:untangle/"
 
-NEW_VERSION_NAME=""
 NEW_VERSION_NUMBER=""
 
 if [ -z "${BRANCH_NAME}" ]; then
@@ -82,17 +77,16 @@ for component in src pkgs hades-pkgs kernel pkgtools isotools-jessie isotools-st
   popd
 done
 
-if [ -n "${NEW_VERSION_NUMBER}" ] &&  [ -n "${NEW_VERSION_NAME}" ] ; then
+if [ -n "${NEW_VERSION_NUMBER}" ] ; then
   echo "Updating the version number in the mainline"
   pushd ngfw_pkgtools/resources
   git checkout master
   echo "${NEW_VERSION_NUMBER}.0" >| VERSION
   echo "${NEW_VERSION_NUMBER}" >| PUBVERSION
-  echo "${NEW_VERSION_NAME}" >| RELEASE_CODENAME
   git commit -a -m "Updating the version string to ${NEW_VERSION_NUMBER}"
   git push
   popd
 fi
 
 popd
- rm -rf "${TEMP_DIST}"
+rm -rf "${TEMP_DIST}"
