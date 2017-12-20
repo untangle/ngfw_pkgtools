@@ -34,7 +34,7 @@ TO_DISTRIBUTION=$2
 [ -n "$REGEX" -a -n "$NREGEX" ] && usage && exit 1
 [ -z "$REGEX" -a -z "$NREGEX" ] && REGEX="-E ."
 
-. `dirname $0`/release-constants.sh
+. $(dirname $0)/release-constants.sh
 
 case $FROM_DISTRIBUTION in
   */snapshots/*)
