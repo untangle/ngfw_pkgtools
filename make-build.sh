@@ -29,9 +29,9 @@ while getopts r:b:d:v:a:uencmhk option ; do
     \?) usage ;;
   esac
 done
-[[ -z "$ARCH" ]] && ARCH=i386
+[[ -z "$ARCH" ]] && ARCH=amd64
 
-if [[ $ARCH == i386 ]] && [[ $DEFAULT_TARGETS == *kpkg-arch* ]] ; then
+if [[ $ARCH == amd64 ]] && [[ $DEFAULT_TARGETS == *kpkg-arch* ]] ; then
   # also build source, doc, etc
   DEFAULT_TARGETS="$DEFAULT_TARGETS kpkg-indep"
 fi
@@ -87,7 +87,7 @@ while read package repositories architectures ; do
       # do we build this package for this repository ?
       [[ "$repositories" != *${TARGET_REP}* ]] && continue
       case $ARCH in
-        i386) pattern="(any|all|$ARCH)" ;;
+        amd64) pattern="(any|all|$ARCH)" ;;
         *) pattern="(any|$ARCH)" ;;
       esac
       if [[ "$DEFAULT_TARGETS" = "kernel-module-chroot" ]] || [[ "$DEFAULT_TARGETS" == *kpkg-arch* ]] || grep -qE "^Architecture:.*$pattern" $package/debian/control 2> /dev/null ; then

@@ -21,14 +21,14 @@ while getopts "r:d:A:ah?" opt ; do
     h|\?) usage ;;
   esac
 done
-ARCH=${ARCH:-i386}
+ARCH=${ARCH:-amd64}
 HOST=${HOST:-package-server}
 
 [ -z "$REPOSITORY" ] || [ -z "$DISTRIBUTION" ] && usage
 
 DEBS=$(find . $MAX_DEPTH -iregex '.+_'$ARCH'\.u?deb$' | xargs)
 
-[ $ARCH = i386 ] && DEBS="$DEBS $(find . $MAX_DEPTH -iregex '.+_all\.u?deb$' | xargs)"
+[ $ARCH = amd64 ] && DEBS="$DEBS $(find . $MAX_DEPTH -iregex '.+_all\.u?deb$' | xargs)"
 
 echo "About to upload:"
 
