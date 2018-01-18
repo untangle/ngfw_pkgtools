@@ -121,7 +121,7 @@ create-existence-chroot:
 remove-existence-chroot:
 	sudo rm -fr $(CHROOT_EXISTENCE)
 check-existence: create-existence-chroot
-	if [ $(ARCH) = "i386" ] ; then \
+	if [ $(ARCH) = "amd64" ] ; then \
 	  dh_switch="" ; \
 	else \
 	  dh_switch="-a" ; \
