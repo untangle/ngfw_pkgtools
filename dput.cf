@@ -1,48 +1,3 @@
-[package-server_sarge]
-fqdn = package-server
-method = ftp
-login = anonymous
-incoming = /sarge/incoming
-allow_unsigned_uploads = 1
-run_dinstall = 0
-run_lintian = 0
-check_version = 0
-[package-server_etch]
-fqdn = package-server
-method = ftp
-login = anonymous
-incoming = /etch/incoming
-allow_unsigned_uploads = 1
-run_dinstall = 0
-run_lintian = 0
-check_version = 0
-[package-server_lenny]
-fqdn = package-server
-method = ftp
-login = anonymous
-incoming = /lenny/incoming
-allow_unsigned_uploads = 1
-run_dinstall = 0
-run_lintian = 0
-check_version = 0
-[package-server_squeeze]
-fqdn = package-server
-method = ftp
-login = anonymous
-incoming = /squeeze/incoming
-allow_unsigned_uploads = 1
-run_dinstall = 0
-run_lintian = 0
-check_version = 0
-[package-server_wheezy]
-fqdn = package-server
-method = ftp
-login = anonymous
-incoming = /wheezy/incoming
-allow_unsigned_uploads = 1
-run_dinstall = 0
-run_lintian = 0
-check_version = 0
 [package-server_jessie]
 fqdn = package-server
 method = ftp
@@ -57,42 +12,6 @@ fqdn = package-server
 method = ftp
 login = anonymous
 incoming = /stretch/incoming
-allow_unsigned_uploads = 1
-run_dinstall = 0
-run_lintian = 0
-check_version = 0
-[package-server_sid]
-fqdn = package-server
-method = ftp
-login = anonymous
-incoming = /sid/incoming
-allow_unsigned_uploads = 1
-run_dinstall = 0
-run_lintian = 0
-check_version = 0
-[package-server_gutsy]
-fqdn = package-server
-method = ftp
-login = anonymous
-incoming = /gutsy/incoming
-allow_unsigned_uploads = 1
-run_dinstall = 0
-run_lintian = 0
-check_version = 0
-[package-server_hardy]
-fqdn = package-server
-method = ftp
-login = anonymous
-incoming = /hardy/incoming
-allow_unsigned_uploads = 1
-run_dinstall = 0
-run_lintian = 0
-check_version = 0
-[package-server_intrepid]
-fqdn = package-server
-method = ftp
-login = anonymous
-incoming = /intrepid/incoming
 allow_unsigned_uploads = 1
 run_dinstall = 0
 run_lintian = 0
