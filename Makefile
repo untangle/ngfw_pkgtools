@@ -19,7 +19,7 @@ ifneq ($(origin RECURSIVE), undefined)
 endif
 
 # debuild/dpkg-buildpackage options
-DEBUILD_OPTIONS := -e HADES_KEYSTORE -e HADES_KEY_ALIAS -e HADES_KEY_PASS
+DEBUILD_OPTIONS := 
 DPKGBUILDPACKAGE_OPTIONS := -i -us -uc
 ifeq ($(origin BINARY_UPLOAD), undefined)
   DPKGBUILDPACKAGE_OPTIONS += -sa
