@@ -61,7 +61,6 @@ EOF
 #  $SSH_COMMAND /etc/init.d/untangle-gpg-agent stop
 else
   repreproRemote "checkupdate $VERSION 2>&1 | grep upgraded | sort -u"
-  remoteCommand ./remove-packages.sh -r ${REPOSITORY} -d ${VERSION} -T dsc -C premium non-free -s
 fi
 
 # remove remote pkgtools

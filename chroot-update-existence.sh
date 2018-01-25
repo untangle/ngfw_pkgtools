@@ -5,7 +5,7 @@ DISTRIBUTION=$2
 
 echo "[update-existence] Called with REPOSITORY=$REPOSITORY and DISTRIBUTION=$DISTRIBUTION" >&2
 
-echo deb http://package-server/public/$REPOSITORY $DISTRIBUTION main main/debian-installer premium non-free upstream internal >| /etc/apt/sources.list
+echo deb http://package-server/public/$REPOSITORY $DISTRIBUTION main main/debian-installer non-free >| /etc/apt/sources.list
 
 echo "[update-existence] sources.list is :" >&2
 cat /etc/apt/sources.list >&2
