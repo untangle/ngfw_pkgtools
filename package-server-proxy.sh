@@ -4,7 +4,7 @@
 # make that a CGI on package-server, for fucksake...
 
 PKGTOOLS_DIR=$(readlink -f $(dirname $0))
-REMOTE_HOST="package-server.untangle.int"
+REMOTE_HOST="package-server"
 SSH_OPTIONS="-o StrictHostKeyChecking=no"
 TMP_DIR=/tmp/package-server-proxy_$$
 
