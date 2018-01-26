@@ -179,5 +179,4 @@ release-deb:
 	$(PKGTOOLS_DIR)/release-binary-packages.sh -A $(ARCH) -r $(REPOSITORY) -d $(DISTRIBUTION) $(REC)
 
 copy-src:
-	$(PKGTOOLS_DIR)/copy-src-package.sh -r $(REPOSITORY) -d $(DISTRIBUTION) -f $(DISTRIBUTION_FROM) -s $(SOURCE_NAME) -v $(shell cat $(VERSION_FILE))
-
+	$(PKGTOOLS_DIR)/copy-src-package.sh -r $(REPOSITORY) -p $(SOURCE_NAME) $(DISTRIBUTION_FROM) $(DISTRIBUTION)
