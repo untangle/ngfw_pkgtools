@@ -31,14 +31,7 @@ output=$(gawk '/^'"$PACKAGE_NAME(:[a-z0-9]+)? ${VERSION//+/.}"'/ {print $3 ; exi
 echo "[existence] 1st distribution matching this version:" $output
 
 case $output in
-  $DISTRIBUTION)
-    echo $str $DISTRIBUTION ;;
-  $REPOSITORY)
-    # current has a $repository alias (that is, current in the jessie
-    # repository has a suite name of jessie, current in the stretch
-    # repository has a suite name of stretch, etc), so let's reply
-    # "present in current"
-    echo $str "current" ;;
+  $DISTRIBUTION) echo $str $DISTRIBUTION ;;
 esac
 
 rm $tmpFile
