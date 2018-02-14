@@ -6,7 +6,7 @@ GITHUB_HEADERS = {'Accept' : 'application/vnd.github.loki-preview+json' }
 GITHUB_USER = 'untangle-bot'
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 OUTPUT_TPL = "{branch} vs. {branchRef} | {repository:<20}: {ahead:>02} ahead, {behind:>02} behind {extra}"
-REPOSITORIES_STEMS = ('src', 'pkgs', 'hades-pkgs', 'pkgtools', 'isotools-jessie', 'isotools-stretch', 'upstream')
+REPOSITORIES_STEMS = ('src', 'pkgs', 'hades-pkgs', 'isotools-jessie', 'isotools-stretch', 'upstream')
 REPOSITORIES = ('ngfw_' + x for x in REPOSITORIES_STEMS)
 
 # functions
