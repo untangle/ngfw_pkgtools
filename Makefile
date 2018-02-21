@@ -10,7 +10,7 @@ DISTRIBUTION ?= $(USER)
 DISTRIBUTION_FROM ?= $(DISTRIBUTION)
 ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 PACKAGE_SERVER ?= package-server
-REPOSITORY ?= $(shell $(PKGTOOLS_DIR)/getPlatform.sh)
+REPOSITORY ?= stretch
 TIMESTAMP ?= $(shell date "+%Y-%m-%dT%H%M%S_%N")
 
 # binary upload
