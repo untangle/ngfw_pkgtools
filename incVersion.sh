@@ -68,7 +68,7 @@ if [ -z "$version" ] ; then
       timestamp="$(git log -n 1 --date=iso-strict-local --format='%cd' -- $d)"
       # ... and then to "20160913T234656", accounting for weird
       # timezone format&separator
-      timestamp=$(echo $timestamp | perl -pe 's/:\d\d[-+][\d:]+$// ; s/[-:]//g')
+      timestamp=$(echo $timestamp | perl -pe 's/[-+][\d:]+$// ; s/[-:]//g')
       hasLocalChanges=$(git diff-index --name-only HEAD -- .)
       ;;
   esac
