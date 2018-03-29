@@ -63,15 +63,12 @@ if [ -z "$version" ] ; then
       # control, but their parent dir is
       [[ $(pwd) == */ngfw_upstream/* ]] && d=.. || d=.
       revision=$(git log -n 1 --format="%h" -- $d)
-      # older git versions don't have --date=iso-strict-local, so we
-      # use --date=local (to convert to local timezone) with %cd,
-      # which yields something like "Tue Sep 13 23:46:56 PDT 2016"
-      timestamp="$(git log -n 1 --date=local --format='%cd' -- $d)"
-      # ... then we convert that to something like
+      # convert commit date to something to an ISO timestamp like
       # "2016-09-13T23:46:56-0700"
-      timestamp=$(date -d"$timestamp" --iso-8601=seconds)
-      # ... and finally to "20160913T234656"
-      timestamp=$(echo $timestamp | perl -pe 's/[-+][\d:]+$// ; s/[-:]//g')
+      timestamp="$(git log -n 1 --date=iso-strict-local --format='%cd' -- $d)"
+      # ... and then to "20160913T234656", accounting for weird
+      # timezone format&separator
+      timestamp=$(echo $timestamp | perl -pe 's/:\d\d[-+][\d:]+$// ; s/[-:]//g')
       hasLocalChanges=$(git diff-index --name-only HEAD -- .)
       ;;
   esac
