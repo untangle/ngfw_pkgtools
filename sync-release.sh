@@ -37,14 +37,6 @@ CHANGELOG_FILE="sync.log"
 
 copyRemotePkgtools
 
-# generate changelog
-diffCommand="python3 ${PKGTOOLS}/changelog.py --log-level info --version $VERSION --tag-type sync"
-if [ -z "$simulate" ] ; then
-  diffCommand="$diffCommand --create-tags"
-fi
-$diffCommand >| $CHANGELOG_FILE
-cat $CHANGELOG_FILE
-
 if [ -z "$simulate" ] ; then
   # wipe out target distribution first
   [ -n "$WIPE_OUT_TARGET" ] && remoteCommand ./remove-packages.sh -r ${REPOSITORY} -d ${VERSION}
@@ -58,3 +50,11 @@ fi
 
 # remove remote pkgtools
 removeRemotePkgtools
+
+# generate changelog
+diffCommand="python3 ${PKGTOOLS}/changelog.py --log-level info --version $VERSION --tag-type sync"
+if [ -z "$simulate" ] ; then
+  diffCommand="$diffCommand --create-tags"
+fi
+$diffCommand >| $CHANGELOG_FILE
+cat $CHANGELOG_FILE
