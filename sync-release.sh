@@ -33,7 +33,7 @@ fi
 
 # include common variables
 . $(dirname $0)/release-constants.sh
-CHANGELOG_FILE="promotion.log"
+CHANGELOG_FILE="sync.log"
 
 copyRemotePkgtools
 
@@ -49,11 +49,9 @@ if [ -z "$simulate" ] ; then
   # wipe out target distribution first
   [ -n "$WIPE_OUT_TARGET" ] && remoteCommand ./remove-packages.sh -r ${REPOSITORY} -d ${VERSION}
 
-  repreproRemote --noskipold update ${VERSION} || exit 1
+  repreproRemote --noskipold update ${VERSION}
 
-  repreproRemote export ${VERSION} || exit 1
-
-#  $SSH_COMMAND /etc/init.d/untangle-gpg-agent stop
+  repreproRemote export ${VERSION}
 else
   repreproRemote "checkupdate $VERSION 2>&1 | grep upgraded | sort -u"
 fi
