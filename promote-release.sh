@@ -1,7 +1,7 @@
 #! /bin/bash
 
 usage() {
-  echo "Usage: $0 [-s] [-w]  [-A architecture] [-C <component>] [-T (dsc|udeb|deb)] -r <repository> -f <fromDistribution> -d <toDistribution> -v <version>"
+  echo "Usage: $0 [-s] [-w]  [-A architecture] [-C <component>] [-T (dsc|udeb|deb)] -r <repository> -f <fromDistribution> -v <version>"
   echo "-s : simulate"
   echo "-w : wipe out <toDistribution> first"
   echo "-C <component>    : only act on component <component>"
