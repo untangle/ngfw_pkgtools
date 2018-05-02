@@ -5,10 +5,6 @@
 PKGTOOLS=$(dirname $0)
 PKGTOOLS_VERSION=$(git rev-parse --short HEAD)
 
-MUTT_CONF_FILE=$PKGTOOLS/mutt.conf
-RECIPIENT="engineering@untangle.com"
-SYNC_RECIPIENT="cknickerbocker@untangle.com"
-
 REMOTE_USER="root"
 REMOTE_SERVER="updates.untangle.com"
 SSH_COMMAND="ssh -t ${REMOTE_USER}@${REMOTE_SERVER}"
