@@ -50,7 +50,7 @@ ${PKGTOOLS}/copy-packages.sh $EXTRA_ARGS -r $REPOSITORY $FROM_DISTRIBUTION $VERS
 
 # generate changelog
 diffCommand="python3 ${PKGTOOLS}/changelog.py --log-level info --version $VERSION --tag-type promotion"
-if [ -n "$simulate" ] ; then
+if [ -z "$simulate" ] ; then
   diffCommand="$diffCommand --create-tags"
 fi
 $diffCommand >| $CHANGELOG_FILE
