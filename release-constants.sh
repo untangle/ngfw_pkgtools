@@ -5,10 +5,6 @@
 PKGTOOLS=$(dirname $0)
 PKGTOOLS_VERSION=$(git rev-parse --short HEAD)
 
-MUTT_CONF_FILE=$PKGTOOLS/mutt.conf
-RECIPIENT="engineering@untangle.com"
-SYNC_RECIPIENT="cknickerbocker@untangle.com"
-
 REMOTE_USER="root"
 REMOTE_SERVER="updates.untangle.com"
 SSH_COMMAND="ssh -t ${REMOTE_USER}@${REMOTE_SERVER}"
@@ -19,7 +15,7 @@ REPREPRO_BASE_DIR="/var/www/public/$REPOSITORY"
 REPREPRO_DIST_DIR="${REPREPRO_BASE_DIR}/dists"
 REPREPRO_CONF_DIR="${REPREPRO_BASE_DIR}/conf"
 REPREPRO_DISTRIBUTIONS_FILE="${REPREPRO_CONF_DIR}/distributions"
-REPREPRO_COMMAND="./reprepro-untangle.sh -V -b ${REPREPRO_BASE_DIR} ${EXTRA_ARGS}"
+REPREPRO_COMMAND="./reprepro-untangle.sh -b ${REPREPRO_BASE_DIR} ${EXTRA_ARGS}"
 
 # functions
 repreproLocal() {
