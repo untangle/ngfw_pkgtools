@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -e
+
 usage() {
   echo "Usage: $0 [-s] [-w]  [-A architecture] [-C <component>] [-T (dsc|udeb|deb)] -r <repository> -f <fromDistribution> -v <version>"
   echo "-s : simulate"
