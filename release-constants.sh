@@ -19,7 +19,7 @@ REPREPRO_BASE_DIR="/var/www/public/$REPOSITORY"
 REPREPRO_DIST_DIR="${REPREPRO_BASE_DIR}/dists"
 REPREPRO_CONF_DIR="${REPREPRO_BASE_DIR}/conf"
 REPREPRO_DISTRIBUTIONS_FILE="${REPREPRO_CONF_DIR}/distributions"
-REPREPRO_COMMAND="./reprepro-untangle.sh -V -b ${REPREPRO_BASE_DIR} ${EXTRA_ARGS}"
+REPREPRO_COMMAND="./reprepro-untangle.sh -b ${REPREPRO_BASE_DIR} ${EXTRA_ARGS}"
 
 # functions
 repreproLocal() {
