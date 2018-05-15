@@ -190,3 +190,4 @@ logging.info("done")
 
 if changelogCommits:
   print(formatCommitList(changelogCommits))
+
