@@ -155,4 +155,5 @@ end
 ## main
 $payload = JSON.parse(ARGV[0])
 puts mail_subject
+puts
 puts mail_body
