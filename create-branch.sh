@@ -49,17 +49,18 @@ get_new_version_string()
 ##### start of script
 
 BRANCH_NAME=$1
+NEW_VERSION_NUMBER=$2
 
 GIT_BASE_URL="git@github.com:untangle/"
 
-NEW_VERSION_NUMBER=""
-
 if [ -z "${BRANCH_NAME}" ]; then
-  echo "Usage: $0 <branch name>"
+  echo "Usage: $0 <branch_name> [<new_version_number>]"
   exit 1
 fi
 
-get_new_version_string
+if [ -z "$NEW_VERSION_NUMBER" ] ; then
+  get_new_version_string
+fi
 
 ## Create a temporary directory to clone everything
 TEMP_DIST="/localhome/for-branching"
