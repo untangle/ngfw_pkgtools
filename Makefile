@@ -131,7 +131,7 @@ check-existence: create-existence-chroot
 
 source: checkroot parse-changelog
 	quilt pop -a || true
-	tar cz --exclude="*stamp*" --exclude=".svn" --exclude="debian" \
+	tar cz --exclude="*stamp*" --exclude=".svn" --exclude="./debian" \
 	       --exclude="todo" --exclude="staging" --exclude=".git" \
 	       -f ../$(SOURCE_NAME)_`dpkg-parsechangelog | awk '/^Version:/{gsub(/(^.+:|-.*)/, "", $$2) ; print $$2}'`.orig.tar.gz ../$(CUR_DIR)
 
