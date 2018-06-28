@@ -154,10 +154,10 @@ remove-chroot:
 pkg-chroot-real: checkroot parse-changelog create-dest-dir
 	# if we depend on an untangle-* package, or on
 	# libdebconfclient0-dev, or on libpixman-1-dev, or on
-	# libnetfilter-queue-dev, we want to apt-get update to get the
+	# libnetfilter-queue-dev, or on libnftnl-dev, we want to apt-get update to get the
 	# latest available version (that might have been uploaded
 	# during the current make-build.sh run)
-	if grep-dctrl -s Build-Depends -e '(untangle|libdebconfclient0-dev|libpixman-1-dev|libnetfilter-queue-dev|libdaq-dev)' debian/control ; then \
+	if grep-dctrl -s Build-Depends -e '(untangle|libdebconfclient0-dev|libpixman-1-dev|libnetfilter-queue-dev|libdaq-dev|libnftnl-dev)' debian/control ; then \
           sudo /usr/sbin/cowbuilder --execute --save-after-exec --basepath $(CHROOT_WORK) -- $(CHROOT_UPDATE_SCRIPT) $(REPOSITORY) $(DISTRIBUTION) ; \
         fi
 	pdebuild --pbuilder /usr/sbin/cowbuilder \
