@@ -13,10 +13,11 @@ else
   VCS="git"
 fi
 
-USER=seb # FIXME
 DCH=$(mktemp /tmp/dch-XXXXX)
 
 rm -f debian/changelog.dch
+DEBEMAIL="${DEBEMAIL:-buildbot@untangle.com}"
+DEBFULLNAME="${DEBFULLNAME:-Untangle Buildbot}"
 
 # CL args
 distribution=${1}
@@ -91,8 +92,7 @@ if [ -z "$version" ] ; then
     version=$baseVersion
   else
     echo -e "The changes were:\n$hasLocalChanges"
-    version=${baseVersion}+$USER`date +"%Y%m%dT%H%M%S"`
-    distribution=$USER
+    version=${baseVersion}+localdiff`date +"%Y%m%dT%H%M%S"`
   fi
 
   if [ ! -f UNTANGLE-FORCE-UPSTREAM-VERSION ] ; then  # FIXME: ugly, but will do for now
@@ -121,7 +121,7 @@ dchargs="--preserve -v ${version} -D ${distribution}"
 chmod 755 $DCH
 sed -i -e '/garbage/d' $DCH
 echo "Setting version to \"${version}\", distribution to \"$distribution\""
-DEBEMAIL="${DEBEMAIL:-${USER}@untangle.com}" $DCH $dchargs "auto build" 2> /dev/null
+DEBEMAIL="$DEBEMAIL" DEBFULLNAME="$DEBFULLNAME" $DCH $dchargs "auto build" 2> /dev/null
 # check changelog back in if version was forced; FIXME: disabled for now
 #[ -n "$versionGiven" ] && [ ! -f UNTANGLE-KEEP-UPSTREAM-VERSION ] && $SVN commit debian/changelog -m "Forcing version to $version"
 rm -f $DCH
