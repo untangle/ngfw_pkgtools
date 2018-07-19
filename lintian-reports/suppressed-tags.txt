@@ -1,0 +1,3 @@
+changelog-should-mention-nmu
+source-nmu-has-incorrect-version-number
+source-package-component-has-long-file-name
