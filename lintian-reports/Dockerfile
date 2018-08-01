@@ -21,6 +21,8 @@ RUN fakeroot debian/rules generate-docs
 
 WORKDIR /opt
 ADD config.yaml suppressed-tags.txt ./
+# passing a relative path doesn't seem to be supported by harness
+RUN perl -i -pe 's|(?=suppressed-tags.txt)|/opt/|' config.yaml
 
 VOLUME /var/www/lintian-reports
 VOLUME /var/www/public/stretch
