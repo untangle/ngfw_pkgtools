@@ -4,3 +4,5 @@ source-package-component-has-long-file-name
 package-has-long-file-name
 dir-or-file-in-var-www
 debian-watch-file-is-missing
+font-in-non-font-package
+font-outside-font-dir
