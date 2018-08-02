@@ -3,3 +3,4 @@ source-nmu-has-incorrect-version-number
 source-package-component-has-long-file-name
 package-has-long-file-name
 dir-or-file-in-var-www
+debian-watch-file-is-missing
