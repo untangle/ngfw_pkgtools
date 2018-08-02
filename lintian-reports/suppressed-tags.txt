@@ -1,4 +1,5 @@
 changelog-should-mention-nmu
 source-nmu-has-incorrect-version-number
 source-package-component-has-long-file-name
+package-has-long-file-name
 dir-or-file-in-var-www
