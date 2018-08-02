@@ -6,3 +6,4 @@ dir-or-file-in-var-www
 debian-watch-file-is-missing
 font-in-non-font-package
 font-outside-font-dir
+package-installs-java-bytecode
