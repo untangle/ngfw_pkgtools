@@ -41,7 +41,7 @@ fi
 
 # include common variables
 . $(dirname $0)/release-constants.sh
-CHANGELOG_FILE="promotion.log"
+CHANGELOG_FILE="promotion.txt"
 
 # wipe out target distribution first
 [ -n "$WIPE_OUT_TARGET" ] && ${PKGTOOLS}/remove-packages.sh $EXTRA_ARGS -r $REPOSITORY -d $VERSION

@@ -33,7 +33,7 @@ fi
 
 # include common variables
 . $(dirname $0)/release-constants.sh
-CHANGELOG_FILE="sync.log"
+CHANGELOG_FILE="sync.txt"
 
 copyRemotePkgtools
 
