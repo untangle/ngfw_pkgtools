@@ -35,6 +35,10 @@ fi
 . $(dirname $0)/release-constants.sh
 CHANGELOG_FILE="sync.txt"
 
+# start with a clean changelog, as the one from the previous run might
+# still be present
+echo >| $CHANGELOG
+
 copyRemotePkgtools
 
 if [ -z "$simulate" ] ; then
