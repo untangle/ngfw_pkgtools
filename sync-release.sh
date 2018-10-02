@@ -37,7 +37,7 @@ CHANGELOG_FILE="sync.txt"
 
 # start with a clean changelog, as the one from the previous run might
 # still be present
-echo >| $CHANGELOG
+echo >| $CHANGELOG_FILE
 
 copyRemotePkgtools
 
