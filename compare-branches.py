@@ -88,6 +88,7 @@ def compare(repository, branchFrom, branchTo):
 # main
 args = parser.parse_args()
 branchFrom, branchTo = args.branchFrom, args.branchTo
+rc = 0
 
 print(HEADER1_TPL.format(branchFrom=branchFrom, branchTo=branchTo))
 
@@ -100,8 +101,12 @@ for repository in REPOSITORIES:
     print(OUTPUT_MERGE_TPL.format(status=status))
     if success:
       continue
+    else:
+      rc = 1
 
   ahead, behind, extra = compare(repository, branchFrom, branchTo)
   print(OUTPUT_COMPARE_TPL.format(ahead=ahead,
                                   behind=behind,
                                   extra=extra))
+
+sys.exit(1)
