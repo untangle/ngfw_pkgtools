@@ -9,7 +9,7 @@ import os.path as osp
 
 ## constants
 PROJECT = "NGFW"
-BASE_DIR = osp.join("/tmp", os.getenv('USER'))
+BASE_DIR = osp.join(os.getenv('HOME'), 'tmp')
 REMOTE_TPL = "git@github.com:untangle/{}_{}.git".format(PROJECT.lower(),'{}')
 BRANCH_TPL = "origin/release-{}"
 REPOSITORIES = ("src", "pkgs", "hades-pkgs", "kernels", "isotools-stretch")
