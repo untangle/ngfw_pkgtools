@@ -109,4 +109,4 @@ for repository in REPOSITORIES:
                                   behind=behind,
                                   extra=extra))
 
-sys.exit(1)
+sys.exit(rc)
