@@ -13,8 +13,18 @@ HEADER1_TPL = "{branchFrom} vs. {branchTo}"
 HEADER2_TPL = "    {repository}"
 OUTPUT_COMPARE_TPL = "        {ahead:>02} ahead, {behind:>02} behind {extra}"
 OUTPUT_MERGE_TPL = "        merge {status}"
-REPOSITORIES_STEMS = ('src', 'pkgs', 'hades-pkgs', 'isotools-stretch', 'upstream')
-REPOSITORIES = ('ngfw_' + x for x in REPOSITORIES_STEMS)
+
+NGFW_REPOSITORIES_STEMS = ('src', 'pkgs', 'hades-pkgs', 'isotools-stretch', 'upstream')
+NGFW_REPOSITORIES = ('ngfw_' + x for x in NGFW_REPOSITORIES_STEMS)
+
+MFW_REPOSITORIES_ = ('classd',
+                     'mfw_admin',
+                     'mfw_feeds',
+                     'nft_dict',
+                     'openwrt',
+                     'packetd',
+                     'pyconnector',
+                     'sync' )
 
 # CL options
 parser = argparse.ArgumentParser(description='''List differences
@@ -92,7 +102,7 @@ rc = 0
 
 print(HEADER1_TPL.format(branchFrom=branchFrom, branchTo=branchTo))
 
-for repository in REPOSITORIES:
+for repository in NGFW_REPOSITORIES:
   print()
   print(HEADER2_TPL.format(repository=repository))
 
