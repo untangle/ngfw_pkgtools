@@ -17,14 +17,17 @@ OUTPUT_MERGE_TPL = "        merge {status}"
 NGFW_REPOSITORIES_STEMS = ('src', 'pkgs', 'hades-pkgs', 'isotools-stretch', 'upstream')
 NGFW_REPOSITORIES = ('ngfw_' + x for x in NGFW_REPOSITORIES_STEMS)
 
-MFW_REPOSITORIES_ = ('classd',
-                     'mfw_admin',
-                     'mfw_feeds',
-                     'nft_dict',
-                     'openwrt',
-                     'packetd',
-                     'pyconnector',
-                     'sync' )
+MFW_REPOSITORIES = ('classd',
+                    'mfw_admin',
+                    'mfw_build',
+                    'mfw_feeds',
+                    'nft_dict',
+                    'openwrt',
+                    'packetd',
+                    'sync-settings' )
+
+REPOSITORIES = { 'mfw': MFW_REPOSITORIES,
+                 'ngfw': NGFW_REPOSITORIES }
 
 # CL options
 parser = argparse.ArgumentParser(description='''List differences
@@ -46,6 +49,16 @@ parser.add_argument('--branch-to', dest='branchTo',
                     metavar="BRANCH_TO",
                     help='target branch)')
 
+target = parser.add_mutually_exclusive_group(required=True)
+target.add_argument('--product', type=str, dest='product',
+                    metavar='PRODUCT',
+                    choices=('mfw', 'ngfw'),
+                    help='product to work on (mfw or ngfw)')
+target.add_argument('--repositories', type=str, dest='repositories',
+                    nargs='*',
+                    metavar='REPOSITORIES',
+                    help='list of space-separated repositories to target')
+
 # functions
 def getCompareUrl(repository, branchFrom, branchTo):
     return GITHUB_COMPARE_URL.format(repository=repository,
@@ -61,6 +74,10 @@ def getJson(url, headers, auth, postData = None):
     sc = r.status_code
     if sc == 401:
         print("Couldn't authenticate to GitHub, you need to export a valid GITHUB_TOKEN")
+        sys.exit(1)
+    if sc == 404:
+        print("Couldn't find URL '{}'".format(url))
+        print("... it means one of repository/branchFrom/branchTo does not exist")
         sys.exit(1)
     elif sc == 204:
         jsonData = None
@@ -89,7 +106,6 @@ def merge(repository, branchFrom, branchTo):
 def compare(repository, branchFrom, branchTo):
     url = getCompareUrl(repository, branchFrom, branchTo)
     sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN))
-
     ahead, behind = [ int(jsonData[x]) for x in ('ahead_by', 'behind_by') ]
     extra = "!!! Need to merge !!!" if ahead > 0 else ""
 
@@ -97,12 +113,18 @@ def compare(repository, branchFrom, branchTo):
 
 # main
 args = parser.parse_args()
+
+if args.repositories:
+    repositories = args.repositories
+else:
+    repositories = REPOSITORIES[args.product]
+
 branchFrom, branchTo = args.branchFrom, args.branchTo
 rc = 0
 
 print(HEADER1_TPL.format(branchFrom=branchFrom, branchTo=branchTo))
 
-for repository in NGFW_REPOSITORIES:
+for repository in repositories:
     print()
     print(HEADER2_TPL.format(repository=repository))
 
