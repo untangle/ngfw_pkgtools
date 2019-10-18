@@ -18,7 +18,7 @@ cat /etc/apt/sources.list
 
 str="$PACKAGE_NAME is available in"
 
-apt-get install --yes --force-yes apt-show-versions
+apt-get install --yes --force-yes apt-show-versions gawk
 
 # all distributions containing that version
 tmpFile=$(mktemp /tmp/${PACKAGE_NAME}-${REPOSITORY}-${DISTRIBUTION}-XXXXXX)
