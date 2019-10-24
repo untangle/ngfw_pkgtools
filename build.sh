@@ -9,7 +9,7 @@
 
 ## constants
 PKGTOOLS=$(dirname $(readlink -f $0))
-PKGTOOLS_VERSION=$(git describe --tags --always --long)
+PKGTOOLS_VERSION=$(pushd $PKGTOOLS > /dev/null ; git describe --tags --always --long --dirty ; popd > /dev/null)
 
 ## env
 REPOSITORY=${REPOSITORY:-buster}
@@ -28,6 +28,8 @@ make-pkgtools() {
 }
 
 ## main
+
+echo "pkgtools version ${PKGTOOLS_VERSION}"
 
 # do not gzip apt lists files (for apt-show-versions)
 rm /etc/apt/apt.conf.d/docker-gzip-indexes
