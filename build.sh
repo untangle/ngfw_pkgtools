@@ -20,7 +20,7 @@ UPLOAD=${UPLOAD} # empty default means "no upload"
 
 ## functions
 log() {
-  echo "=== " $@
+  echo "===" $@
 }
 
 make-pkgtools() {
@@ -49,17 +49,20 @@ awk -v repo=$REPOSITORY '$2 ~ repo {print $1}' build-order.txt | while read pkg 
   log "BEGIN $pkg"
 
   if ! grep -qE '^Architecture:.*(amd64|any|all)' ${pkg}/debian/control ; then
-    log "END $pkg NO-ARCH-MATCH"
+    log "NO-ARCH-MATCH $pkg"
     continue
   fi
 
   if [[ -n "$PACKAGE" ]] && ! [[ $pkg =~ $PACKAGE ]] ; then
-    log "END $pkg NO-PKG-MATCH"
+    log "NO-PKG-MATCH $pkg"
     continue
   fi
 
   pushd $pkg > /dev/null
 
+  logfile=/tmp/${REPOSITORY}-${DISTRIBUTION}-${pkg}.log
+
+  {
   # bump version and create source tarball
   make-pkgtools version source create-dest-dir
 
@@ -79,17 +82,24 @@ awk -v repo=$REPOSITORY '$2 ~ repo {print $1}' build-order.txt | while read pkg 
     apt build-dep -y .
 
     # build package
-    dpkg-buildpackage -sa --no-sign || reason="FAIL"
+    dpkg-buildpackage -sa --no-sign || reason="FAILURE"
 
     # upload only if needed
     if [[ -n "$UPLOAD" ]] ; then
-      make-pkgtools move-debian-files release || reason="FAIL"
+      make-pkgtools move-debian-files release || reason="FAILURE"
     fi
   fi
 
   # clean
   make-pkgtools clean-untangle-files clean-build
+  } > $logfile 2>&1
 
-  log "END $pkg $reason $version"
+  if [[ $reason == "FAIL" ]] ; then
+    cat $logfile
+  fi
+
+  rm -f $logfile
+
+  log "$reason $pkg $version"
   popd > /dev/null
 done
