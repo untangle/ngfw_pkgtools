@@ -36,13 +36,13 @@ rm /etc/apt/apt.conf.d/docker-gzip-indexes
 
 # add mirror targetting REPOSITORY & DISTRIBUTION
 echo "deb http://package-server/public/$REPOSITORY $DISTRIBUTION main non-free" > /etc/apt/sources.list.d/${DISTRIBUTION}.list
-apt-get update
+apt-get update -q
 
 # update u-d-build
-apt install -y untangle-development-build
+apt install -q -y untangle-development-build
 
 # install apt-show-versions
-apt install -y apt-show-versions
+apt install -q -y apt-show-versions
 
 # main return code
 rc=0
