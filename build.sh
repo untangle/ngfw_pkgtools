@@ -44,6 +44,9 @@ apt install -y untangle-development-build
 # install apt-show-versions
 apt install -y apt-show-versions
 
+# main return code
+rc=0
+
 # iterate over packages to build
 awk -v repo=$REPOSITORY '$2 ~ repo {print $1}' build-order.txt | while read pkg ; do
   log "BEGIN $pkg"
@@ -95,6 +98,7 @@ awk -v repo=$REPOSITORY '$2 ~ repo {print $1}' build-order.txt | while read pkg 
   } > $logfile 2>&1
 
   if [[ $reason == "FAIL" ]] ; then
+    rc=1 # global fail on 1st package fail
     cat $logfile
   fi
 
@@ -103,3 +107,5 @@ awk -v repo=$REPOSITORY '$2 ~ repo {print $1}' build-order.txt | while read pkg 
   log "$reason $pkg $version"
   popd > /dev/null
 done
+
+exit $rc
