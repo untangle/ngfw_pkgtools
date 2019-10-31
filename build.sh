@@ -82,7 +82,7 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo {print $1}' build-order.txt) ; d
     apt build-dep -y .
 
     # build package
-    dpkg-buildpackage -sa --no-sign || reason="FAILURE"
+    dpkg-buildpackage -i -sa --no-sign || reason="FAILURE"
 
     # upload only if needed
     if [[ -n "$UPLOAD" ]] ; then
