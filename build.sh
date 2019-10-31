@@ -31,9 +31,6 @@ make-pkgtools() {
 
 echo "pkgtools version ${PKGTOOLS_VERSION}"
 
-# do not gzip apt lists files (for apt-show-versions)
-rm /etc/apt/apt.conf.d/docker-gzip-indexes
-
 # add mirror targetting REPOSITORY & DISTRIBUTION
 echo "deb http://package-server/public/$REPOSITORY $DISTRIBUTION main non-free" > /etc/apt/sources.list.d/${DISTRIBUTION}.list
 apt-get update -q
@@ -41,8 +38,8 @@ apt-get update -q
 # update u-d-build
 apt install -q -y untangle-development-build
 
-# install apt-show-versions
-apt install -q -y apt-show-versions
+# update apt-show-versions cache
+apt-show-versions -i
 
 # main return code
 rc=0
