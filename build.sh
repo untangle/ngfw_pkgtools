@@ -91,7 +91,7 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo {print $1}' build-order.txt) ; d
   fi
 
   # clean
-  make-pkgtools clean-untangle-files clean-build
+  make-pkgtools move-debian-files clean-untangle-files clean-build
   } > $logfile 2>&1
 
   if [[ $reason == "FAILURE" ]] ; then
