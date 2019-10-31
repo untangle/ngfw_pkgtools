@@ -97,7 +97,7 @@ awk -v repo=$REPOSITORY '$2 ~ repo {print $1}' build-order.txt | while read pkg 
   make-pkgtools clean-untangle-files clean-build
   } > $logfile 2>&1
 
-  if [[ $reason == "FAIL" ]] ; then
+  if [[ $reason == "FAILURE" ]] ; then
     rc=1 # global fail on 1st package fail
     cat $logfile
   fi
