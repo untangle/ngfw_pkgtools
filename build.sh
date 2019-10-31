@@ -48,7 +48,7 @@ apt install -q -y apt-show-versions
 rc=0
 
 # iterate over packages to build
-awk -v repo=$REPOSITORY '$2 ~ repo {print $1}' build-order.txt | while read pkg ; do
+for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo {print $1}' build-order.txt) ; do
   log "BEGIN $pkg"
 
   if ! grep -qE '^Architecture:.*(amd64|any|all)' ${pkg}/debian/control ; then
@@ -98,7 +98,7 @@ awk -v repo=$REPOSITORY '$2 ~ repo {print $1}' build-order.txt | while read pkg 
   } > $logfile 2>&1
 
   if [[ $reason == "FAILURE" ]] ; then
-    rc=1 # global fail on 1st package fail
+    let rc=rc+1 # global failure count
     cat $logfile
   fi
 
