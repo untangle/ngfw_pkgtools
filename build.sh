@@ -16,6 +16,7 @@ REPOSITORY=${REPOSITORY:-buster}
 DISTRIBUTION=${DISTRIBUTION:-current}
 BRANCH=${BRANCH:-master}
 PACKAGE=${PACKAGE} # empty default means "all"
+VERBOSE=${VERBOSE} # empty means "not verbose"
 UPLOAD=${UPLOAD} # empty default means "no upload"
 
 ## functions
@@ -25,6 +26,40 @@ log() {
 
 make-pkgtools() {
   make -f ${PKGTOOLS}/Makefile DISTRIBUTION=${DISTRIBUTION} REPOSITORY=${REPOSITORY} $@
+}
+
+do-build() {
+  pkg=$1
+
+  # bump version and create source tarball
+  make-pkgtools version source create-dest-dir
+
+  # collect existing versions
+  version=$(cat debian/version)
+  output=$(apt-show-versions -p '^'${pkg}'$' -a -R)
+
+  # ... and build depending on that
+  if echo "$output" | grep -qP " ${version//+/.}" ; then # no need to build
+    # move orig tarball out of the way
+    make-pkgtools move-debian-files
+    reason="ALREADY-PRESENT"
+  else # build it
+    reason="SUCCESS"
+
+    # install build dependencies
+    apt build-dep -y .
+
+    # build package
+    dpkg-buildpackage -i.* -sa --no-sign || reason="FAILURE"
+
+    # upload only if needed
+    if [[ -n "$UPLOAD" ]] ; then
+      make-pkgtools move-debian-files release || reason="FAILURE"
+    fi
+  fi
+
+  # clean
+  make-pkgtools move-debian-files clean-untangle-files clean-build
 }
 
 ## main
@@ -62,41 +97,15 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo {print $1}' build-order.txt) ; d
 
   logfile=/tmp/${REPOSITORY}-${DISTRIBUTION}-${pkg}.log
 
-  {
-  # bump version and create source tarball
-  make-pkgtools version source create-dest-dir
-
-  # collect existing versions
-  version=$(cat debian/version)
-  output=$(apt-show-versions -p '^'${pkg}'$' -a -R)
-
-  # ... and build depending on that
-  if echo "$output" | grep -qP " ${version//+/.}" ; then # no need to build
-    # move orig tarball out of the way
-    make-pkgtools move-debian-files
-    reason="ALREADY-PRESENT"
-  else # build it
-    reason="SUCCESS"
-
-    # install build dependencies
-    apt build-dep -y .
-
-    # build package
-    dpkg-buildpackage -i.* -sa --no-sign || reason="FAILURE"
-
-    # upload only if needed
-    if [[ -n "$UPLOAD" ]] ; then
-      make-pkgtools move-debian-files release || reason="FAILURE"
-    fi
+  if [[ -n "$VERBOSE" ]] ; then
+    do-build $pkg 2>&1 | tee $logfile
+  else
+    do-build $pkg > $logfile 2>&1
   fi
-
-  # clean
-  make-pkgtools move-debian-files clean-untangle-files clean-build
-  } > $logfile 2>&1
 
   if [[ $reason == "FAILURE" ]] ; then
     let rc=rc+1 # global failure count
-    cat $logfile
+    [[ -n "$VERBOSE" ]] || cat $logfile
   fi
 
   rm -f $logfile
