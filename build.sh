@@ -95,7 +95,7 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo {print $1}' build-order.txt) ; d
 
   pushd $pkg > /dev/null
 
-  logfile=/tmp/${REPOSITORY}-${DISTRIBUTION}-${pkg}.log
+  logfile=/tmp/${REPOSITORY}-${DISTRIBUTION}-${$pkg//\//_}.log
 
   if [[ -n "$VERBOSE" ]] ; then
     do-build $pkg 2>&1 | tee $logfile
