@@ -88,7 +88,7 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-
     continue
   fi
 
-  if [[ -n "$PACKAGE" ]] && ! [[ $pkg =~ $PACKAGE ]] ; then
+  if [[ -n "$PACKAGE" ]] && ! [[ $pkg = $PACKAGE ]] ; then
     log "NO-PKG-MATCH $pkg"
     continue
   fi
