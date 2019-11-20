@@ -80,7 +80,7 @@ apt-show-versions -i
 rc=0
 
 # iterate over packages to build
-for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo {print $1}' build-order.txt) ; do
+for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-order.txt) ; do
   log "BEGIN $pkg"
 
   if ! grep -qE '^Architecture:.*(amd64|any|all)' ${pkg}/debian/control ; then
