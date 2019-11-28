@@ -36,7 +36,8 @@ do-build() {
 
   # collect existing versions
   version=$(cat debian/version)
-  output=$(apt-show-versions -p '^'${pkg}'$' -a -R)
+  binary_pkg=$(dh_listpackages $pkg | tail -1)
+  output=$(apt-show-versions -p '^'${binary_pkg}'$' -a -R)
 
   # ... and build depending on that
   if echo "$output" | grep -qP " ${version//+/.}" ; then # no need to build
