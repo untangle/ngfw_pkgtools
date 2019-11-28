@@ -21,7 +21,7 @@ UPLOAD=${UPLOAD} # empty default means "no upload"
 
 ## functions
 log() {
-  echo "===" $@
+  echo "=== " $@
 }
 
 make-pkgtools() {
@@ -54,7 +54,7 @@ do-build() {
     dpkg-buildpackage -i.* -sa --no-sign || reason="FAILURE"
 
     # upload only if needed
-    if [[ -n "$UPLOAD" ]] ; then
+    if [[ -n "$UPLOAD" && "$UPLOAD" != 0 ]] ; then
       make-pkgtools move-debian-files release || reason="FAILURE"
     fi
   fi
@@ -98,7 +98,7 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-
 
   logfile=/tmp/${REPOSITORY}-${DISTRIBUTION}-${pkg//\//_}.log
 
-  if [[ -n "$VERBOSE" ]] ; then
+  if [[ -n "$VERBOSE" && "VERBOSE" != 0 ]] ; then
     do-build $pkg 2>&1 | tee $logfile
   else
     do-build $pkg > $logfile 2>&1
