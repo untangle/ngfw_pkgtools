@@ -102,7 +102,7 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-
 
   logfile=/tmp/${REPOSITORY}-${DISTRIBUTION}-${pkg//\//_}.log
 
-  if [[ -n "$VERBOSE" && "VERBOSE" != 0 ]] ; then
+  if [[ -n "$VERBOSE" && "$VERBOSE" != 0 ]] ; then
     do-build $pkg 2>&1 | tee $logfile
     set $(tail -n 1 $logfile)
     reason=$1
@@ -113,7 +113,7 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-
 
   if [[ $reason == "FAILURE" ]] ; then
     let rc=rc+1 # global failure count
-    [[ -n "$VERBOSE" ]] || cat $logfile
+    [[ -n "$VERBOSE" && "$VERBOSE" != 0 ]] || cat $logfile
   fi
 
   rm -f $logfile
