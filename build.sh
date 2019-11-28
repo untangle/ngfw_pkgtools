@@ -61,6 +61,10 @@ do-build() {
 
   # clean
   make-pkgtools move-debian-files clean-untangle-files clean-build
+
+  # so it can be extracted by the calling shell when do-build is piped
+  # into tee in VERBOSE mode
+  echo $reason $version
 }
 
 ## main
@@ -100,6 +104,9 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-
 
   if [[ -n "$VERBOSE" && "VERBOSE" != 0 ]] ; then
     do-build $pkg 2>&1 | tee $logfile
+    set $(tail -n 1 $logfile)
+    reason=$1
+    version=$2
   else
     do-build $pkg > $logfile 2>&1
   fi
