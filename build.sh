@@ -55,7 +55,7 @@ do-build() {
 
     # upload only if needed
     if [[ -n "$UPLOAD" && "$UPLOAD" != 0 ]] ; then
-      make-pkgtools move-debian-files release || reason="FAILURE"
+      make-pkgtools DPUT_METHOD=${UPLOAD} move-debian-files release || reason="FAILURE"
     fi
   fi
 

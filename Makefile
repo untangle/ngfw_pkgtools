@@ -12,6 +12,7 @@ ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 PACKAGE_SERVER ?= package-server
 REPOSITORY ?= stretch
 TIMESTAMP ?= $(shell date "+%Y-%m-%dT%H%M%S_%N")
+DPUT_METHOD ?= ftp
 
 # binary upload
 ifneq ($(origin RECURSIVE), undefined)
@@ -175,7 +176,7 @@ kernel-module-chroot-real: checkroot parse-changelog create-dest-dir
 kernel-module-chroot: create-dest-dir create-chroot kernel-module-chroot-real
 
 release:
-	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER)_$(REPOSITORY) `cat $(DESTDIR_FILE)`/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
+	dput -c $(PKGTOOLS_DIR)/dput.cf $(PACKAGE_SERVER)_$(REPOSITORY)_$(DPUT_METHOD) `cat $(DESTDIR_FILE)`/$(SOURCE_NAME)_`perl -pe 's/^.+://' $(VERSION_FILE)`*.changes
 
 release-deb:
 	$(PKGTOOLS_DIR)/release-binary-packages.sh -A $(ARCH) -r $(REPOSITORY) -d $(DISTRIBUTION) $(REC)
