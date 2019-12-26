@@ -89,6 +89,11 @@ rc=0
 for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-order.txt) ; do
   log "BEGIN $pkg"
 
+  if [[ -n "$PACKAGE" ]] && ! [[ $pkg = $PACKAGE ]] ; then
+    log "NO-PKG-MATCH $pkg"
+    continue
+  fi
+
   # to build or not to build, depending on target architecture and
   # package specs
   arches_to_build="${ARCHITECTURE}|any" # always build arch-dep
@@ -97,11 +102,6 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-
   fi
   if ! grep -qE "^Architecture:.*(${arches_to_build})" ${pkg}/debian/control ; then
     log "NO-ARCHITECTURE-MATCH $pkg"
-    continue
-  fi
-
-  if [[ -n "$PACKAGE" ]] && ! [[ $pkg = $PACKAGE ]] ; then
-    log "NO-PKG-MATCH $pkg"
     continue
   fi
 
