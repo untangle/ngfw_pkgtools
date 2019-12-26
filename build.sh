@@ -55,7 +55,7 @@ do-build() {
     reason="SUCCESS"
 
     # install build dependencies
-    apt build-dep -y .
+    apt build-dep --host-architecture $ARCHITECTURE -y .
 
     # build package
     dpkg-buildpackage --host-arch $ARCHITECTURE -i.* -sa --no-sign || reason="FAILURE"
