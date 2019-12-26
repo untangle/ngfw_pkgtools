@@ -110,7 +110,7 @@ clean-chroot-files: clean-debian-files clean-untangle-files
 clean: clean-chroot-files clean-build remove-chroot remove-existence-chroot
 
 version-real: checkroot
-	bash $(PKGTOOLS_DIR)/incVersion.sh $(DISTRIBUTION) VERSION=$(VERSION) REPOSITORY=$(REPOSITORY)
+	bash $(PKGTOOLS_DIR)/set-version.sh $(DISTRIBUTION) VERSION=$(VERSION) REPOSITORY=$(REPOSITORY)
 version: version-real parse-changelog
 
 create-existence-chroot:
