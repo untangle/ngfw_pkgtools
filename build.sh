@@ -14,6 +14,7 @@ PKGTOOLS_VERSION=$(pushd $PKGTOOLS > /dev/null ; git describe --tags --always --
 ## env
 REPOSITORY=${REPOSITORY:-buster}
 DISTRIBUTION=${DISTRIBUTION:-current}
+ARCHITECTURE=${ARCHITECTURE:-$(dpkg-architecture -qDEB_BUILD_ARCH)}
 BRANCH=${BRANCH:-master}
 PACKAGE=${PACKAGE} # empty default means "all"
 VERBOSE=${VERBOSE} # empty means "not verbose"
@@ -51,7 +52,7 @@ do-build() {
     apt build-dep -y .
 
     # build package
-    dpkg-buildpackage -i.* -sa --no-sign || reason="FAILURE"
+    dpkg-buildpackage --host-arch $ARCHITECTURE -i.* -sa --no-sign || reason="FAILURE"
 
     # upload only if needed
     if [[ -n "$UPLOAD" && "$UPLOAD" != 0 ]] ; then
@@ -88,8 +89,14 @@ rc=0
 for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-order.txt) ; do
   log "BEGIN $pkg"
 
-  if ! grep -qE '^Architecture:.*(amd64|any|all)' ${pkg}/debian/control ; then
-    log "NO-ARCH-MATCH $pkg"
+  # to build or not to build, depending on target architecture and
+  # package specs
+  arches_to_build="${ARCHITECTURE}|any" # always build arch-dep
+  if [[ $ARCHITECTURE == "amd64" ]] ; then # also build arch-indep packages
+    arches_to_build="${arches_to_build}|all"
+  fi
+  if ! grep -qE "^Architecture:.*(${arches_to_build})" ${pkg}/debian/control ; then
+    log "NO-ARCHITECTURE-MATCH $pkg"
     continue
   fi
 
