@@ -37,11 +37,17 @@ do-build() {
 
   # collect existing versions
   version=$(cat debian/version)
-  binary_pkg=$(dh_listpackages $pkg | tail -1)
-  output=$(apt-show-versions -p '^'${binary_pkg}'$' -a -R)
+  is_present=1
+  for binary_pkg in $(dh_listpackages $pkg) ; do
+    output=$(apt-show-versions -p '^'${binary_pkg}'$' -a -R)
+    if ! echo "$output" | grep -qP ":(all|${ARCHITECTURE}) ${version//+/.}" ; then
+      is_present=0
+      break
+    fi
+  done
 
   # ... and build depending on that
-  if echo "$output" | grep -qP " ${version//+/.}" ; then # no need to build
+  if [[ $is_present == 1 ]] ; then
     # move orig tarball out of the way
     make-pkgtools move-debian-files
     reason="ALREADY-PRESENT"
