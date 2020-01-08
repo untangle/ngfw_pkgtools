@@ -31,6 +31,8 @@ make-pkgtools() {
 
 do-build() {
   pkg=$1
+  shift
+  dpkg_buildpackage_options="$@"
 
   # bump version and create source tarball
   make-pkgtools version source create-dest-dir
@@ -56,7 +58,7 @@ do-build() {
 
     # install build dependencies, and build package
     apt build-dep --host-architecture $ARCHITECTURE -y . \
-      && dpkg-buildpackage --host-arch $ARCHITECTURE -i.* -sa --no-sign || reason="FAILURE" \
+      && dpkg-buildpackage --host-arch $ARCHITECTURE -i.* $dpkg_buildpackage_options --no-sign || reason="FAILURE" \
       || reason=FAILURE
 
     # upload only if needed
@@ -99,8 +101,14 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-
   # to build or not to build, depending on target architecture and
   # package specs
   arches_to_build="${ARCHITECTURE}|any" # always build arch-dep
-  if [[ $ARCHITECTURE == "amd64" ]] ; then # also build arch-indep packages
+  if [[ $ARCHITECTURE == "amd64" ]] ; then
+    # also build arch-indep packages
     arches_to_build="${arches_to_build}|all"
+    # build source *and* binary packages
+    DPKG_BUILDPACKAGE_OPTIONS="-sa"
+  else
+    # only build binary packages
+    DPKG_BUILDPACKAGE_OPTIONS="-B"
   fi
   if ! grep -qE "^Architecture:.*(${arches_to_build})" ${pkg}/debian/control ; then
     log "NO-ARCHITECTURE-MATCH $pkg"
@@ -112,7 +120,7 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-
   logfile=/tmp/${REPOSITORY}-${DISTRIBUTION}-${pkg//\//_}.log
 
   if [[ -n "$VERBOSE" && "$VERBOSE" != 0 ]] ; then
-    do-build $pkg 2>&1 | tee $logfile
+    do-build $pkg $DPKG_BUILDPACKAGE_OPTIONS 2>&1 | tee $logfile
     set $(tail -n 1 $logfile)
     reason=$1
     version=$2
