@@ -54,14 +54,13 @@ do-build() {
   else # build it
     reason="SUCCESS"
 
-    # install build dependencies
-    apt build-dep --host-architecture $ARCHITECTURE -y .
-
-    # build package
-    dpkg-buildpackage --host-arch $ARCHITECTURE -i.* -sa --no-sign || reason="FAILURE"
+    # install build dependencies, and build package
+    apt build-dep --host-architecture $ARCHITECTURE -y . \
+      && dpkg-buildpackage --host-arch $ARCHITECTURE -i.* -sa --no-sign || reason="FAILURE" \
+      || reason=FAILURE
 
     # upload only if needed
-    if [[ -n "$UPLOAD" && "$UPLOAD" != 0 ]] ; then
+    if [[ reason != "FAILURE" && -n "$UPLOAD" && "$UPLOAD" != 0 ]] ; then
       make-pkgtools DPUT_METHOD=${UPLOAD} move-debian-files release || reason="FAILURE"
     fi
   fi
