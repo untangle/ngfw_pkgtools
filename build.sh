@@ -14,6 +14,7 @@ PKGTOOLS_VERSION=$(pushd $PKGTOOLS > /dev/null ; git describe --tags --always --
 ## env
 REPOSITORY=${REPOSITORY:-buster}
 DISTRIBUTION=${DISTRIBUTION:-current}
+ARCHITECTURE=${ARCHITECTURE:-$(dpkg-architecture -qDEB_BUILD_ARCH)}
 BRANCH=${BRANCH:-master}
 PACKAGE=${PACKAGE} # empty default means "all"
 VERBOSE=${VERBOSE} # empty means "not verbose"
@@ -36,26 +37,31 @@ do-build() {
 
   # collect existing versions
   version=$(cat debian/version)
-  binary_pkg=$(dh_listpackages $pkg | tail -1)
-  output=$(apt-show-versions -p '^'${binary_pkg}'$' -a -R)
+  is_present=1
+  for binary_pkg in $(dh_listpackages $pkg) ; do
+    output=$(apt-show-versions -p '^'${binary_pkg}'$' -a -R)
+    if ! echo "$output" | grep -qP ":(all|${ARCHITECTURE}) ${version//+/.}" ; then
+      is_present=0
+      break
+    fi
+  done
 
   # ... and build depending on that
-  if echo "$output" | grep -qP " ${version//+/.}" ; then # no need to build
+  if [[ $is_present == 1 ]] ; then
     # move orig tarball out of the way
     make-pkgtools move-debian-files
     reason="ALREADY-PRESENT"
   else # build it
     reason="SUCCESS"
 
-    # install build dependencies
-    apt build-dep -y .
-
-    # build package
-    dpkg-buildpackage -i.* -sa --no-sign || reason="FAILURE"
+    # install build dependencies, and build package
+    apt build-dep --host-architecture $ARCHITECTURE -y . \
+      && dpkg-buildpackage --host-arch $ARCHITECTURE -i.* -sa --no-sign || reason="FAILURE" \
+      || reason=FAILURE
 
     # upload only if needed
-    if [[ -n "$UPLOAD" && "$UPLOAD" != 0 ]] ; then
-      make-pkgtools move-debian-files release || reason="FAILURE"
+    if [[ reason != "FAILURE" && -n "$UPLOAD" && "$UPLOAD" != 0 ]] ; then
+      make-pkgtools DPUT_METHOD=${UPLOAD} move-debian-files release || reason="FAILURE"
     fi
   fi
 
@@ -85,13 +91,19 @@ rc=0
 for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-order.txt) ; do
   log "BEGIN $pkg"
 
-  if ! grep -qE '^Architecture:.*(amd64|any|all)' ${pkg}/debian/control ; then
-    log "NO-ARCH-MATCH $pkg"
+  if [[ -n "$PACKAGE" ]] && ! [[ $pkg = $PACKAGE ]] ; then
+    log "NO-PKG-MATCH $pkg"
     continue
   fi
 
-  if [[ -n "$PACKAGE" ]] && ! [[ $pkg = $PACKAGE ]] ; then
-    log "NO-PKG-MATCH $pkg"
+  # to build or not to build, depending on target architecture and
+  # package specs
+  arches_to_build="${ARCHITECTURE}|any" # always build arch-dep
+  if [[ $ARCHITECTURE == "amd64" ]] ; then # also build arch-indep packages
+    arches_to_build="${arches_to_build}|all"
+  fi
+  if ! grep -qE "^Architecture:.*(${arches_to_build})" ${pkg}/debian/control ; then
+    log "NO-ARCHITECTURE-MATCH $pkg"
     continue
   fi
 
