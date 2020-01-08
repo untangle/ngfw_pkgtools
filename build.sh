@@ -82,9 +82,6 @@ echo "pkgtools version ${PKGTOOLS_VERSION}"
 echo "deb http://package-server/public/$REPOSITORY $DISTRIBUTION main non-free" > /etc/apt/sources.list.d/${DISTRIBUTION}.list
 apt-get update -q
 
-# update u-d-build
-apt install -q -y untangle-development-build
-
 # update apt-show-versions cache
 apt-show-versions -i
 
