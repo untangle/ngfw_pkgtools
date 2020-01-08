@@ -19,6 +19,7 @@ BRANCH=${BRANCH:-master}
 PACKAGE=${PACKAGE} # empty default means "all"
 VERBOSE=${VERBOSE} # empty means "not verbose"
 UPLOAD=${UPLOAD} # empty default means "no upload"
+FORCE=${FORCE} # emtpy means "do not force build"
 
 ## functions
 log() {
@@ -40,13 +41,15 @@ do-build() {
   # collect existing versions
   version=$(cat debian/version)
   is_present=1
-  for binary_pkg in $(dh_listpackages $pkg) ; do
-    output=$(apt-show-versions -p '^'${binary_pkg}'$' -a -R)
-    if ! echo "$output" | grep -qP ":(all|${ARCHITECTURE}) ${version//+/.}" ; then
-      is_present=0
-      break
-    fi
-  done
+  if [[ -n "$FORCE" ]] ; then
+    for binary_pkg in $(dh_listpackages $pkg) ; do
+      output=$(apt-show-versions -p '^'${binary_pkg}'$' -a -R)
+      if ! echo "$output" | grep -qP ":(all|${ARCHITECTURE}) ${version//+/.}" ; then
+	is_present=0
+	break
+      fi
+    done
+  fi
 
   # ... and build depending on that
   if [[ $is_present == 1 ]] ; then
