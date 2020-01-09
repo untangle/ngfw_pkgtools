@@ -20,7 +20,7 @@ UPLOAD=${UPLOAD} # empty default means "no upload"
 FORCE=${FORCE} # emtpy means "do not force build"
 DEBUG=${DEBUG} # emtpy means "no debugging"
 
-if [[ -n "$DEBUG" ]] ;
+if [[ -n "$DEBUG" ]] ; then
    set -x
    VERBOSE=1 # also force VERBOSE
 fi
