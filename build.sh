@@ -5,8 +5,6 @@
 #
 # This is meant to be run in a disposable container.
 
-#set -x
-
 ## constants
 PKGTOOLS=$(dirname $(readlink -f $0))
 PKGTOOLS_VERSION=$(pushd $PKGTOOLS > /dev/null ; git describe --tags --always --long --dirty ; popd > /dev/null)
@@ -20,6 +18,9 @@ PACKAGE=${PACKAGE} # empty default means "all"
 VERBOSE=${VERBOSE} # empty means "not verbose"
 UPLOAD=${UPLOAD} # empty default means "no upload"
 FORCE=${FORCE} # emtpy means "do not force build"
+DEBUG=${DEBUG} # emtpy means "no debugging"
+
+[[ -n "$DEBUG" ]] && set -x
 
 ## functions
 log() {
