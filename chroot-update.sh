@@ -34,7 +34,7 @@ esac
 echo >| $SOURCES
 
 # for our own build-deps
-addSource "http://package-server/public/$REPOSITORY $DISTRIBUTION main main/debian-installer non-free citrix"
+addSource "http://package-server/public/$REPOSITORY $DISTRIBUTION main main/debian-installer non-free"
 
 # also search in current-$branch if not buildbot
 case $DISTRIBUTION in
@@ -42,7 +42,7 @@ case $DISTRIBUTION in
   *)
     case "$HOME" in
       *buildbot*) ;;
-      *) addSource "http://package-server/public/$REPOSITORY current${branch} main main/debian-installer non-free citrix"
+      *) addSource "http://package-server/public/$REPOSITORY current${branch} main main/debian-installer non-free"
     esac ;;
 esac
 
