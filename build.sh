@@ -37,11 +37,12 @@ do-build() {
 
   # bump version and create source tarball
   make-pkgtools version source create-dest-dir
+  version=$(cat debian/version)
 
   # collect existing versions
-  version=$(cat debian/version)
-  is_present=1
-  if [[ -n "$FORCE" ]] ; then
+  is_present=0
+  if [[ -z "$FORCE" ]] ; then
+    is_present=1
     for binary_pkg in $(dh_listpackages $pkg) ; do
       output=$(apt-show-versions -p '^'${binary_pkg}'$' -a -R)
       if ! echo "$output" | grep -qP ":(all|${ARCHITECTURE}) ${version//+/.}" ; then
