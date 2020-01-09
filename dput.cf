@@ -1,8 +1,39 @@
-[package-server_stretch]
+[package-server_stretch_ftp]
 fqdn = package-server
 method = ftp
 login = anonymous
 incoming = /stretch/incoming
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+[package-server_stretch_scp]
+fqdn = package-server
+method = scp
+login = buildbot
+ssh_config_options = StrictHostKeyChecking=no
+ IdentityFile=/tmp/travis-buildbot.rsa
+incoming = /var/www/public/stretch/incoming
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+[package-server_buster_ftp]
+fqdn = package-server
+method = ftp
+login = anonymous
+incoming = /buster/incoming
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+[package-server_buster_scp]
+fqdn = package-server
+method = scp
+login = buildbot
+ssh_config_options = StrictHostKeyChecking=no
+ IdentityFile=/tmp/travis-buildbot.rsa
+incoming = /var/www/public/buster/incoming
 allow_unsigned_uploads = 1
 run_dinstall = 0
 run_lintian = 0
