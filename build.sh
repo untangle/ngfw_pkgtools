@@ -20,7 +20,10 @@ UPLOAD=${UPLOAD} # empty default means "no upload"
 FORCE=${FORCE} # emtpy means "do not force build"
 DEBUG=${DEBUG} # emtpy means "no debugging"
 
-[[ -n "$DEBUG" ]] && set -x
+if [[ -n "$DEBUG" ]] ;
+   set -x
+   VERBOSE=1 # also force VERBOSE
+fi
 
 ## functions
 log() {
@@ -130,7 +133,7 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-
     reason=$1
     version=$2
   else
-    do-build $pkg > $logfile 2>&1
+    do-build $pkg $DPKG_BUILDPACKAGE_OPTIONS > $logfile 2>&1
   fi
 
   if [[ $reason == "FAILURE" ]] ; then
