@@ -40,7 +40,13 @@ do-build() {
   dpkg_buildpackage_options="$@"
 
   # bump version and create source tarball
-  make-pkgtools version source create-dest-dir
+  if [[ "$pkg" =~ "/linux-" ]] ; then
+    # for kernels, the version is manually managed
+    dpkg-parsechangelog -S Version > debian/version
+  else
+    make-pkgtools version source create-dest-dir
+  fi
+  make-pkgtools create-dest-dir
   version=$(cat debian/version)
 
   # collect existing versions
@@ -104,6 +110,13 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-
   if [[ -n "$PACKAGE" ]] && ! [[ $pkg = $PACKAGE ]] ; then
     log "NO-PKG-MATCH $pkg"
     continue
+  fi
+
+  # kernel source tree need to be prepared
+  if [[ "$pkg" =~ "/linux-" ]] ; then
+    pushd $(dirname "$pkg") > /dev/null
+    make patch version deps control-real
+    popd > /dev/null    
   fi
 
   # to build or not to build, depending on target architecture and
