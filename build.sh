@@ -34,6 +34,15 @@ make-pkgtools() {
   make -f ${PKGTOOLS}/Makefile DISTRIBUTION=${DISTRIBUTION} REPOSITORY=${REPOSITORY} $@
 }
 
+wait-for-pid() {
+  pid=$1
+  delay=30
+  while ps hp $pid > /dev/null ; do
+    echo "... still waiting for PID ${pid}, next check in ${delay}s"
+    sleep $delay
+  done
+}
+
 do-build() {
   pkg=$1
   shift
@@ -142,12 +151,15 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-
 
   if [[ -n "$VERBOSE" && "$VERBOSE" != 0 ]] ; then
     do-build $pkg $DPKG_BUILDPACKAGE_OPTIONS 2>&1 | tee $logfile
-    set $(tail -n 1 $logfile)
-    reason=$1
-    version=$2
   else
-    do-build $pkg $DPKG_BUILDPACKAGE_OPTIONS > $logfile 2>&1
+    do-build $pkg $DPKG_BUILDPACKAGE_OPTIONS > $logfile 2>&1 &
+    wait-for-pid $!
   fi
+
+  # always extract reason & version from logfile
+  set $(tail -n 1 $logfile)
+  reason=$1
+  version=$2
 
   if [[ $reason == "FAILURE" ]] ; then
     let rc=rc+1 # global failure count
