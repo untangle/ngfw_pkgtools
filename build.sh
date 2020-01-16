@@ -46,7 +46,7 @@ wait-for-pid() {
 install-build-deps() {
   pkg=$1
 
-  if [[ "$pkg" =~ "/linux-" ]] ; then
+  if [[ "$pkg" =~ "/linux-" ]] && [[ $ARCHITECTURE != "amd64" ]] ; then
     # when cross-building kernels, build-dep chokes trying to install:
     #   - the native version of python3-sphinx (which is arch-indep)
     #   - the native version of python3 which conflicts with
