@@ -66,6 +66,8 @@ do-build() {
   if [[ "$pkg" =~ "/linux-" ]] ; then
     # for kernels, the version is manually managed
     dpkg-parsechangelog -S Version > debian/version
+    # ... and we don't let dpkg-buildpackage check build-dependencies
+    dpkg_buildpackage_options="$dpkg_buildpackage_options -d"
   else
     make-pkgtools version source create-dest-dir
   fi
