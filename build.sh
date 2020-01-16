@@ -43,6 +43,20 @@ wait-for-pid() {
   done
 }
 
+install-build-deps() {
+  pkg=$1
+
+  if [[ "$pkg" =~ "/linux-" ]] ; then
+    # when cross-building kernels, build-dep chokes trying to install:
+    #   - the native version of python3-sphinx (which is arch-indep)
+    #   - the native version of python3 which conflicts with
+    #     core/build-essential dependencies
+    make -f ../Makefile ARCH=$ARCHITECTURE deps-crossbuild
+  else
+    apt build-dep -y --host-architecture $ARCHITECTURE .
+  fi
+}
+
 do-build() {
   pkg=$1
   shift
@@ -80,8 +94,8 @@ do-build() {
     reason="SUCCESS"
 
     # install build dependencies, and build package
-    apt build-dep --host-architecture $ARCHITECTURE -y . \
-      && dpkg-buildpackage --host-arch $ARCHITECTURE -i.* $dpkg_buildpackage_options --no-sign || reason="FAILURE" \
+    install-build-deps $pkg \
+      && dpkg-buildpackage --host-arch $ARCHITECTURE -i.* $dpkg_buildpackage_options --no-sign \
       || reason=FAILURE
 
     # upload only if needed
