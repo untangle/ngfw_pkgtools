@@ -67,6 +67,7 @@ do-build() {
     # for kernels, the version is manually managed
     dpkg-parsechangelog -S Version > debian/version
     # ... and we don't let dpkg-buildpackage check build-dependencies
+    # or build documentation packages
     dpkg_buildpackage_options="$dpkg_buildpackage_options -d --build-profiles=nodoc"
   else
     make-pkgtools version source create-dest-dir
