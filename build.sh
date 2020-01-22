@@ -36,9 +36,14 @@ make-pkgtools() {
 
 wait-for-pid() {
   pid=$1
-  delay=30
+  delay=1
+  delay_msg=30
+  i=0
   while ps hp $pid > /dev/null ; do
-    echo "... still waiting for PID ${pid}, next check in ${delay}s"
+    let i=i+1
+    if [[ $(( $i % $delay_msg )) = 0 ]] ; then
+      echo "... still waiting for PID ${pid} ever ${delay}s, next message in ${delay_msg}s"
+    fi
     sleep $delay
   done
 }
