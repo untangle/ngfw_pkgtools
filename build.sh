@@ -70,7 +70,7 @@ do-build() {
     # or build documentation packages
     dpkg_buildpackage_options="$dpkg_buildpackage_options -d --build-profiles=nodoc"
   else
-    make-pkgtools version source create-dest-dir
+    make-pkgtools version source
   fi
   make-pkgtools create-dest-dir
   version=$(cat debian/version)

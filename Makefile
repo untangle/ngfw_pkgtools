@@ -81,7 +81,7 @@ parse-changelog: # store version so we can use that later for uploading
 
 move-debian-files:
 	@find .. -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(upload\|changes\|udeb\|deb\|upload\|dsc\|build\|diff\.gz\|debian\.tar\.xz\|buildinfo\)' -exec mv "{}" `cat $(DESTDIR_FILE)` \;
-	@find .. -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec mv "{}" `cat $(DESTDIR_FILE)` \;
+	@find .. -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.*z" -exec mv "{}" `cat $(DESTDIR_FILE)` \;
 
 clean-build: checkroot
 	@fakeroot debian/rules clean
