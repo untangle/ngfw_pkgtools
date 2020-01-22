@@ -42,7 +42,7 @@ wait-for-pid() {
   while ps hp $pid > /dev/null ; do
     let i=i+1
     if [[ $(( $i % $delay_msg )) = 0 ]] ; then
-      echo "... still waiting for PID ${pid} ever ${delay}s, next message in ${delay_msg}s"
+      echo "... still waiting for PID ${pid} every ${delay}s, next message in ${delay_msg}s"
     fi
     sleep $delay
   done
