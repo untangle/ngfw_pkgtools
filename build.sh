@@ -67,6 +67,10 @@ do-build() {
   shift
   dpkg_buildpackage_options="$@"
 
+  # bring resources/ from pkgtools into the source directory we cd'ed
+  # in
+  cp -r ${PKGTOOLS}/resources ./
+
   # bump version and create source tarball
   if [[ "$pkg" =~ "/linux-" ]] ; then
     # for kernels, the version is manually managed
@@ -114,6 +118,7 @@ do-build() {
 
   # clean
   make-pkgtools move-debian-files clean-untangle-files clean-build
+  rm -fr resources
 
   # so it can be extracted by the calling shell when do-build is piped
   # into tee in VERBOSE mode
