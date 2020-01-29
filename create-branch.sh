@@ -68,8 +68,8 @@ rm -rf "${TEMP_DIST}"
 mkdir -p "$TEMP_DIST"
 pushd $TEMP_DIST
 
-for component in src pkgs hades-pkgs pkgtools isotools-stretch upstream sync-settings classd runtests ; do
-  component="ngfw_$component"
+for component in ngfw_src ngfw_pkgs ngfw_hades-pkgs ngfw_pkgtools ngfw_isotools-stretch ngfw_upstream sync-settings classd runtests ; do
+  component="$component"
   url="${GIT_BASE_URL}$component"
   git clone $url
   pushd $component
