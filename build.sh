@@ -13,7 +13,7 @@ PKGTOOLS_VERSION=$(pushd $PKGTOOLS > /dev/null ; git describe --tags --always --
 REPOSITORY=${REPOSITORY:-buster}
 DISTRIBUTION=${DISTRIBUTION:-current}
 ARCHITECTURE=${ARCHITECTURE:-$(dpkg-architecture -qDEB_BUILD_ARCH)}
-BRANCH=${BRANCH:-master}
+TRAVIS_BRANCH=${TRAVIS_BRANCH:-master}
 PACKAGE=${PACKAGE} # empty default means "all"
 VERBOSE=${VERBOSE} # empty means "not verbose"
 UPLOAD=${UPLOAD} # empty default means "no upload"
@@ -23,6 +23,13 @@ DEBUG=${DEBUG} # emtpy means "no debugging"
 if [[ -n "$DEBUG" ]] ; then
    set -x
    VERBOSE=1 # also force VERBOSE
+fi
+
+# only allow Travis to upload packages if it's building from official
+# branches; this means taking into account the pull requests targetting
+# those
+if ! echo $TRAVIS_BRANCH | grep -qP '^(master|release-[\d.]+)$' || [ "$TRAVIS_PULL_REQUEST" == "true" ] ; then 
+  export UPLOAD=
 fi
 
 ## functions
