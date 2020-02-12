@@ -10,10 +10,16 @@ PKGTOOLS=$(dirname $(readlink -f $0))
 PKGTOOLS_VERSION=$(pushd $PKGTOOLS > /dev/null ; git describe --tags --always --long --dirty ; popd > /dev/null)
 
 ## env
-REPOSITORY=${REPOSITORY:-buster}
-DISTRIBUTION=${DISTRIBUTION:-current}
+
+# arch default to the build arch
 ARCHITECTURE=${ARCHITECTURE:-$(dpkg-architecture -qDEB_BUILD_ARCH)}
-TRAVIS_BRANCH=${TRAVIS_BRANCH:-master}
+
+# the following variable re-assignments are no-ops, and are here just
+# for documentation
+REPOSITORY=${REPOSITORY}
+DISTRIBUTION=${DISTRIBUTION}
+TRAVIS_BRANCH=${TRAVIS_BRANCH}
+TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST}
 PACKAGE=${PACKAGE} # empty default means "all"
 VERBOSE=${VERBOSE} # empty means "not verbose"
 UPLOAD=${UPLOAD} # empty default means "no upload"
