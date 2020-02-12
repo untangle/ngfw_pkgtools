@@ -80,8 +80,7 @@ parse-changelog: # store version so we can use that later for uploading
 	@dpkg-parsechangelog | awk '/Version:/{print $$2}' >| $(VERSION_FILE)
 
 move-debian-files:
-	@find .. -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(upload\|changes\|udeb\|deb\|upload\|dsc\|build\|diff\.gz\|debian\.tar\.xz\|buildinfo\)' -exec mv "{}" `cat $(DESTDIR_FILE)` \;
-	@find .. -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.*z" -exec mv "{}" `cat $(DESTDIR_FILE)` \;
+	find .. -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*"  -regextype posix-extended -regex ".*[._](upload|changes|udeb|deb|upload|dsc|build|diff.gz|debian.tar\..z|buildinfo|orig\.tar\..z|$(ARCH)\.tar\..z)" -exec mv "{}" `cat $(DESTDIR_FILE)` \;
 
 clean-build: checkroot
 	@fakeroot debian/rules clean
@@ -94,8 +93,7 @@ clean-untangle-files: revert-changelog
 	@rm -f $(VERSION_FILE) $(DESTDIR_FILE)
 clean-debian-files:
 	@if [ -f $(DESTDIR_FILE) ] && [ -d `cat $(DESTDIR_FILE)` ] ; then \
-	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+://' $(VERSION_FILE)`*" -regex '.*\.\(changes\|deb\|upload\|dsc\|build\|diff\.gz\)' -exec rm -f "{}" \; ; \
-	  find `cat $(DESTDIR_FILE)` -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*orig.tar.gz" -exec rm -f "{}" \; ; \
+	  find .. -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*"  -regextype posix-extended -regex ".*[._](upload|changes|udeb|deb|upload|dsc|build|diff.gz|debian.tar\..z|buildinfo|orig\.tar\..z|$(ARCH)\.tar\..z)" -delete
 	fi
 
 get-upstream-source:
