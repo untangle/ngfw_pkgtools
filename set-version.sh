@@ -8,9 +8,9 @@ if [ ! $# -eq 3 ] ; then
 fi
 
 # env/constants
-TIMEZONE="US/Pacific"
-DEBEMAIL="${DEBEMAIL:-buildbot@untangle.com}"
-DEBFULLNAME="${DEBFULLNAME:-Untangle Buildbot}"
+export TZ="US/Pacific"
+export DEBEMAIL="${DEBEMAIL:-buildbot@untangle.com}"
+export DEBFULLNAME="${DEBFULLNAME:-Untangle Buildbot}"
 
 # CL args
 distribution=${1}
@@ -42,12 +42,18 @@ if [ -z "$version" ] ; then
   # control, but their parent dir is
   [[ $(pwd) == */ngfw_upstream/* ]] && d=.. || d=.
   revision=$(git log -n 1 --format="%h" -- $d)
-  # convert commit date to something to an ISO timestamp like
+
+  # convert commit date to debian/changelog format
+  timestampDch="$(git log -n 1 --date=format-local:'%a, %d %b %Y %T %z' --format='%cd' -- $d)"
+
+  # convert commit date to an ISO timestamp of the form
   # "2016-09-13T23:46:56-0700"
-  timestamp="$(TZ=US/Pacific git log -n 1 --date=iso-strict-local --format='%cd' -- $d)"
+  timestamp="$(git log -n 1 --date=iso-strict-local --format='%cd' -- $d)"
   # ... and then to "20160913T234656", accounting for weird
   # timezone format&separator
   timestamp=$(echo $timestamp | perl -pe 's/[-+][\d:]+$// ; s/[-:]//g')
+
+  # is this a clean git tree ?
   hasLocalChanges=$(git diff-index --name-only HEAD -- .)
 
   # this is the base version; it will be tweaked a bit if need be:
@@ -87,13 +93,20 @@ fi
 
 version=${version}${repository}
 
-# setup dch, and write new version
-DCH=$(mktemp /tmp/dch-XXXXX)
-/bin/cp -f /usr/bin/dch $DCH
-chmod 755 $DCH
-sed -i -e '/garbage/d' $DCH
-echo "Setting version to \"${version}\", distribution to \"$distribution\""
-DCHARGS="--preserve -v ${version} -D ${distribution}"
-DEBEMAIL="$DEBEMAIL" DEBFULLNAME="$DEBFULLNAME" $DCH $DCHARGS "auto build" 2> /dev/null
-rm -f $DCH
-echo " done."
+# setup dch
+dch=$(mktemp /tmp/dch-XXXXX)
+/bin/cp -f /usr/bin/dch $dch
+chmod 755 $dch
+sed -i -e '/garbage/d' $dch
+
+# write new version
+echo "Setting version='${version}' distribution='$distribution' timestamp='$timestampDch'"
+dchArgs="--preserve -v ${version} -D ${distribution}"
+$dch $dchArgs "auto build" 2> /dev/null
+
+# rewrite debian/changelog timestamp to commit timestamp
+awk -v ts="$timestampDch" 'NR == 5 { gsub(/\s\s.+/, "  " ts, $0) } { print }' debian/changelog > debian/changelog.dch
+mv -f debian/changelog.dch debian/changelog
+
+rm -f $dch
+echo "... done"
