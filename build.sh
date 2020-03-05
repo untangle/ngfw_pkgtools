@@ -162,6 +162,11 @@ Host *
 EOF
 fi
 
+if [[ "$1" == "setup-only" ]] ; then
+ # we're not interested in building packages
+ exit 0
+fi
+
 # update apt-show-versions cache
 apt-show-versions -i
 
