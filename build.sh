@@ -71,7 +71,7 @@ install-build-deps() {
     #     core/build-essential dependencies
     make -f ../Makefile ARCH=$ARCHITECTURE deps-crossbuild
   else
-    apt build-dep -y --host-architecture $ARCHITECTURE .
+    apt -o Dpkg::Options::="--force-overwrite" build-dep -y --host-architecture $ARCHITECTURE .
   fi
 }
 
