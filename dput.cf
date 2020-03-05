@@ -11,8 +11,6 @@ check_version = 0
 fqdn = package-server
 method = scp
 login = buildbot
-ssh_config_options = StrictHostKeyChecking=no
- IdentityFile=/tmp/travis-buildbot.rsa
 incoming = /var/www/public/stretch/incoming
 allow_unsigned_uploads = 1
 run_dinstall = 0
@@ -31,8 +29,6 @@ check_version = 0
 fqdn = package-server
 method = scp
 login = buildbot
-ssh_config_options = StrictHostKeyChecking=no
- IdentityFile=/tmp/travis-buildbot.rsa
 incoming = /var/www/public/buster/incoming
 allow_unsigned_uploads = 1
 run_dinstall = 0

@@ -70,6 +70,10 @@ install-build-deps() {
     #   - the native version of python3 which conflicts with
     #     core/build-essential dependencies
     make -f ../Makefile ARCH=$ARCHITECTURE deps-crossbuild
+  elif [[ "$pkg" =~ "/d-i" ]] && [[ $ARCHITECTURE != "amd64" ]] ; then
+    # when cross-building d-i, build-dep chokes trying to install the
+    # following packages and qforcing arch-spec
+    apt install -y apt-utils bf-utf-source mklibs win32-loader
   else
     apt -o Dpkg::Options::="--force-overwrite" build-dep -y --host-architecture $ARCHITECTURE .
   fi
@@ -145,6 +149,18 @@ echo "pkgtools version ${PKGTOOLS_VERSION}"
 # add mirror targetting REPOSITORY & DISTRIBUTION
 echo "deb http://package-server/public/$REPOSITORY $DISTRIBUTION main non-free" > /etc/apt/sources.list.d/${DISTRIBUTION}.list
 apt-get update -q
+
+# ssh
+if [[ "$SSH_KEY" =~ /tmp/ ]] ; then
+  eval $(ssh-add -s)
+  ssh-add $SSH_KEY
+  mkdir -p ~/.ssh
+  cat >> ~/.ssh/config <<EOF
+Host *
+  IdentityFile /tmp/travis-buildbot.rsa
+  StrictHostKeyChecking no
+EOF
+fi
 
 # update apt-show-versions cache
 apt-show-versions -i
