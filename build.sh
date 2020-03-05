@@ -25,6 +25,8 @@ VERBOSE=${VERBOSE} # empty means "not verbose"
 UPLOAD=${UPLOAD} # empty default means "no upload"
 FORCE=${FORCE} # emtpy means "do not force build"
 DEBUG=${DEBUG} # emtpy means "no debugging"
+SSH_KEY=${SSH_KEY} # empty means "no key"
+NO_CLEAN=${NO_CLEAN} # empty default means "perform cleaning post build"
 
 if [[ -n "$DEBUG" ]] ; then
    set -x
@@ -134,7 +136,8 @@ do-build() {
   fi
 
   # clean
-  make-pkgtools move-debian-files clean-untangle-files clean-build
+  make-pkgtools move-debian-files clean-untangle-files
+  [[ "$NO_CLEAN" == 1 ]] || make-pkgtools clean-build
   rm -fr resources
 
   # so it can be extracted by the calling shell when do-build is piped
