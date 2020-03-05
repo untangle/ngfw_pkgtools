@@ -105,7 +105,7 @@ dchArgs="--preserve -v ${version} -D ${distribution}"
 $dch $dchArgs "auto build" 2> /dev/null
 
 # rewrite debian/changelog timestamp to commit timestamp
-awk -v ts="$timestampDch" 'NR == 5 { gsub(/\s\s.+/, "  " ts, $0) } { print }' debian/changelog > debian/changelog.dch
+gawk -v ts="$timestampDch" 'NR == 5 { gsub(/\s\s.+/, "  " ts, $0) } { print }' debian/changelog > debian/changelog.dch
 mv -f debian/changelog.dch debian/changelog
 
 rm -f $dch
