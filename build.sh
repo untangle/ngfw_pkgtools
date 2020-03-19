@@ -33,6 +33,11 @@ if [[ -n "$DEBUG" ]] ; then
    VERBOSE=1 # also force VERBOSE
 fi
 
+# use default distribution from resources/ if none was passed
+if [[ -z "$DISTRIBUTION" ]] ; then
+  DISTRIBUTION=$(cat $PKGTOOLS/resources/DISTRIBUTION)
+fi
+
 # only allow Travis to upload packages if it's building from official
 # branches; this means taking into account the pull requests targetting
 # those
