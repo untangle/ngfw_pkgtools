@@ -41,7 +41,7 @@ fi
 # only allow Travis to upload packages if it's building from official
 # branches; this means taking into account the pull requests targetting
 # those
-if ! echo $TRAVIS_BRANCH | grep -qP '^(master|release-[\d.]+)$' || [ "$TRAVIS_PULL_REQUEST" == "true" ] ; then 
+if ! echo $TRAVIS_BRANCH | grep -qP '^(master|release-[\d.]+)$' || [ -n "$TRAVIS_PULL_REQUEST_BRANCH" ] ; then
   export UPLOAD=
 fi
 
