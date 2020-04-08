@@ -70,17 +70,14 @@ wait-for-pid() {
 
 install-build-deps() {
   pkg=$1
+  profiles=$2
 
-  if [[ "$pkg" =~ "/linux-" ]] && [[ $ARCHITECTURE != "amd64" ]] ; then
-    # when cross-building kernels, build-dep chokes trying to install:
-    #   - the native version of python3-sphinx (which is arch-indep)
-    #   - the native version of python3 which conflicts with
-    #     core/build-essential dependencies
-    make -f ../Makefile ARCH=$ARCHITECTURE deps-crossbuild
-  elif [[ "$pkg" =~ "/d-i" ]] && [[ $ARCHITECTURE != "amd64" ]] ; then
+  if [[ "$pkg" =~ "/d-i" ]] && [[ $ARCHITECTURE != "amd64" ]] ; then
     # when cross-building d-i, build-dep chokes trying to install the
     # following packages and qforcing arch-spec
     apt install -y apt-utils bf-utf-source mklibs win32-loader
+  elif [[ -n "$profiles" ]] ; then
+    apt -o Dpkg::Options::="--force-overwrite" build-dep -y --build-profiles $profiles --host-architecture $ARCHITECTURE .
   else
     apt -o Dpkg::Options::="--force-overwrite" build-dep -y --host-architecture $ARCHITECTURE .
   fi
@@ -99,9 +96,6 @@ do-build() {
   if [[ "$pkg" =~ "/linux-" ]] ; then
     # for kernels, the version is manually managed
     dpkg-parsechangelog -S Version > debian/version
-    # ... and we don't let dpkg-buildpackage check build-dependencies
-    # or build documentation packages
-    dpkg_buildpackage_options="$dpkg_buildpackage_options -d --build-profiles=nodoc"
   else
     make-pkgtools version
   fi
@@ -129,8 +123,14 @@ do-build() {
 
     make-pkgtools source
 
+    # set profiles, if any
+    if [[ -f debian/untangle-build-profiles ]] ; then
+      build_profiles=$(cat debian/untangle-build-profiles 2> /dev/null)
+      dpkg_buildpackage_options="$dpkg_buildpackage_options --build-profiles=$build_profiles"
+    fi
+
     # install build dependencies, and build package
-    install-build-deps $pkg \
+    install-build-deps $pkg "$build_profiles" \
       && dpkg-buildpackage --host-arch $ARCHITECTURE -i.* $dpkg_buildpackage_options --no-sign \
       || reason=FAILURE
 
@@ -190,7 +190,7 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-
     continue
   fi
 
-  # kernel source tree need to be prepared
+  # the kernel source tree needs to be prepared
   if [[ "$pkg" =~ "/linux-" ]] ; then
     pushd $(dirname "$pkg") > /dev/null
     make patch version control-real
