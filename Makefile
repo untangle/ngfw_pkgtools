@@ -91,10 +91,6 @@ clean-build: checkroot
 clean-untangle-files: revert-changelog
 	@rm -fr `cat $(DESTDIR_FILE) 2> /dev/null`
 	@rm -f $(VERSION_FILE) $(DESTDIR_FILE)
-clean-debian-files:
-	@if [ -f $(DESTDIR_FILE) ] && [ -d `cat $(DESTDIR_FILE)` ] ; then \
-	  find .. -maxdepth 1 -name "*`perl -pe 's/^.+:// ; s/-.*//' $(VERSION_FILE)`*"  -regextype posix-extended -regex ".*[._](upload|changes|udeb|deb|upload|dsc|build|diff.gz|debian.tar\..z|buildinfo|orig\.tar\..z|$(ARCH)\.tar\..z)" -delete
-	fi
 
 get-upstream-source:
 	source $(SOURCE_CONF) ; \
