@@ -141,8 +141,8 @@ do-build() {
   fi
 
   # clean
-  make-pkgtools move-debian-files clean-untangle-files
-  [[ "$NO_CLEAN" == 1 ]] || make-pkgtools clean-build
+  make-pkgtools move-debian-files
+  [[ "$NO_CLEAN" == 1 ]] || make-pkgtools clean-untangle-files clean-build
   rm -fr resources
 
   # so it can be extracted by the calling shell when do-build is piped
