@@ -144,7 +144,7 @@ do-build() {
       || reason=FAILURE
 
     # upload: never for d-i, and only if successful and UPLOAD specified
-    if ! [[ "$pkg" =~ "/d-i" ]] && [[ $reason != "FAILURE" && -n "$UPLOAD" && "$UPLOAD" != 0 ]] ; then
+    if [ "$pkg" != "d-i" && $reason != "FAILURE" && -n "$UPLOAD" && "$UPLOAD" != 0 ]] ; then
       make-pkgtools DPUT_METHOD=${UPLOAD} move-debian-files release || reason="FAILURE"
     fi
   fi
