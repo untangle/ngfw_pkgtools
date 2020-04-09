@@ -143,8 +143,8 @@ do-build() {
       && dpkg-buildpackage --host-arch $ARCHITECTURE -i.* $dpkg_buildpackage_options --no-sign \
       || reason=FAILURE
 
-    # upload only if needed
-    if [[ reason != "FAILURE" && -n "$UPLOAD" && "$UPLOAD" != 0 ]] ; then
+    # upload: never for d-i, and only if successful and UPLOAD specified
+    if ! [[ "$pkg" =~ "/d-i" ]] && [[ $reason != "FAILURE" && -n "$UPLOAD" && "$UPLOAD" != 0 ]] ; then
       make-pkgtools DPUT_METHOD=${UPLOAD} move-debian-files release || reason="FAILURE"
     fi
   fi
