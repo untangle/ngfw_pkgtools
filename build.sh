@@ -202,7 +202,7 @@ for pkg in $(awk -v repo=$REPOSITORY '$2 ~ repo && ! /^(#|$)/ {print $1}' build-
   # the kernel source tree needs to be prepared
   if [[ "$pkg" =~ "/linux-" ]] ; then
     pushd $(dirname "$pkg") > /dev/null
-    make patch version control-real
+    make patch control-real
     popd > /dev/null    
   fi
 
