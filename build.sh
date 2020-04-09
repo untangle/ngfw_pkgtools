@@ -128,8 +128,13 @@ do-build() {
     fi
 
     # set profiles, if any
+    if [[ $ARCHITECTURE != "amd64" ]] ; then
+      build_profiles="cross"
+    fi
     if [[ -f debian/untangle-build-profiles ]] ; then
-      build_profiles=$(cat debian/untangle-build-profiles 2> /dev/null)
+      build_profiles="${build_profiles},$(cat debian/untangle-build-profiles)"
+    fi
+    if [[ -n "$build_profiles" ]] ; then
       dpkg_buildpackage_options="$dpkg_buildpackage_options --build-profiles=$build_profiles"
     fi
 
