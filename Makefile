@@ -84,7 +84,7 @@ move-debian-files:
 
 clean-build: checkroot
 	@fakeroot debian/rules clean
-	@quilt pop -a || true
+	@quilt pop -a 2> /dev/null || true
 	@echo "Attempting to remove older *.deb files"
 	find . -type f -regex '\(.*-modules?-3.\(2\|16\).0-4.*\.deb\|core\)' -exec rm -f "{}" \;
 
@@ -125,7 +125,7 @@ check-existence: create-existence-chroot
 	sudo /usr/sbin/chroot $(CHROOT_EXISTENCE) /$(shell basename $(CHROOT_CHECK_PACKAGE_VERSION_SCRIPT)) "$${packageName}" $(shell cat $(VERSION_FILE)) $(REPOSITORY) $(DISTRIBUTION)
 
 source: checkroot parse-changelog
-	quilt pop -a || true
+	@quilt pop -a 2> /dev/null || true
 	tar cz --exclude="*stamp*.txt" \
 	       --exclude="*-stamp" \
 	       --exclude=".svn" --exclude="./debian" \
