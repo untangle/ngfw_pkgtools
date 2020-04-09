@@ -126,11 +126,11 @@ check-existence: create-existence-chroot
 
 source: checkroot parse-changelog
 	@quilt pop -a 2> /dev/null || true
-	tar cz --exclude="*stamp*.txt" \
+	tar ca --exclude="*stamp*.txt" \
 	       --exclude="*-stamp" \
 	       --exclude=".svn" --exclude="./debian" \
 	       --exclude="todo" --exclude="staging" --exclude=".git" \
-	       -f ../$(SOURCE_NAME)_`dpkg-parsechangelog | awk '/^Version:/{gsub(/(^.+:|-.*)/, "", $$2) ; print $$2}'`.orig.tar.gz ../$(CUR_DIR)
+	       -f ../$(SOURCE_NAME)_`dpkg-parsechangelog | awk '/^Version:/{gsub(/(^.+:|-.*)/, "", $$2) ; print $$2}'`.orig.tar.xz ../$(CUR_DIR)
 
 pkg-real: checkroot parse-changelog
 	/usr/bin/debuild $(DEBUILD_OPTIONS) $(DPKGBUILDPACKAGE_OPTIONS)
