@@ -92,7 +92,7 @@ do-build() {
   # in
   cp -r ${PKGTOOLS}/resources ./
 
-  # bump version and create source tarball
+  # bump version
   if [[ "$pkg" =~ "/linux-" ]] ; then
     # for kernels, the version is manually managed
     dpkg-parsechangelog -S Version > debian/version
@@ -121,7 +121,11 @@ do-build() {
   else # build it
     reason="SUCCESS"
 
-    make-pkgtools source
+    # for kernels, we already have a source tarball; for other
+    # packages, create one
+    if ! [[ "$pkg" =~ "/linux-" ]] ; then # 
+      make-pkgtools source
+    fi
 
     # set profiles, if any
     if [[ -f debian/untangle-build-profiles ]] ; then
