@@ -65,7 +65,7 @@ def formatCommit(commit, repo, tickets = None):
     return "{} ({})".format(s, ", ".join(tickets))
 
 def generateTag(version, tagType):
-  ts = datetime.datetime.now().strftime('%Y%m%dT%H')
+  ts = datetime.datetime.now().strftime('%Y%m%dT%H%M')
   return "{}-{}-{}".format(version, ts, tagType)
 
 def updateRepo(name):
