@@ -45,6 +45,9 @@ if ! echo $TRAVIS_BRANCH | grep -qP '^(master|release-[\d.]+)$' || [ -n "$TRAVIS
   export UPLOAD=
 fi
 
+# use http_proxy if defined for apt
+export http_proxy=$(perl -pe 's/.*"(.*?)".*/$1/' 2> /dev/null < /etc/apt/apt.conf.d/01proxy)
+
 ## functions
 log() {
   echo "=== " $@
