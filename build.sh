@@ -172,7 +172,7 @@ apt-get update -q
 
 # ssh
 if [[ "$SSH_KEY" =~ /tmp/ ]] ; then
-  eval $(ssh-add -s)
+  eval $(ssh-agent)
   ssh-add $SSH_KEY
   mkdir -p ~/.ssh
   cat >> ~/.ssh/config <<EOF
