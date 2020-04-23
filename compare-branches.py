@@ -1,6 +1,10 @@
 #! /usr/bin/env python3
 
-import argparse, json, os, requests, subprocess, sys
+import argparse
+import os
+import requests
+import sys
+
 
 # constants
 GITHUB_BASE_URL = 'https://api.github.com/repos/untangle/{repository}'
@@ -14,20 +18,79 @@ HEADER2_TPL = "    {repository}"
 OUTPUT_COMPARE_TPL = "        {ahead:>02} ahead, {behind:>02} behind {extra}"
 OUTPUT_MERGE_TPL = "        merge {status}"
 
-NGFW_REPOSITORIES_STEMS = ('src', 'pkgs', 'hades-pkgs', 'imgtools', 'upstream')
-NGFW_REPOSITORIES = ('ngfw_' + x for x in NGFW_REPOSITORIES_STEMS)
+NGFW_REPOSITORIES_STEMS = ['src', 'pkgs', 'hades-pkgs', 'imgtools', 'upstream']
+NGFW_REPOSITORIES = ['ngfw_' + x for x in NGFW_REPOSITORIES_STEMS] + ['debian-cloud-images']
 
-MFW_REPOSITORIES = ('classd',
+MFW_REPOSITORIES = ['classd',
                     'mfw_admin',
                     'mfw_build',
                     'mfw_feeds',
                     'nft_dict',
                     'openwrt',
                     'packetd',
-                    'sync-settings' )
+                    'sync-settings']
 
-REPOSITORIES = { 'mfw': MFW_REPOSITORIES,
-                 'ngfw': NGFW_REPOSITORIES }
+REPOSITORIES = {'mfw': MFW_REPOSITORIES,
+                'ngfw': NGFW_REPOSITORIES}
+
+
+# functions
+def getCompareUrl(repository, branchFrom, branchTo):
+    return GITHUB_COMPARE_URL.format(repository=repository,
+                                     branchFrom=branchFrom,
+                                     branchTo=branchTo)
+
+
+def getJson(url, headers, auth, postData = None):
+    if postData:
+        r = requests.post(url, headers = headers, auth = auth, json = postData)
+    else:
+        r = requests.get(url, headers = headers, auth = auth)
+
+    sc = r.status_code
+    if sc == 401:
+        print("Couldn't authenticate to GitHub, you need to export a valid GITHUB_TOKEN")
+        sys.exit(1)
+    if sc == 404:
+        print("Couldn't find URL '{}'".format(url))
+        print("... it means one of repository/branchFrom/branchTo does not exist")
+        sys.exit(1)
+    elif sc == 204:
+        jsonData = None
+    else:
+        jsonData = r.json()
+
+    return sc, jsonData
+
+
+def merge(repository, branchFrom, branchTo):
+    url = GITHUB_MERGE_URL.format(repository=repository)
+    postData = { 'base':branchTo, 'head':branchFrom, 'commit_message':'Merged by Jenkins'}
+    sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN), postData = postData)
+
+    if sc == 204:
+        success = True
+        status = 'SKIPPED: no need to merge'
+    elif sc == 201:
+        success = True
+        status = 'DONE: commitId=' + jsonData['sha']
+    else:
+        success = False
+        status = 'FAILED: conflicts'
+
+    return success, status
+
+
+def compare(repository, branchFrom, branchTo):
+    url = getCompareUrl(repository, branchFrom, branchTo)
+    sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN))
+    ahead, behind = [ int(jsonData[x]) for x in ('ahead_by', 'behind_by') ]
+    extra = "!!! Need to merge !!!" if ahead > 0 else ""
+
+    return ahead, behind, extra
+
+
+# main
 
 # CL options
 parser = argparse.ArgumentParser(description='''List differences
@@ -59,59 +122,6 @@ target.add_argument('--repositories', type=str, dest='repositories',
                     metavar='REPOSITORIES',
                     help='list of space-separated repositories to target')
 
-# functions
-def getCompareUrl(repository, branchFrom, branchTo):
-    return GITHUB_COMPARE_URL.format(repository=repository,
-                                     branchFrom=branchFrom,
-                                     branchTo=branchTo)
-
-def getJson(url, headers, auth, postData = None):
-    if postData:
-        r = requests.post(url, headers = headers, auth = auth, json = postData)
-    else:
-        r = requests.get(url, headers = headers, auth = auth)
-
-    sc = r.status_code
-    if sc == 401:
-        print("Couldn't authenticate to GitHub, you need to export a valid GITHUB_TOKEN")
-        sys.exit(1)
-    if sc == 404:
-        print("Couldn't find URL '{}'".format(url))
-        print("... it means one of repository/branchFrom/branchTo does not exist")
-        sys.exit(1)
-    elif sc == 204:
-        jsonData = None
-    else:
-        jsonData = r.json()
-
-    return sc, jsonData
-
-def merge(repository, branchFrom, branchTo):
-    url = GITHUB_MERGE_URL.format(repository=repository)
-    postData = { 'base':branchTo, 'head':branchFrom, 'commit_message':'Merged by Jenkins'}
-    sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN), postData = postData)
-
-    if sc == 204:
-        success = True
-        status = 'SKIPPED: no need to merge'
-    elif sc == 201:
-        success = True
-        status = 'DONE: commitId=' + jsonData['sha']
-    else:
-        success = False
-        status = 'FAILED: conflicts'
-
-    return success, status
-
-def compare(repository, branchFrom, branchTo):
-    url = getCompareUrl(repository, branchFrom, branchTo)
-    sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN))
-    ahead, behind = [ int(jsonData[x]) for x in ('ahead_by', 'behind_by') ]
-    extra = "!!! Need to merge !!!" if ahead > 0 else ""
-
-    return ahead, behind, extra
-
-# main
 args = parser.parse_args()
 
 if args.repositories:
