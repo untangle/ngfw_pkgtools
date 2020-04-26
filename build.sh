@@ -77,9 +77,12 @@ install-build-deps() {
 
   if [[ "$pkg" =~ "/d-i" ]] && [[ $ARCHITECTURE != "amd64" ]] ; then
     # when cross-building d-i, build-dep chokes trying to install the
-    # following packages and qforcing arch-spec
+    # following packages
     apt install -y apt-utils bf-utf-source mklibs win32-loader
   elif [[ -n "$profiles" ]] ; then
+    if [[ "$pkg" =~ "/linux-4.19" ]] && [[ $ARCHITECTURE == "i386" ]] ; then
+      apt install --yes libelf-dev:i386 libpci-dev:i386 libglib2.0-dev:i386 zlib1g-dev:i386 libmount-dev:i386 libpcre3-dev:i386 libselinux1-dev:i386 libc6-dev:i386 libblkid-dev:i386 linux-libc-dev:i386
+    fi
     apt -o Dpkg::Options::="--force-overwrite" build-dep -y --build-profiles $profiles --host-architecture $ARCHITECTURE .
   else
     apt -o Dpkg::Options::="--force-overwrite" build-dep -y --host-architecture $ARCHITECTURE .
