@@ -12,13 +12,11 @@ import os.path as osp
 import re
 import sys
 
+# relative to cwd
+from lib import *
+
 
 # constants
-PROJECT = "NGFW"
-BASE_DIR = osp.join(os.getenv('HOME'), 'tmp')
-REMOTE_TPL = "git@github.com:untangle/{}_{}.git".format(PROJECT.lower(),'{}')
-BRANCH_TPL = "origin/release-{}"
-REPOSITORIES = ("src", "pkgs", "hades-pkgs", "kernels", "imgtools", "debian-cloud-images")
 JIRA_FILTER = re.compile(r'{}-\d+'.format(PROJECT))
 CHANGELOG_FILTER = re.compile(r'@changelog')
 CHANGELOG_EXCLUDE_FILTER = re.compile(r'@exclude')
@@ -33,32 +31,9 @@ def formatCommit(commit, repo, tickets=None):
         return "{} ({})".format(s, ", ".join(tickets))
 
 
-def generateTag(version, tagType):
+def get_tag_name(version, tagType):
     ts = datetime.datetime.now().strftime('%Y%m%dT%H%M')
     return "{}-{}-{}".format(version, ts, tagType)
-
-
-def updateRepo(name, base_dir=BASE_DIR):
-    # create base_dir if needed
-    if not osp.isdir(base_dir):
-        os.makedirs(base_dir)
-
-    d = osp.join(base_dir, name)
-
-    repoUrl = REMOTE_TPL.format(name)
-    logging.info("looking at {}".format(repoUrl))
-
-    if osp.isdir(d):
-        logging.info("using existing {} ".format(d))
-        r = git.Repo(d)
-        o = r.remote('origin')
-        o.fetch()
-    else:
-        logging.info("cloning from remote into {} ".format(d))
-        r = git.Repo.clone_from(repoUrl, d)
-        o = r.remote('origin')
-
-    return r, o
 
 
 def findMostRecentTag(repo, version, tagType):
@@ -76,12 +51,6 @@ def findMostRecentTag(repo, version, tagType):
     old = tags[-1]
     logging.info("most recent tag: {}".format(old.name))
     return old
-
-
-def listCommits(repo, old, new):
-    sl = "{}...{}".format(old, new)
-    logging.info("running git log {}".format(sl))
-    yield from repo.iter_commits(sl)
 
 
 def filterCommit(commit):
@@ -105,13 +74,6 @@ def formatCommitList(l, sep = '\n'):
     return sep.join([formatCommit(*x) for x in l])
 
 
-def fullVersion(o):
-    if len(o.split('.')) != 3:
-        raise argparse.ArgumentTypeError("Not a valid full version (x.y.z)")
-    else:
-        return o
-
-
 # CL options
 parser = argparse.ArgumentParser(description='''List changelog entries
 between tags across multiple repositories.
@@ -132,7 +94,7 @@ parser.add_argument('--version', dest='version',
                                         required=True,
                                         default=None,
                                         metavar="VERSION",
-                                        type=fullVersion,
+                                        type=full_version,
                                         help='the version on which to base the diff. It needs to be of the form x.y.z, that means including the bugfix revision')
 mode = parser.add_mutually_exclusive_group(required=True)
 mode.add_argument('--tag-type', dest='tagType', action='store',
@@ -173,12 +135,12 @@ if __name__ == '__main__':
     allCommits = []
 
     # create tag name and message anyway
-    tagName = generateTag(args.version, args.tagType)
+    tagName = get_tag_name(args.version, args.tagType)
     tagMsg = "Automated tag creation: version={}, branch={}".format(args.version, new)
 
     # iterate over repositories
     for name in REPOSITORIES:
-        repo, origin = updateRepo(name, BASE_DIR)
+        repo, origin = get_repo(name, BASE_DIR)
 
         if not args.manualBoundaries:
             old = findMostRecentTag(repo, args.version, args.tagType).name
@@ -190,7 +152,7 @@ if __name__ == '__main__':
             except git.exc.BadName:
                 new = "origin/master"
 
-        for commit in listCommits(repo, old, new):
+        for commit in list_commits_between(repo, old, new):
             allCommits.append((commit, name, None))
 
             clCommit, tickets = filterCommit(commit)
