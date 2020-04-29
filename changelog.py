@@ -25,7 +25,7 @@ CHANGELOG_EXCLUDE_FILTER = re.compile(r'@exclude')
 
 
 # functions
-def formatCommit(commit, repo, tickets = None):
+def formatCommit(commit, repo, tickets=None):
     s = "{} [{}] {}".format(str(commit)[0:7], repo, commit.summary)
     if not tickets:
         return s
@@ -38,8 +38,13 @@ def generateTag(version, tagType):
     return "{}-{}-{}".format(version, ts, tagType)
 
 
-def updateRepo(name):
-    d = osp.join(BASE_DIR, name)
+def updateRepo(name, base_dir=BASE_DIR):
+    # create base_dir if needed
+    if not osp.isdir(base_dir):
+        os.makedirs(base_dir)
+
+    d = osp.join(base_dir, name)
+
     repoUrl = REMOTE_TPL.format(name)
     logging.info("looking at {}".format(repoUrl))
 
@@ -58,12 +63,12 @@ def updateRepo(name):
 
 def findMostRecentTag(repo, version, tagType):
     # filter tags by type first
-    tags = [ t for t in repo.tags if t.name.find(tagType) >= 0]
+    tags = [t for t in repo.tags if t.name.find(tagType) >= 0]
     # let's see if some of those are about the current version
-    versionTags = [ t for t in tags if t.name.find(version) >= 0 ]
+    versionTags = [t for t in tags if t.name.find(version) >= 0]
     if versionTags:
         tags = versionTags
-    tags = sorted(tags, key = lambda x: x.name)
+    tags = sorted(tags, key=lambda x: x.name)
     logging.info("found tags: {}".format(tags))
     if not tags:
         logging.error("no tags found, aborting")
@@ -171,13 +176,9 @@ if __name__ == '__main__':
     tagName = generateTag(args.version, args.tagType)
     tagMsg = "Automated tag creation: version={}, branch={}".format(args.version, new)
 
-    # create tmp dir
-    if not osp.isdir(BASE_DIR):
-        os.makedirs(BASE_DIR)
-
     # iterate over repositories
     for name in REPOSITORIES:
-        repo, origin = updateRepo(name)
+        repo, origin = updateRepo(name, BASE_DIR)
 
         if not args.manualBoundaries:
             old = findMostRecentTag(repo, args.version, args.tagType).name
