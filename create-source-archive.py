@@ -82,10 +82,10 @@ def upload(archive, version, user=NETBOOT_USER, host=NETBOOT_HOST, directory=NET
 
     logging.info("uploading to {}".format(dst))
     cmd = "scp -q {} {}".format(archive, dst)
-    # rc = subprocess.run(cmd, shell=True)
-    # if rc != 0:
-    #     logging.error("could not upload")
-    #     sys.exit(rc)
+    rc = subprocess.run(cmd, shell=True)
+    if rc != 0:
+        logging.error("could not upload")
+        sys.exit(rc)
 
     logging.info("available at {}".format(get_remote_archive_url(version)))
 
