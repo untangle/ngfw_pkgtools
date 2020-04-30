@@ -98,7 +98,7 @@ if __name__ == '__main__':
     # logging
     logging.getLogger().setLevel(getattr(logging, args.logLevel.upper()))
     console = logging.StreamHandler(sys.stderr)
-    formatter = logging.Formatter('[%(asctime)s] changelog: %(levelname)-7s %(message)s')
+    formatter = logging.Formatter('[%(asctime)s] archive: %(levelname)-7s %(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
 
