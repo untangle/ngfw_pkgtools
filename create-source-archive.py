@@ -33,7 +33,7 @@ parser = argparse.ArgumentParser(description='Create archive for {}'.format(PROJ
 
 parser.add_argument('--log-level', dest='logLevel',
                     choices=['debug', 'info', 'warning'],
-                    default='warning',
+                    default='info',
                     help='level at which to log')
 parser.add_argument('--archive', dest='archive',
                     action='store',
