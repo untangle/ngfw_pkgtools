@@ -44,3 +44,8 @@ def full_version(o):
         raise argparse.ArgumentTypeError("Not a valid full version (x.y.z)")
     else:
         return o
+
+
+def archive_repo_lz(repo, dst, treeish='master'):
+    logging.info("creating archive {} from {}".format(dst, treeish))
+    repo.archive(lzma.open(dst, 'w'), treeish=treeish)
