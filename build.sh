@@ -153,7 +153,7 @@ do-build() {
   fi
 
   # clean
-  make-pkgtools move-debian-files
+  [[ "$UPLOAD" == "local" ]] || make-pkgtools move-debian-files
   [[ "$NO_CLEAN" == 1 ]] || make-pkgtools clean-untangle-files clean-build
   rm -fr resources
 
