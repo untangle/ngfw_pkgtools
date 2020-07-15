@@ -126,13 +126,17 @@ do-build() {
 
     # for kernels, we already have a source tarball; for other
     # packages, create one
-    if ! [[ "$pkg" =~ "/linux-" ]] ; then # 
+    if ! [[ "$pkg" =~ "/linux-" ]] ; then
       make-pkgtools source
     fi
 
     # set profiles, if any
     if [[ $ARCHITECTURE != "amd64" ]] ; then
       build_profiles="cross"
+      if [[ $ARCHITECTURE = "arm64" ]] &&  [[ "$pkg" =~ "/linux-" ]] ; then
+	# FIXME: add pkg.linux.notools to profiles for now (NGFW-13152)
+	build_profiles="${build_profiles},pkg.linux.notools"
+      fi
     fi
     if [[ -f debian/untangle-build-profiles ]] ; then
       build_profiles="${build_profiles},$(cat debian/untangle-build-profiles)"
