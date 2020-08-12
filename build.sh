@@ -12,7 +12,8 @@ PKGTOOLS_VERSION=$(pushd $PKGTOOLS > /dev/null ; git describe --tags --always --
 ## env
 
 # arch default to the build arch
-ARCHITECTURE=${ARCHITECTURE:-$(dpkg-architecture -qDEB_BUILD_ARCH)}
+BUILD_ARCHITECTURE=$(dpkg-architecture -qDEB_BUILD_ARCH)
+ARCHITECTURE=${ARCHITECTURE:-${BUILD_ARCHITECTURE}}
 
 # the following variable re-assignments are no-ops, and are here just
 # for documentation
@@ -75,7 +76,7 @@ install-build-deps() {
   pkg=$1
   profiles=$2
 
-  if [[ "$pkg" =~ "/d-i" ]] && [[ $ARCHITECTURE != "amd64" ]] ; then
+  if [[ "$pkg" =~ "/d-i" ]] && [[ $ARCHITECTURE != $BUILD_ARCHITECTURE ]] ; then
     # when cross-building d-i, build-dep chokes trying to install the
     # following packages
     apt install -y apt-utils bf-utf-source mklibs win32-loader
@@ -131,7 +132,7 @@ do-build() {
     fi
 
     # set profiles, if any
-    if [[ $ARCHITECTURE != "amd64" ]] ; then
+    if [[ $ARCHITECTURE != $BUILD_ARCHITECTURE ]] ; then
       build_profiles="cross"
       if [[ $ARCHITECTURE = "arm64" ]] &&  [[ "$pkg" =~ "/linux-" ]] ; then
 	# FIXME: add pkg.linux.notools to profiles for now (NGFW-13152)
