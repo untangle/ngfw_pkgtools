@@ -25,6 +25,6 @@ ADD config.yaml suppressed-tags.txt ./
 RUN perl -i -pe 's|(?=suppressed-tags.txt)|/opt/|' config.yaml
 
 VOLUME /var/www/lintian-reports
-VOLUME /var/www/public/stretch
+VOLUME /var/www/public/buster
 
 ENTRYPOINT [ "lintian/reporting/harness" ]

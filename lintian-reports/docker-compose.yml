@@ -3,6 +3,6 @@ services:
   lintian-reports:
     image: untangleinc/ngfw:lintian
     volumes:
-      - /var/www/public/stretch:/var/www/public/stretch
+      - /var/www/public/buster:/var/www/public/buster
       - /var/www/lintian-reports:/var/www/lintian-reports
     command: -i --to-stdout
