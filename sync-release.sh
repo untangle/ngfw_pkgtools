@@ -49,7 +49,7 @@ if [ -z "$simulate" ] ; then
 
   repreproRemote export ${VERSION}
 else
-  repreproRemote "checkupdate $VERSION 2>&1 | grep upgraded | sort -u"
+  repreproRemote "checkupdate $VERSION 2>&1 | grep -E '(upgraded|newly installed)' | sort -u"
 fi
 
 # remove remote pkgtools
