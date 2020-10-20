@@ -110,7 +110,7 @@ do-build() {
   is_present=0
   if [[ -z "$FORCE" ]] ; then
     is_present=1
-    for binary_pkg in $(dh_listpackages $pkg) ; do
+    for binary_pkg in $(DEB_HOST_ARCH="$ARCHITECTURE" dh_listpackages $pkg) ; do
       output=$(apt-show-versions -p '^'${binary_pkg}'$' -a -R)
       if ! echo "$output" | grep -qP ":(all|${ARCHITECTURE}) ${version//+/.}" ; then
 	is_present=0
