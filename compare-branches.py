@@ -26,7 +26,7 @@ MFW_REPOSITORIES = ['classd',
                     'mfw_build',
                     'mfw_feeds',
                     'nft_dict',
-                    'openwrt',
+#                    'openwrt',
                     'packetd',
                     'sync-settings']
 
