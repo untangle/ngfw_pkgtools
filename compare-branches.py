@@ -22,9 +22,12 @@ NGFW_REPOSITORIES_STEMS = ['src', 'pkgs', 'hades-pkgs', 'imgtools', 'upstream', 
 NGFW_REPOSITORIES = ['ngfw_' + x for x in NGFW_REPOSITORIES_STEMS] + ['debian-cloud-images']
 
 MFW_REPOSITORIES = ['classd',
+                    'client-license-service',
                     'mfw_admin',
                     'mfw_build',
                     'mfw_feeds',
+                    'mfw_schema',
+                    'mfw_ui',
                     'nft_dict',
 #                    'openwrt',
                     'packetd',
