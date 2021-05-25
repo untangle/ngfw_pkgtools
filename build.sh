@@ -8,8 +8,11 @@
 ## constants
 PKGTOOLS=$(dirname $(readlink -f $0))
 PKGTOOLS_VERSION=$(pushd $PKGTOOLS > /dev/null ; git describe --tags --always --long --dirty ; popd > /dev/null)
+VERSION_FILE=debian/version
 
 ## env
+export CCACHE_DISABLE=true
+export CCACHE_DIR=/tmp
 
 # arch default to the build arch
 BUILD_ARCHITECTURE=$(dpkg-architecture -qDEB_BUILD_ARCH)
@@ -54,10 +57,6 @@ log() {
   echo "=== " $@
 }
 
-make-pkgtools() {
-  make -f ${PKGTOOLS}/Makefile DISTRIBUTION=${DISTRIBUTION} REPOSITORY=${REPOSITORY} $@
-}
-
 wait-for-pid() {
   pid=$1
   delay=1
@@ -92,19 +91,20 @@ do-build() {
   shift
   dpkg_buildpackage_options="$@"
 
+  source_name=$(dpkg-parsechangelog -S source)
+
   # bring resources/ from pkgtools into the source directory we cd'ed
   # in
   cp -r ${PKGTOOLS}/resources ./
 
-  # bump version
-  if [[ "$pkg" =~ "/linux-" ]] ; then
-    # for kernels, the version is manually managed
-    dpkg-parsechangelog -S Version > debian/version
-  else
-    make-pkgtools version
+  # bump version, except for kernels where it's manually managed
+  if ! [[ "$pkg" =~ "/linux-" ]] ; then
+    bash ${PKGTOOLS}/set-version.sh $DISTRIBUTION $REPOSITORY
   fi
-  make-pkgtools create-dest-dir
-  version=$(cat debian/version)
+
+  # store this version
+  version=$(dpkg-parsechangelog -S Version)
+  echo $version >| $VERSION_FILE
 
   # collect existing versions
   is_present=0
@@ -126,9 +126,16 @@ do-build() {
     reason="SUCCESS"
 
     # for kernels, we already have a source tarball; for other
-    # packages, create one
+    # packages, create an ad-hoc one
     if ! [[ "$pkg" =~ "/linux-" ]] ; then
-      make-pkgtools source
+      quilt pop -a 2> /dev/null || true
+      tar ca --exclude="*stamp*.txt" \
+	     --exclude="*-stamp" \
+	     --exclude="./debian" \
+	     --exclude="todo" \
+	     --exclude="staging" \
+	     --exclude=".git" \
+	     -f ../${source_name}_$(echo $version | perl -pe 's/(^\d+:|-.*)//').orig.tar.xz ../$(basename $pkg)
     fi
 
     # set profiles, if any
@@ -153,13 +160,25 @@ do-build() {
 
     # upload: never for d-i, and only if successful and UPLOAD specified
     if [[ "$pkg" != "d-i" && $reason != "FAILURE" && -n "$UPLOAD" && "$UPLOAD" != 0 ]] ; then
-      make-pkgtools DPUT_METHOD=${UPLOAD} move-debian-files release || reason="FAILURE"
+      dput_profile=package-server_${REPOSITORY}_${UPLOAD}
+      changes_file=../${source_name}_$(perl -pe 's/^.+://' ${VERSION_FILE})*.changes
+      dput -c ${PKGTOOLS}/dput.cf $dput_profile $changes_file || reason="FAILURE"
     fi
   fi
 
   # clean
-  [[ "$UPLOAD" == "local" ]] || make-pkgtools move-debian-files
-  [[ "$NO_CLEAN" == 1 ]] || make-pkgtools clean-untangle-files clean-build
+  if [[ "$UPLOAD" != "local" ]] ; then
+    find .. -maxdepth 1 -name "*$(perl -pe 's/(^.+:|-.*)//' ${VERSION_FILE})*"  -regextype posix-extended -regex ".*[._](upload|changes|udeb|deb|upload|dsc|build|buildinfo|diff.gz|debian.tar\..z|orig\.tar\..z|${ARCHITECTURE}\.tar\..z)" -delete
+  fi
+
+  if [[ "$NO_CLEAN" != 1 ]] ; then
+    git checkout -- debian/changelog 2>&1 || true
+    rm -f $VERSION_FILE
+    fakeroot debian/rules clean
+    quilt pop -a 2> /dev/null || true
+    find . -type f -regex '\(.*-modules?-3.\(2\|16\).0-4.*\.deb\|core\)' -exec rm -f "{}" \;
+  fi
+
   rm -fr resources
 
   # so it can be extracted by the calling shell when do-build is piped
