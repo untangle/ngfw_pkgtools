@@ -2,16 +2,29 @@
 
 set -e
 
+## constants
+PKGTOOLS=$(dirname $(readlink -f $0))
+USER=buildbot
+BASE_DIR=/var/www/public
+
+## functions
 usage() {
   echo "Usage: $0 -r <repository> -d <distribution> [-h host] [-A architecture] [-a]"
   echo -e "\t-a : all (recurse into subdirectories)"
+  echo -e "\t-r : repository to target"
+  echo -e "\t-d : distribution to target"
+  echo -e "\t-h : host to upload to"
   echo -e "\t-A <arch> : only act on architecture <arch>"
   exit 1
 }
 
+## main
+HOST=package-server.untangle.int
+ARCH=amd64
+DISTRIBUTION=$(cat $PKGTOOLS/resources/DISTRIBUTION)
 MAX_DEPTH="-maxdepth 1"
 
-while getopts "r:d:A:ah?" opt ; do
+while getopts "r:d:A:h:a?" opt ; do
   case "$opt" in
     r) REPOSITORY=$OPTARG ;;
     d) DISTRIBUTION=$OPTARG ;;
@@ -21,8 +34,6 @@ while getopts "r:d:A:ah?" opt ; do
     h|\?) usage ;;
   esac
 done
-ARCH=${ARCH:-amd64}
-HOST=${HOST:-package-server}
 
 [ -z "$REPOSITORY" ] || [ -z "$DISTRIBUTION" ] && usage
 
@@ -42,7 +53,7 @@ if [ -n "$DEBS" ] ; then
 
   MANIFESTS=$(find . $MAXDEPTH -name "*.manifest" | xargs)
 
-  [ -n "$MANIFESTS" ] && lftp -e "set net:max-retries 1 ; cd $REPOSITORY/incoming ; put $DEBS $UDEBS $MANIFESTS ; exit" $HOST
+  [ -n "$MANIFESTS" ] && scp $DEBS $UDEBS $MANIFESTS $USER@$HOST:$BASE_DIR/$REPOSITORY/incoming
 
   rm -f $MANIFESTS
 fi

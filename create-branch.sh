@@ -18,7 +18,7 @@ set_resources_branch() {
 
 ## constants
 GIT_BASE_URL="git@github.com:untangle"
-REPOSITORIES="ngfw_pkgtools ngfw_src ngfw_pkgs ngfw_hades-pkgs ngfw_imgtools ngfw_kernels debian-cloud-images ngfw_upstream sync-settings classd runtests"
+REPOSITORIES="ngfw_pkgtools ngfw_src ngfw_pkgs ngfw_hades-pkgs ngfw_vendor-pkgs ngfw_imgtools ngfw_kernels debian-cloud-images ngfw_upstream sync-settings classd runtests"
 
 
 ## main
