@@ -53,7 +53,7 @@ if [ -n "$DEBS" ] ; then
 
   MANIFESTS=$(find . $MAXDEPTH -name "*.manifest" | xargs)
 
-  [ -n "$MANIFESTS" ] && scp $DEBS $UDEBS $MANIFESTS $USER@$HOST:$BASE_DIR/$REPOSITORY/incoming
+  [ -n "$MANIFESTS" ] && scp -o StrictHostKeyChecking=no $DEBS $UDEBS $MANIFESTS $USER@$HOST:$BASE_DIR/$REPOSITORY/incoming
 
   rm -f $MANIFESTS
 fi
