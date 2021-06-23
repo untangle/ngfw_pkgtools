@@ -31,7 +31,7 @@ shift $(($OPTIND - 1))
 [ -n "$REGEX" -a -n "$NREGEX" ] && usage && exit 1
 [ -z "$REGEX" -a -z "$NREGEX" ] && REGEX="-E ."
 
-. `dirname $0`/release-constants.sh
+. $(dirname $0)/lib/constants.sh
 
 list=`repreproLocal $EXTRA_ARGS listfilter ${DISTRIBUTION} Package | grep $REGEX $NREGEX | awk '{print $2}' | sort -u`
 

@@ -32,7 +32,7 @@ fi
 # MAIN
 
 # include common variables
-. $(dirname $0)/release-constants.sh
+. $(dirname $0)/lib/constants.sh
 CHANGELOG_FILE="sync.txt"
 
 # start with a clean changelog, as the one from the previous run might

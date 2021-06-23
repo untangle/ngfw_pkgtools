@@ -20,7 +20,7 @@ HOST="package-server"
 
 [ -z "$REPOSITORY" -o -z "$FROM_DISTRIBUTION" -o -z "$TO_DISTRIBUTION" -o -z "$SOURCE_PKG" ] && usage && exit 1
 
-. $(dirname $0)/release-constants.sh
+. $(dirname $0)/lib/constants.sh
 
 $PKGTOOLS/${REPREPRO_COMMAND} copysrc ${FROM_DISTRIBUTION} ${TO_DISTRIBUTION} ${SOURCE_PKG}
 
