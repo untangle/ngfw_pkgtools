@@ -37,24 +37,16 @@ if [[ -n "$DEBUG" ]] ; then
    VERBOSE=1 # also force VERBOSE
 fi
 
-# use default distribution from resources/ if none was passed
-if [[ -z "$DISTRIBUTION" ]] ; then
-  DISTRIBUTION=$(cat $PKGTOOLS/resources/DISTRIBUTION)
-fi
-
-# only allow Travis to upload packages if it's building from official
-# branches; this means taking into account the pull requests targetting
-# those
-if ! echo $TRAVIS_BRANCH | grep -qP '^(master|release-[\d.]+)$' || [ -n "$TRAVIS_PULL_REQUEST_BRANCH" ] ; then
-  export UPLOAD=
-fi
-
 # use http_proxy if defined for apt
 export http_proxy=$(perl -pe 's/.*"(.*?)".*/$1/' 2> /dev/null < /etc/apt/apt.conf.d/01proxy)
 
 ## functions
 log() {
   echo "=== " $@
+}
+
+is-official-branch() {
+  echo $1 | grep -qP '^(master|release-[\d.]+)$'
 }
 
 wait-for-pid() {
@@ -99,7 +91,7 @@ do-build() {
 
   # bump version, except for kernels where it's manually managed
   if ! [[ "$pkg" =~ "/linux-" ]] ; then
-    bash ${PKGTOOLS}/set-version.sh $DISTRIBUTION $REPOSITORY
+    bash ${PKGTOOLS}/set-version.sh $TARGET_DISTRIBUTION $REPOSITORY
   fi
 
   # store this version
@@ -160,7 +152,7 @@ do-build() {
 
     # upload: never for d-i, and only if successful and UPLOAD specified
     if [[ "$pkg" != "d-i" && $reason != "FAILURE" && -n "$UPLOAD" && "$UPLOAD" != 0 ]] ; then
-      dput_profile=package-server_${REPOSITORY}_${UPLOAD}
+      dput_profile=${DPUT_BASE_PROFILE}_${REPOSITORY}_${UPLOAD}
       changes_file=../${source_name}_$(perl -pe 's/^.+://' ${VERSION_FILE})*.changes
       dput -c ${PKGTOOLS}/dput.cf $dput_profile $changes_file || reason="FAILURE"
     fi
@@ -190,8 +182,31 @@ do-build() {
 
 echo "pkgtools version ${PKGTOOLS_VERSION}"
 
-# add mirror targetting REPOSITORY & DISTRIBUTION
+# only allow Travis to upload packages if it's building from official
+# branches, or from PRs targetting those
+if ! is-official-branch $TRAVIS_BRANCH ; then
+  UPLOAD=
+fi
+
+# set base distribution if none was passed
+if [[ -z "$DISTRIBUTION" ]] ; then
+  DISTRIBUTION=$(cat $PKGTOOLS/resources/DISTRIBUTION)
+fi
+
+# set target distribution for PRs
+if [[ -n "$TRAVIS_PULL_REQUEST_BRANCH" ]] ; then
+  DPUT_BASE_PROFILE=package-server-dev
+  TARGET_DISTRIBUTION=$TRAVIS_PULL_REQUEST_BRANCH
+else
+  DPUT_BASE_PROFILE=package-server
+  TARGET_DISTRIBUTION=$DISTRIBUTION
+fi
+
+# add mirrors for base and target distributions
 echo "deb http://package-server/public/$REPOSITORY $DISTRIBUTION main non-free" > /etc/apt/sources.list.d/${DISTRIBUTION}.list
+if [[ $DISTRIBUTION != $TARGET_DISTRIBUTION ]] ; then
+  echo "deb http://package-server/dev/$REPOSITORY $TARGET_DISTRIBUTION main non-free" > /etc/apt/sources.list.d/${TARGET_DISTRIBUTION}.list
+fi
 apt-get update -q
 
 # ssh
