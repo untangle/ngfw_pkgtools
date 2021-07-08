@@ -1,9 +1,7 @@
-import argparse
 import git  # FIXME: need >= 2.3, declare in requirements.txt
 import lzma
 import logging
 import os.path as osp
-
 
 # local
 from .constants import *
@@ -40,9 +38,7 @@ def list_commits_between(repo, old, new):
 
 
 def full_version(o):
-    if len(o.split('.')) != 3:
-        raise argparse.ArgumentTypeError("Not a valid full version (x.y.z)")
-    else:
+    if len(o.split('.')) == 3:
         return o
 
 

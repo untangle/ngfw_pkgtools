@@ -7,8 +7,6 @@ import argparse
 import datetime
 import git  # FIXME: need >= 2.3, declare in requirements.txt
 import logging
-import os
-import os.path as osp
 import re
 import sys
 
@@ -122,6 +120,10 @@ if __name__ == '__main__':
 
     # go
     logging.info("started with {}".format(" ".join(sys.argv[1:])))
+
+    if not args.version:
+        logging.warning("not a valid full version (x.y.z)")
+        sys.exit(0)
 
     # derive remote branch name from version
     majorMinor = '.'.join(args.version.split(".")[0:2]) # FIXME
