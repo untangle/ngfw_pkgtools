@@ -24,7 +24,7 @@ NGFW_REPOSITORIES = ['ngfw_' + x for x in NGFW_REPOSITORIES_STEMS] + ['debian-cl
 MFW_REPOSITORIES = ['classd',
                     'client-license-service',
                     'mfw_admin',
-                    'mfw_build',
+#                    'mfw_build',
                     'mfw_feeds',
                     'mfw_schema',
                     'mfw_ui',
