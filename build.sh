@@ -151,10 +151,18 @@ do-build() {
       || reason=FAILURE
 
     # upload: never for d-i, and only if successful and UPLOAD specified
-    if [[ "$pkg" != "d-i" && $reason != "FAILURE" && -n "$UPLOAD" && "$UPLOAD" != 0 && "$UPLOAD" != "local" ]] ; then
-      dput_profile=${DPUT_BASE_PROFILE}_${REPOSITORY}_${UPLOAD}
+    if [[ "$pkg" != "d-i" && $reason != "FAILURE" && -n "$UPLOAD" && "$UPLOAD" != 0 ]] ; then
       changes_file=../${source_name}_$(perl -pe 's/^.+://' ${VERSION_FILE})*.changes
-      dput -c ${PKGTOOLS}/dput.cf $dput_profile $changes_file || reason="FAILURE"
+
+      if [[ "$UPLOAD" != "local" ]] ; then
+	dput_profile=${DPUT_BASE_PROFILE}_${REPOSITORY}_${UPLOAD}
+      elif [[ $pkg = . ]] ; then
+	dput_profile=local_curdir
+      fi
+
+      if [[ -n "$dput_profile" ]] ; then
+	dput -c ${PKGTOOLS}/dput.cf $dput_profile $changes_file || reason="FAILURE"
+      fi
     fi
   fi
 
