@@ -24,6 +24,7 @@ REPOSITORY=${REPOSITORY}
 DISTRIBUTION=${DISTRIBUTION}
 TRAVIS_BRANCH=${TRAVIS_BRANCH}
 TRAVIS_PULL_REQUEST_BRANCH=${TRAVIS_PULL_REQUEST_BRANCH}
+TRAVIS_REPO_SLUG=${TRAVIS_REPO_SLUG}
 PACKAGE=${PACKAGE} # empty default means "all"
 VERBOSE=${VERBOSE} # empty means "not verbose"
 UPLOAD=${UPLOAD} # empty default means "no upload"
@@ -204,7 +205,9 @@ fi
 # set target distribution for PRs
 if [[ -n "$TRAVIS_PULL_REQUEST_BRANCH" ]] ; then
   DPUT_BASE_PROFILE=package-server-dev
-  TARGET_DISTRIBUTION=$TRAVIS_PULL_REQUEST_BRANCH
+  # replace _ (not allowed in a distribution name) with .
+  REPO_NAME=$(basename $TRAVIS_REPO_SLUG | perl -pe 's/_/./g')
+  TARGET_DISTRIBUTION="${REPO_NAME}.$TRAVIS_PULL_REQUEST_BRANCH"
 else
   DPUT_BASE_PROFILE=package-server
   TARGET_DISTRIBUTION=$DISTRIBUTION
