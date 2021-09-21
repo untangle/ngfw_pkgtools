@@ -18,14 +18,15 @@ HEADER2_TPL = "    {repository}"
 OUTPUT_COMPARE_TPL = "        {ahead:>02} ahead, {behind:>02} behind {extra}"
 OUTPUT_MERGE_TPL = "        merge {status}"
 
-NGFW_REPOSITORIES = ['ngfw_src',
-                     'ngfw_pkgs',
-                     'ngfw_hades-pkgs',
-                     'ngfw_imgtools',
-                     'ngfw_upstream',
+NGFW_REPOSITORIES = ['ngfw_upstream',
                      'ngfw_kernels',
+                     'ngfw_pkgs',
                      'sync-settings',
                      'runtests',
+                     'ngfw_src',
+                     'ngfw_hades-pkgs',
+                     'classd',
+                     'ngfw_imgtools',
                      'debian-cloud-images']
 
 MFW_REPOSITORIES = ['classd',
