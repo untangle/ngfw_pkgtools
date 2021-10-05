@@ -47,7 +47,7 @@ log() {
 }
 
 is-official-branch() {
-  echo $1 | grep -qP '^(main|master|release-[\d.]+)$'
+  echo $1 | grep -qP '^(main|master|((ngfw|waf)-)?release-[\d.]+)$'
 }
 
 wait-for-pid() {
