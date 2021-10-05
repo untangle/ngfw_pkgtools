@@ -3,6 +3,12 @@
 set -e
 
 ## functions
+usage() {
+  echo "Usage: $0 [-s] <product> <branch_name> <new_version_number>"
+  echo "   where <product> can be NGFW or WAF"
+  exit 1
+}
+
 set_resources_version() {
   local version=$1
   echo $version >| resources/PUBVERSION
@@ -18,49 +24,64 @@ set_resources_branch() {
 
 ## constants
 GIT_BASE_URL="git@github.com:untangle"
-REPOSITORIES="ngfw_pkgtools ngfw_src ngfw_pkgs ngfw_hades-pkgs ngfw_vendor-pkgs ngfw_imgtools ngfw_kernels debian-cloud-images ngfw_upstream sync-settings classd runtests"
-
+NGFW_REPOSITORIES="ngfw_src ngfw_pkgs ngfw_hades-pkgs ngfw_vendor-pkgs ngfw_imgtools ngfw_kernels debian-cloud-images ngfw_upstream sync-settings classd runtests"
+WAF_REPOSITORIES="sync-settings client-license-service waf waf_pkgs waf_ui ngfw_imgtools"
 
 ## main
 
 # CLI parameters
-BRANCH_NAME=$1
-NEW_VERSION_NUMBER=$2
+while getopts "A:T:C:shwr:f:v:" opt ; do
+  case "$opt" in
+    s) simulate="-n" ;;
+    h) usage ;;
+    \?) usage ;;
+  esac
+done
+shift $(($OPTIND - 1))
 
-if [ -z "${BRANCH_NAME}" ] || [ -z "${NEW_VERSION_NUMBER}" ]; then
-  echo "Usage: $0 <branch_name> <new_version_number>"
-  exit 1
+if [ $# != 3 ] ; then
+  usage
 fi
 
-# create a temporary directory to clone everything
-TEMP_DIST="/localhome/for-branching"
-rm -rf "${TEMP_DIST}"
-mkdir -p "$TEMP_DIST"
-pushd $TEMP_DIST
+PRODUCT=$1
+BRANCH_NAME=$2
+NEW_VERSION_NUMBER=$3
 
-# branch each repository
-for repository in $REPOSITORIES ; do
+case $PRODUCT in
+  NGFW)
+    repositories=$NGFW_REPOSITORIES
+    pkgtools_branch=master ;;
+  WAF)
+    repositories=$WAF_REPOSITORIES
+    pkgtools_branch=waf-master ;;
+  *) usage ;;
+esac
+
+# create a temporary directory to clone everything
+tmp_dir="/localhome/for-branching"
+rm -rf "${tmp_dir}"
+mkdir -p "$tmp_dir"
+pushd $tmp_dir
+
+# branch pkgtools and update resources/
+git clone ${GIT_BASE_URL}/ngfw_pkgtools
+pushd ngfw_pkgtools
+git checkout -t origin/${pkgtools_branch}
+set_resources_version $NEW_VERSION_NUMBER
+set_resources_branch $BRANCH_NAME
+echo git push $simulate origin
+popd
+
+# branch each repository except pkgtools
+for repository in ${repositories} ; do
   url="${GIT_BASE_URL}/$repository"
   git clone --depth 2 $url
   pushd $repository
   git checkout -b $BRANCH_NAME
-  if [[ $repository == ngfw_pkgtools ]] ; then
-    # release-XY.Z -> current-releaseXYZ
-    branch_distribution=current-$(echo $BRANCH_NAME | perl -pe 's/[\.\-]//g')
-    # bump distribution in pkgtools:release
-    set_resources_branch $branch_distribution
-  fi
-  git push origin ${BRANCH_NAME}:$BRANCH_NAME
+  git push $simulate origin
   popd
 done
 
-# bump version in pkgtools:master
-pushd ngfw_pkgtools
-git checkout master
-set_resources_version ${NEW_VERSION_NUMBER}
-git push origin master:master
-popd
-
 # cleanup
 popd
-rm -rf "${TEMP_DIST}"
+rm -rf "${tmp_dir}"
