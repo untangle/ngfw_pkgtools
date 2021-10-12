@@ -16,10 +16,10 @@ set_resources_version() {
   git commit -a -m "Updating resources: version=$version"
 }
 
-set_resources_branch() {
+set_resources_distribution() {
   local branch=$1
   echo $branch >| resources/DISTRIBUTION
-  git commit -a -m "Updating resources: branch=$branch"
+  git commit -a -m "Updating resources: distribution=$branch"
 }
 
 ## constants
@@ -63,13 +63,13 @@ rm -rf "${tmp_dir}"
 mkdir -p "$tmp_dir"
 pushd $tmp_dir
 
-# branch pkgtools and update resources/
+# branch pkgtools and update branch in resources/
 git clone ${GIT_BASE_URL}/ngfw_pkgtools
 pushd ngfw_pkgtools
 git checkout -t origin/${pkgtools_branch}
-set_resources_version $NEW_VERSION_NUMBER
-set_resources_branch $BRANCH_NAME
-echo git push $simulate origin
+git checkout -b $BRANCH_NAME
+set_resources_distribution $BRANCH_NAME
+git push $simulate origin
 popd
 
 # branch each repository except pkgtools
@@ -82,6 +82,13 @@ for repository in ${repositories} ; do
   popd
 done
 
+# set new version in pkgtools/resources
+pushd ngfw_pkgtools
+git checkout ${pkgtools_branch}
+set_resources_version $NEW_VERSION_NUMBER
+git push $simulate origin
+popd
+
 # cleanup
 popd
-rm -rf "${tmp_dir}"
+[[ -n "$simulate" ]] || rm -rf "${tmp_dir}"
