@@ -69,7 +69,7 @@ pushd ngfw_pkgtools
 git checkout -t origin/${pkgtools_branch}
 git checkout -b $BRANCH_NAME
 set_resources_distribution $BRANCH_NAME
-git push $simulate origin
+git push $simulate origin ${BRANCH_NAME}:${BRANCH_NAME}
 popd
 
 # branch each repository except pkgtools
@@ -78,7 +78,7 @@ for repository in ${repositories} ; do
   git clone --depth 2 $url
   pushd $repository
   git checkout -b $BRANCH_NAME
-  git push $simulate origin
+  git push $simulate origin ${BRANCH_NAME}:${BRANCH_NAME}
   popd
 done
 
@@ -86,7 +86,7 @@ done
 pushd ngfw_pkgtools
 git checkout ${pkgtools_branch}
 set_resources_version $NEW_VERSION_NUMBER
-git push $simulate origin
+git push $simulate origin ${pkgtools_branch}:${pkgtools_branch}
 popd
 
 # cleanup
