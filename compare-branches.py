@@ -41,8 +41,16 @@ MFW_REPOSITORIES = ['classd',
                     'packetd',
                     'sync-settings']
 
+WAF_REPOSITORIES = ['sync-settings',
+                    'client-license-service',
+                    'waf',
+                    'waf_pkgs',
+                    'waf_ui',
+                    'ngfw_imgtools']
+
 REPOSITORIES = {'mfw': MFW_REPOSITORIES,
-                'ngfw': NGFW_REPOSITORIES}
+                'ngfw': NGFW_REPOSITORIES,
+                'waf': WAF_REPOSITORIES}
 
 
 # functions
@@ -126,7 +134,7 @@ parser.add_argument('--branch-to', dest='branchTo',
 target = parser.add_mutually_exclusive_group(required=True)
 target.add_argument('--product', type=str, dest='product',
                     metavar='PRODUCT',
-                    choices=('mfw', 'ngfw'),
+                    choices=('mfw', 'ngfw', 'waf'),
                     help='product to work on (mfw or ngfw)')
 target.add_argument('--repositories', type=str, dest='repositories',
                     nargs='*',
