@@ -35,18 +35,13 @@ def get_tag_name(version, tagType):
 
 
 def findMostRecentTag(product, repo, version, tagType):
-    # filter tags by product first; we can't select directly based on
-    # the current product name because older tags didn't include that
-    other_products = repoinfo.list_products() - set({product,})
-    tags = []
-    for t in repo.tags:
-        other = False
-        for p in other_products:
-            if t.name.find(p) >= 0:
-                other = True
-                break
-        if not other:
-            tags.append(t)
+    tags = repo.tags
+
+    if product == 'ngfw':
+        # older ngfw tags didn't have the product prefix
+        tags = [t for t in tags if re.match(r'(^\d|ngfw-)', t.name)]
+    else:
+        tags = [t for t in tags if t.name.startswith(product)]
 
     # then filter by type
     tags = [t for t in tags if t.name.find(tagType) >= 0]
@@ -56,7 +51,7 @@ def findMostRecentTag(product, repo, version, tagType):
     if versionTags:
         tags = versionTags
     tags = sorted(tags, key=lambda x: x.name)
-    logging.info("found tags: {}".format(tags))
+    logging.info("found tags: {}".format([t.name for t in tags]))
     if not tags:
         logging.warning("no tags found")
         return None
