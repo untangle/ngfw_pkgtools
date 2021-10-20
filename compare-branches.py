@@ -85,8 +85,6 @@ def compare(repository, branchFrom, branchTo):
     return ahead, behind, extra
 
 
-# main
-
 # CL options
 parser = argparse.ArgumentParser(description='''List differences
 between two branches across multiple repositories.
@@ -94,6 +92,11 @@ between two branches across multiple repositories.
 It can also optionally try to merge the branches before computing
 the differences.''')
 
+parser.add_argument('--log-level',
+                    dest='logLevel',
+                    choices=['debug', 'info', 'warning'],
+                    default='warning',
+                    help='level at which to log')
 parser.add_argument('--merge', dest='merge',
                     action='store_true',
                     default=False,
@@ -117,40 +120,48 @@ target.add_argument('--repositories', type=str, dest='repositories',
                     metavar='REPOSITORIES',
                     help='list of space-separated repositories to target')
 
-args = parser.parse_args()
+if __name__ == '__main__':
+    args = parser.parse_args()
 
-product = args.product
+    # logging
+    logging.getLogger().setLevel(getattr(logging, args.logLevel.upper()))
+    console = logging.StreamHandler(sys.stderr)
+    formatter = logging.Formatter('[%(asctime)s] changelog: %(levelname)-7s %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
 
-if args.repositories:
-    repositories = args.repositories
-else:
-    repositories = [r.name for r in repoinfo.list_repositories(product) if not r.disable_forward_merge]
+    product = args.product
 
-branchFrom, branchTo = args.branchFrom, args.branchTo
-rc = 0
+    if args.repositories:
+        repositories = args.repositories
+    else:
+        repositories = [r.name for r in repoinfo.list_repositories(product) if not r.disable_forward_merge]
 
-print(HEADER1_TPL.format(branchFrom=branchFrom, branchTo=branchTo))
+    branchFrom, branchTo = args.branchFrom, args.branchTo
+    rc = 0
 
-for repository in repositories:
-    s = ['']
-    s.append(HEADER2_TPL.format(repository=repository))
+    print(HEADER1_TPL.format(branchFrom=branchFrom, branchTo=branchTo))
 
-    if args.merge:
-        success, status = merge(repository, branchFrom, branchTo)
-        s.append(OUTPUT_MERGE_TPL.format(status=status))
-        if success:
-            print('\n'.join(s))
+    for repository in repositories:
+        s = ['']
+        s.append(HEADER2_TPL.format(repository=repository))
+
+        if args.merge:
+            success, status = merge(repository, branchFrom, branchTo)
+            s.append(OUTPUT_MERGE_TPL.format(status=status))
+            if success:
+                print('\n'.join(s))
+                continue
+            else:
+                rc = 1
+
+        ahead, behind, extra = compare(repository, branchFrom, branchTo)
+        if ahead is None:
             continue
-        else:
-            rc = 1
 
-    ahead, behind, extra = compare(repository, branchFrom, branchTo)
-    if ahead is None:
-        continue
+        s.append(OUTPUT_COMPARE_TPL.format(ahead=ahead,
+                                           behind=behind,
+                                           extra=extra))
+        print('\n'.join(s))
 
-    s.append(OUTPUT_COMPARE_TPL.format(ahead=ahead,
-                                       behind=behind,
-                                       extra=extra))
-    print('\n'.join(s))
-
-sys.exit(rc)
+    sys.exit(rc)
