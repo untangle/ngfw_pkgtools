@@ -21,7 +21,13 @@ class RepositoryInfo:
 
 
 def read_source_info():
-    return yaml.load(open(YAML_REPOSITORY_INFO), Loader=yaml.FullLoader)
+    with open(YAML_REPOSITORY_INFO) as f:
+        try:
+            y = yaml.load(f, Loader=yaml.FullLoader)
+        except AttributeError:
+            y = yaml.load(f, Loader=yaml.Loader)
+
+    return y
 
 
 def list_repositories(product):
