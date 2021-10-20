@@ -16,6 +16,7 @@ class RepositoryInfo:
     contains_versioning_info: bool = False
     disable_branch_creation: bool = False
     disable_forward_merge: bool = False
+    private: bool = False
 
     def __post_init__(self):
         self.git_url = osp.join(self.git_base_url, self.name)

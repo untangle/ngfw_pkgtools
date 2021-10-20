@@ -15,6 +15,7 @@ repositories:
     products:
       ngfw:
   ngfw_vendor-pkgs:
+    private: true
     products:
       ngfw:
   debian-cloud-images:
@@ -40,6 +41,7 @@ repositories:
     products:
       mfw:
   mfw_ui:
+    private: true
     products:
       mfw:
   nft_dict:
@@ -59,29 +61,36 @@ repositories:
 
   # WAF only
   waf:
+    private: true
     products:
       waf:
   waf_pkgs:
+    private: true
     products:
       waf:
   waf_ui:
+    private: true
     products:
       waf:
 
   # used in multiple products
   client-license-service:
+    private: true
     products:
       mfw:
       waf:
   bctid:
+    private: true
     products:
       mfw:
       ngfw:
   classd:
+    private: true
     products:
       mfw:
       ngfw:
   ngfw_hades-pkgs:
+    private: true
     products:
       mfw:
       ngfw:
