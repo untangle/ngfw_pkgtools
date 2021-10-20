@@ -1,0 +1,108 @@
+git_base_url: git@github.com:untangle
+
+repositories:
+  # NGFW only
+  - name: ngfw_upstream
+    products:
+      - name: ngfw
+  - name: ngfw_kernels
+    products:
+      - name: ngfw
+  - name: ngfw_pkgs
+    products:
+      - name: ngfw
+  - name: ngfw_src
+    products:
+      - name: ngfw
+  - name: ngfw_vendor-pkgs
+    products:
+      - name: ngfw
+  - name: debian-cloud-images
+    products:
+      - name: ngfw
+
+  # MFW only
+  - name: bpfgen
+    products:
+      - name: mfw
+  - name: mfw_admin
+    products:
+      - name: mfw
+  - name: mfw_build
+    contains_versioning_info: true
+    disable_forward_merge: true
+    products:
+      - name: mfw
+  - name: mfw_feeds
+    products:
+      - name: mfw
+  - name: mfw_schema
+    products:
+      - name: mfw
+  - name: mfw_ui
+    products:
+      - name: mfw
+  - name: nft_dict
+    products:
+      - name: mfw
+  - name: openwrt
+    disable_branch_creation: true
+    disable_forward_merge: true
+    products:
+      - name: mfw
+  - name: packetd
+    products:
+      - name: mfw
+  - name: restd
+    products:
+      - name: mfw
+
+  # WAF only
+  - name: client-license-service
+    products:
+      - name: mfw
+      - name: waf
+  - name: waf
+    products:
+      - name: waf
+  - name: waf_pkgs
+    products:
+      - name: waf
+  - name: waf_ui
+    products:
+      - name: waf
+
+  # used in multiple products
+  - name: classd
+    products:
+      - name: mfw
+      - name: ngfw
+  - name: ngfw_hades-pkgs
+    products:
+      - name: mfw
+      - name: ngfw
+  - name: ngfw_imgtools
+    products:
+      - name: ngfw
+      - name: waf
+  - name: ngfw_pkgtools
+    contains_versioning_info: true
+    disable_forward_merge: true
+    products:
+      - name: mfw
+      - name: ngfw
+      - name: waf
+        default_branch: waf-master
+  - name: runtests
+    products:
+      - name: mfw
+      - name: ngfw
+  - name: support-diagnostics
+    products:
+      - name: mfw
+      - name: ngfw
+  - name: sync-settings
+    products:
+      - name: mfw
+      - name: ngfw
+      - name: waf

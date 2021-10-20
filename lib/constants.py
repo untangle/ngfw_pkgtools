@@ -1,17 +1,11 @@
 import os
 import os.path as osp
+import shutil
 
-PROJECT = 'NGFW'
-BASE_DIR = osp.join(os.getenv('HOME'), 'tmp')
+WORK_DIR = osp.join(os.getenv('HOME'), 'tmp', 'pkgtools-workdir')
+shutil.rmtree(WORK_DIR, ignore_errors=True)
 
-ORIGIN = 'origin'
-BRANCH_TPL = '{}/release-{{}}'.format(ORIGIN)
-
-
-REMOTE_TPL = 'git@github.com:untangle/{}.git'
-PREFIXED_REPOSITORIES = ['src', 'pkgs', 'hades-pkgs', 'kernels', 'imgtools']
-REGULAR_REPOSITORIES = ['debian-cloud-images']
-REPOSITORIES = ['{}_{}'.format(PROJECT.lower(), e) for e in PREFIXED_REPOSITORIES] + REGULAR_REPOSITORIES
+YAML_SOURCE_INFO = 'sources.yaml'
 
 NETBOOT_USER = 'buildbot'
 NETBOOT_HOST = 'netboot-server.untangle.int'

@@ -21,15 +21,38 @@ REMOTE_ARCHIVE_TPL = "{}_full_source-{}-{}.tar.xz"
 
 
 # functions
-def fullVersion(o):
-    if len(o.split('.')) != 3:
-        raise argparse.ArgumentTypeError("Not a valid full version (x.y.z)")
-    else:
-        return o
+def get_remote_archive_name(product, branch):
+    ts = datetime.datetime.now().strftime('%Y%m%dT%H%M')
+    return REMOTE_ARCHIVE_TPL.format(product.lower(), branch, ts)
+
+
+def get_remote_archive_scp_path(product, branch, user=NETBOOT_USER, host=NETBOOT_HOST, directory=NETBOOT_DIR):
+    dst_name = get_remote_archive_name(product, branch)
+    dst_path = osp.join(directory, branch, dst_name)
+    return '{}@{}:{}'.format(user, host, dst_path)
+
+
+def get_remote_archive_url(product, branch, host=NETBOOT_HOST, directory=NETBOOT_HTTP_DIR):
+    dst_name = get_remote_archive_name(product, branch)
+    return "http://{}/{}/{}/{}".format(host, directory, branch, dst_name)
+
+
+def upload(archive, branch, user=NETBOOT_USER, host=NETBOOT_HOST, directory=NETBOOT_DIR):
+    dst = get_remote_archive_scp_path(product, branch)
+
+    logging.info("uploading to {}".format(dst))
+    cmd = "scp -q {} {}".format(archive, dst)
+    try:
+        subprocess.run(cmd, shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        logging.error("could not upload: {}".format(e.output))
+        sys.exit(1)
+
+    logging.info("available at {}".format(get_remote_archive_url(product, branch)))
 
 
 # CL options
-parser = argparse.ArgumentParser(description='Create archive for {}'.format(PROJECT))
+parser = argparse.ArgumentParser(description='Create full source archive for product')
 
 parser.add_argument('--log-level', dest='logLevel',
                     choices=['debug', 'info', 'warning'],
@@ -45,50 +68,18 @@ parser.add_argument('--upload', dest='upload',
                     action='store_true',
                     default=False,
                     help='upload to package-server (default=no)')
-parser.add_argument('--version', dest='version',
+parser.add_argument('--product', dest='product', action='store',
+                    choices=('ngfw', 'waf'),
+                    required=True,
+                    default=None,
+                    metavar="PRODUCT",
+                    help='product name')
+parser.add_argument('--branch', dest='branch',
                     action='store',
                     required=True,
                     default=None,
-                    metavar="VERSION",
-                    type=full_version,
-                    help='the version on which to base the archive. It needs to be of the form x.y.z, that means including the bugfix revision')
-
-
-def fullVersion(o):
-    if len(o.split('.')) != 3:
-        raise argparse.ArgumentTypeError("Not a valid full version (x.y.z)")
-    else:
-        return o
-
-
-def get_remote_archive_name(version):
-    ts = datetime.datetime.now().strftime('%Y%m%dT%H%M')
-    return REMOTE_ARCHIVE_TPL.format(PROJECT.lower(), version, ts)
-
-
-def get_remote_archive_scp_path(version, user=NETBOOT_USER, host=NETBOOT_HOST, directory=NETBOOT_DIR):
-    dst_name = get_remote_archive_name(version)
-    dst_path = osp.join(directory, version, dst_name)
-    return '{}@{}:{}'.format(user, host, dst_path)
-
-
-def get_remote_archive_url(version, host=NETBOOT_HOST, directory=NETBOOT_HTTP_DIR):
-    dst_name = get_remote_archive_name(version)
-    return "http://{}/{}/{}/{}".format(host, directory, version, dst_name)
-
-
-def upload(archive, version, user=NETBOOT_USER, host=NETBOOT_HOST, directory=NETBOOT_DIR):
-    dst = get_remote_archive_scp_path(version)
-
-    logging.info("uploading to {}".format(dst))
-    cmd = "scp -q {} {}".format(archive, dst)
-    try:
-        rc = subprocess.run(cmd, shell=True, check=True)
-    except subprocess.CalledProcessError:
-        logging.error("could not upload")
-        sys.exit(rc)
-
-    logging.info("available at {}".format(get_remote_archive_url(version)))
+                    metavar="branch",
+                    help='the branch on which to base the archive')
 
 
 # main
@@ -105,10 +96,9 @@ if __name__ == '__main__':
     # go
     logging.info("started with {}".format(" ".join(sys.argv[1:])))
 
-    # derive remote branch name from version
-    version = args.version
-    majorMinor = '.'.join(version.split(".")[0:2])  # FIXME
-    branch = BRANCH_TPL.format(majorMinor)
+    # derive remote branch name from branch
+    product = args.product
+    branch = args.branch
 
     # open main uncompressed archive
     archive = args.archive
@@ -116,11 +106,11 @@ if __name__ == '__main__':
 
     subarchives = {}
     # iterate over repositories
-    for name in ('ngfw_src', 'ngfw_pkgs', 'ngfw_kernels'):
-        repo, origin = get_repo(name)
+    for repo_name, repo_url in list_repositories(product):
+        repo, origin = get_repo(repo_name, repo_url)
 
-        subarchive = SUBARCHIVE_TPL.format(name, version)
-        archive_repo_lz(repo, subarchive, branch)
+        subarchive = SUBARCHIVE_TPL.format(repo_name, branch)
+        archive_repo_lz(repo, subarchive, osp.join(origin.name, branch))
 
         logging.info("adding {} to {}".format(subarchive, archive))
         tar.add(subarchive)
@@ -130,6 +120,6 @@ if __name__ == '__main__':
     logging.info("created {}".format(archive))
 
     if args.upload:
-        upload(archive, version)
+        upload(archive, branch)
 
     logging.info("done")

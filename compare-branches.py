@@ -1,9 +1,13 @@
 #! /usr/bin/env python3
 
 import argparse
+import logging
 import os
 import requests
 import sys
+
+# relative to cwd
+from lib import *
 
 
 # constants
@@ -17,40 +21,6 @@ HEADER1_TPL = "{branchFrom} vs. {branchTo}"
 HEADER2_TPL = "    {repository}"
 OUTPUT_COMPARE_TPL = "        {ahead:>02} ahead, {behind:>02} behind {extra}"
 OUTPUT_MERGE_TPL = "        merge {status}"
-
-NGFW_REPOSITORIES = ['ngfw_upstream',
-                     'ngfw_kernels',
-                     'ngfw_pkgs',
-                     'sync-settings',
-                     'runtests',
-                     'ngfw_src',
-                     'ngfw_hades-pkgs',
-                     'classd',
-                     'ngfw_imgtools',
-                     'debian-cloud-images']
-
-MFW_REPOSITORIES = ['classd',
-                    'client-license-service',
-                    'mfw_admin',
-#                    'mfw_build',
-                    'mfw_feeds',
-                    'mfw_schema',
-                    'mfw_ui',
-                    'nft_dict',
-#                    'openwrt',
-                    'packetd',
-                    'sync-settings']
-
-WAF_REPOSITORIES = ['sync-settings',
-                    'client-license-service',
-                    'waf',
-                    'waf_pkgs',
-                    'waf_ui',
-                    'ngfw_imgtools']
-
-REPOSITORIES = {'mfw': MFW_REPOSITORIES,
-                'ngfw': NGFW_REPOSITORIES,
-                'waf': WAF_REPOSITORIES}
 
 
 # functions
@@ -68,12 +38,12 @@ def getJson(url, headers, auth, postData = None):
 
     sc = r.status_code
     if sc == 401:
-        print("Couldn't authenticate to GitHub, you need to export a valid GITHUB_TOKEN")
+        logging.error("Couldn't authenticate to GitHub, you need to export a valid GITHUB_TOKEN")
         sys.exit(1)
     if sc == 404:
-        print("Couldn't find URL '{}'".format(url))
-        print("... it means one of repository/branchFrom/branchTo does not exist")
-        sys.exit(1)
+        logging.debug("Couldn't find URL '{}'".format(url))
+        logging.debug("... it means one of repository/branchFrom/branchTo does not exist")
+        return None, None
     elif sc == 204:
         jsonData = None
     else:
@@ -87,7 +57,10 @@ def merge(repository, branchFrom, branchTo):
     postData = { 'base':branchTo, 'head':branchFrom, 'commit_message':'Merged by Jenkins'}
     sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN), postData = postData)
 
-    if sc == 204:
+    if not sc:
+        success = False
+        status = 'SKIPPED: no comparison could be made'
+    elif sc == 204:
         success = True
         status = 'SKIPPED: no need to merge'
     elif sc == 201:
@@ -103,6 +76,9 @@ def merge(repository, branchFrom, branchTo):
 def compare(repository, branchFrom, branchTo):
     url = getCompareUrl(repository, branchFrom, branchTo)
     sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN))
+    if not sc:
+        return None, None, None
+
     ahead, behind = [ int(jsonData[x]) for x in ('ahead_by', 'behind_by') ]
     extra = "!!! Need to merge !!!" if ahead > 0 else ""
 
@@ -143,10 +119,12 @@ target.add_argument('--repositories', type=str, dest='repositories',
 
 args = parser.parse_args()
 
+product = args.product
+
 if args.repositories:
     repositories = args.repositories
 else:
-    repositories = REPOSITORIES[args.product]
+    repositories = [r.name for r in list_repositories(product) if not r.disable_forward_merge]
 
 branchFrom, branchTo = args.branchFrom, args.branchTo
 rc = 0
@@ -154,20 +132,25 @@ rc = 0
 print(HEADER1_TPL.format(branchFrom=branchFrom, branchTo=branchTo))
 
 for repository in repositories:
-    print()
-    print(HEADER2_TPL.format(repository=repository))
+    s = ['']
+    s.append(HEADER2_TPL.format(repository=repository))
 
     if args.merge:
         success, status = merge(repository, branchFrom, branchTo)
-        print(OUTPUT_MERGE_TPL.format(status=status))
+        s.append(OUTPUT_MERGE_TPL.format(status=status))
         if success:
+            print('\n'.join(s))
             continue
         else:
             rc = 1
 
     ahead, behind, extra = compare(repository, branchFrom, branchTo)
-    print(OUTPUT_COMPARE_TPL.format(ahead=ahead,
-                                    behind=behind,
-                                    extra=extra))
+    if ahead is None:
+        continue
+
+    s.append(OUTPUT_COMPARE_TPL.format(ahead=ahead,
+                                       behind=behind,
+                                       extra=extra))
+    print('\n'.join(s))
 
 sys.exit(rc)

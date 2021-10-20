@@ -15,7 +15,6 @@ from lib import *
 
 
 # constants
-JIRA_FILTER = re.compile(r'{}-\d+'.format(PROJECT))
 CHANGELOG_FILTER = re.compile(r'@changelog')
 CHANGELOG_EXCLUDE_FILTER = re.compile(r'@exclude')
 
@@ -34,9 +33,23 @@ def get_tag_name(version, tagType):
     return "{}-{}-{}".format(version, ts, tagType)
 
 
-def findMostRecentTag(repo, version, tagType):
-    # filter tags by type first
-    tags = [t for t in repo.tags if t.name.find(tagType) >= 0]
+def findMostRecentTag(product, repo, version, tagType):
+    # filter tags by product first; we can't select directly based on
+    # the current product name because older tags didn't include that
+    other_products = list_products() - set({product,})
+    tags = []
+    for t in repo.tags:
+        other = False
+        for p in other_products:
+            if t.name.find(p) >= 0:
+                other = True
+                break
+        if not other:
+            tags.append(t)
+
+    # then filter by type
+    tags = [t for t in tags if t.name.find(tagType) >= 0]
+
     # let's see if some of those are about the current version
     versionTags = [t for t in tags if t.name.find(version) >= 0]
     if versionTags:
@@ -44,15 +57,15 @@ def findMostRecentTag(repo, version, tagType):
     tags = sorted(tags, key=lambda x: x.name)
     logging.info("found tags: {}".format(tags))
     if not tags:
-        logging.error("no tags found, aborting")
-        sys.exit(2)
+        logging.warning("no tags found")
+        return None
     old = tags[-1]
     logging.info("most recent tag: {}".format(old.name))
     return old
 
 
-def filterCommit(commit):
-    tickets = JIRA_FILTER.findall(commit.message)
+def filterCommit(commit, jira_filter):
+    tickets = jira_filter.findall(commit.message)
     cl = CHANGELOG_FILTER.search(commit.message)
     exclude = CHANGELOG_EXCLUDE_FILTER.search(commit.message)
     if (tickets or cl) and not exclude:
@@ -94,6 +107,12 @@ parser.add_argument('--version', dest='version',
                                         metavar="VERSION",
                                         type=full_version,
                                         help='the version on which to base the diff. It needs to be of the form x.y.z, that means including the bugfix revision')
+parser.add_argument('--product', dest='product', action='store',
+                                    choices=('ngfw', 'waf'),
+                                    required=True,
+                                    default=None,
+                                    metavar="PRODUCT",
+                                    help='product name')
 mode = parser.add_mutually_exclusive_group(required=True)
 mode.add_argument('--tag-type', dest='tagType', action='store',
                                     choices=('promotion','sync'),
@@ -125,10 +144,19 @@ if __name__ == '__main__':
         logging.warning("not a valid full version (x.y.z)")
         sys.exit(0)
 
+    product = args.product
+
+    jira_filter = re.compile(r'{}-\d+'.format(args.product.upper()))
+
     # derive remote branch name from version
-    majorMinor = '.'.join(args.version.split(".")[0:2]) # FIXME
-    if not args.manualBoundaries:        
-        new = BRANCH_TPL.format(majorMinor)
+    major, minor = [int(i) for i in args.version.split(".")[0:2]]
+    if not args.manualBoundaries:
+        if product == 'ngfw' and (major > 16 or (major >= 16 and minor >= 4)):
+            new = '{}-release-{}.{}'.format(product, major, minor)
+        else:
+            new = 'release-{}.{}'.format(major, minor)
+        new = osp.join('origin', new)
+
     else:
         old, new = args.manualBoundaries
 
@@ -141,25 +169,36 @@ if __name__ == '__main__':
     tagMsg = "Automated tag creation: version={}, branch={}".format(args.version, new)
 
     # iterate over repositories
-    for name in REPOSITORIES:
-        repo, origin = get_repo(name, BASE_DIR)
+    for repo_info in list_repositories(product):
+        if repo_info.disable_forward_merge:
+            continue
+
+        repo_name = repo_info.name
+        repo_url = repo_info.git_url
+
+        repo, origin = get_repo(repo_name, repo_url)
 
         if not args.manualBoundaries:
-            old = findMostRecentTag(repo, args.version, args.tagType).name
+            old = findMostRecentTag(product, repo, args.version, args.tagType)
+            if not old:
+                continue
+            old = old.name
+
             # origin/release-X.Y may not have been created already (promoting
             # from "current" for instance); in that case, use origin/master
             # instead
             try:
                 repo.commit(new)
             except git.exc.BadName:
-                new = "origin/master"
+                new = osp.join(origin.name, 'master')
+
 
         for commit in list_commits_between(repo, old, new):
-            allCommits.append((commit, name, None))
+            allCommits.append((commit, repo_name, None))
 
-            clCommit, tickets = filterCommit(commit)
+            clCommit, tickets = filterCommit(commit, jira_filter)
             if clCommit:
-                changelogCommits.append((commit, name, tickets))
+                changelogCommits.append((commit, repo_name, tickets))
 
         if args.createTags:
             logging.info("about to create tag {}".format(tagName))
