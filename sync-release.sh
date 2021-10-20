@@ -3,20 +3,20 @@
 set -e
 
 usage() {
-  echo "Usage: $0 [-s] [-w] -r <repository> -v <version>"
+  echo "Usage: $0 [-s] [-w] -r <repository> -d <target_distribution>"
   echo "-s : simulate"
   echo "-w : wipe out target before sync'ing"
   echo "-r : repository to use"
-  echo "-v : version (needs to be a full x.y.z)"
+  echo "-d : target distribution (needs to be a full <product>-x.y.z)"
   exit 1
 }
 
-while getopts "wshr:v:" opt ; do
+while getopts "wshr:d:" opt ; do
   case "$opt" in
     s) simulate=1 ;;
     w) WIPE_OUT_TARGET=1 ;;
     r) REPOSITORY=$OPTARG ;;
-    v) VERSION=$OPTARG ;;
+    d) TARGET_DISTRIBUTION=$OPTARG ;;
     h) usage ;;
     \?) usage ;;
   esac
@@ -26,7 +26,7 @@ if [ ! $# = 0 ] ; then
   usage
 fi
 
-[ -z "$REPOSITORY" -o -z "$VERSION" ] && usage && exit 1
+[ -z "$REPOSITORY" -o -z "$TARGET_DISTRIBUTION" ] && usage && exit 1
 
 #########
 # MAIN
@@ -43,22 +43,22 @@ copyRemotePkgtools
 
 if [ -z "$simulate" ] ; then
   # wipe out target distribution first
-  [ -n "$WIPE_OUT_TARGET" ] && remoteCommand ./remove-packages.sh -r ${REPOSITORY} -d ${VERSION}
+  [ -n "$WIPE_OUT_TARGET" ] && remoteCommand ./remove-packages.sh -r ${REPOSITORY} -d ${TARGET_DISTRIBUTION}
 
-  repreproRemote --noskipold update ${VERSION}
+  repreproRemote --noskipold update ${TARGET_DISTRIBUTION}
 
-  repreproRemote export ${VERSION}
+  repreproRemote export ${TARGET_DISTRIBUTION}
 else
-  repreproRemote "checkupdate $VERSION 2>&1 | grep -E '(upgraded|newly installed)' | sort -u"
+  repreproRemote "checkupdate $TARGET_DISTRIBUTION 2>&1 | grep -E '(upgraded|newly installed)' | sort -u"
 fi
 
 # remove remote pkgtools
 removeRemotePkgtools
 
 # generate changelog
-diffCommand="python3 ${PKGTOOLS}/changelog.py --log-level info --version $VERSION --tag-type sync"
-if [ -z "$simulate" ] ; then
-  diffCommand="$diffCommand --create-tags"
+diffCommand="python3 ${PKGTOOLS}/changelog.py --log-level info --product ${TARGET_DISTRIBUTION/-*} --distribution $TARGET_DISTRIBUTION --tag-type sync --create-tags"
+if [ -n "$simulate" ] ; then
+  diffCommand="$diffCommand --simulate"
 fi
 $diffCommand >| $CHANGELOG_FILE
 cat $CHANGELOG_FILE

@@ -3,7 +3,7 @@
 set -e
 
 usage() {
-  echo "Usage: $0 [-s] [-w]  [-A architecture] [-C <component>] [-T (dsc|udeb|deb)] -r <repository> -f <fromDistribution> -v <version>"
+  echo "Usage: $0 [-s] [-w]  [-A architecture] [-C <component>] [-T (dsc|udeb|deb)] -r <repository> -f <fromDistribution> -d <targetDistribution>"
   echo "-s : simulate"
   echo "-w : wipe out <toDistribution> first"
   echo "-C <component>    : only act on component <component>"
@@ -11,11 +11,11 @@ usage() {
   echo "-A <arch>         : only act on architecture <arch>"
   echo "-r : repository to use"
   echo "-f : source distribution to promote from"
-  echo "-v : version (needs to be a full x.y.z)"
+  echo "-d : target distribution (needs to be a full <product>-x.y.z)"
   exit 1
 }
 
-while getopts "A:T:C:shwr:f:v:" opt ; do
+while getopts "A:T:C:shwr:f:d:" opt ; do
   case "$opt" in
     s) simulate=1 && EXTRA_ARGS="$EXTRA_ARGS -s" ;;
     r) REPOSITORY=$OPTARG ;;
@@ -24,7 +24,7 @@ while getopts "A:T:C:shwr:f:v:" opt ; do
     T) TYPE="$OPTARG" && EXTRA_ARGS="$EXTRA_ARGS -T $TYPE" ;;
     w) WIPE_OUT_TARGET=1 ;;
     f) FROM_DISTRIBUTION=$OPTARG ;;
-    v) VERSION=$OPTARG ;;
+    d) TARGET_DISTRIBUTION=$OPTARG ;;
     h) usage ;;
     \?) usage ;;
   esac
@@ -34,7 +34,7 @@ if [ ! $# = 0 ] ; then
   usage
 fi
 
-[ -z "$REPOSITORY" -o -z "$FROM_DISTRIBUTION" -o -z "$VERSION" ] && usage && exit 1
+[ -z "$REPOSITORY" -o -z "$FROM_DISTRIBUTION" -o -z "$TARGET_DISTRIBUTION" ] && usage && exit 1
 
 ##########
 # MAIN
@@ -48,14 +48,14 @@ CHANGELOG_FILE="promotion.txt"
 echo >| $CHANGELOG_FILE
 
 # wipe out target distribution first
-[ -n "$WIPE_OUT_TARGET" ] && ${PKGTOOLS}/remove-packages.sh $EXTRA_ARGS -r $REPOSITORY -d $VERSION
+[ -n "$WIPE_OUT_TARGET" ] && ${PKGTOOLS}/remove-packages.sh $EXTRA_ARGS -r $REPOSITORY -d $TARGET_DISTRIBUTION
 
-${PKGTOOLS}/copy-packages.sh $EXTRA_ARGS -r $REPOSITORY $FROM_DISTRIBUTION $VERSION
+${PKGTOOLS}/copy-packages.sh $EXTRA_ARGS -r $REPOSITORY $FROM_DISTRIBUTION $TARGET_DISTRIBUTION
 
 # generate changelog
-diffCommand="python3 ${PKGTOOLS}/changelog.py --log-level info --version $VERSION --tag-type promotion"
-if [ -z "$simulate" ] ; then
-  diffCommand="$diffCommand --create-tags"
+diffCommand="python3 ${PKGTOOLS}/changelog.py --log-level info --product ${TARGET_DISTRIBUTION/-*} --distribution $TARGET_DISTRIBUTION --tag-type promotion --create-tags"
+if [ -n "$simulate" ] ; then
+  diffCommand="$diffCommand --simulate"
 fi
 $diffCommand >| $CHANGELOG_FILE
 cat $CHANGELOG_FILE
