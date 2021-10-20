@@ -73,6 +73,10 @@ repositories:
       - name: waf
 
   # used in multiple products
+  - name: bctid
+    products:
+      - name: mfw
+      - name: ngfw
   - name: classd
     products:
       - name: mfw
