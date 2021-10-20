@@ -1,14 +1,12 @@
 #!/usr/bin/python3
 
 import argparse
-import datetime
-import git  # FIXME: need >= 2.3, declare in requirements.txt
 import logging
-import re
+import os.path as osp
 import sys
 
 # relative to cwd
-from lib import *
+from lib import gitutils, simple_version, WORK_DIR, repoinfo
 
 
 # constants
@@ -109,14 +107,14 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # iterate over repositories
-    for repo_info in list_repositories(product):
+    for repo_info in repoinfo.list_repositories(product):
         if repo_info.disable_branch_creation:
             continue
 
         repo_name = repo_info.name
         repo_url = repo_info.git_url
 
-        repo, origin = get_repo(repo_name, repo_url)
+        repo, origin = gitutils.get_repo(repo_name, repo_url)
 
         # checkout new branch
         logging.info('creating branch {}'.format(branch))

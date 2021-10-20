@@ -7,7 +7,7 @@ import requests
 import sys
 
 # relative to cwd
-from lib import *
+from lib import repoinfo
 
 
 # constants
@@ -124,7 +124,7 @@ product = args.product
 if args.repositories:
     repositories = args.repositories
 else:
-    repositories = [r.name for r in list_repositories(product) if not r.disable_forward_merge]
+    repositories = [r.name for r in repoinfo.list_repositories(product) if not r.disable_forward_merge]
 
 branchFrom, branchTo = args.branchFrom, args.branchTo
 rc = 0

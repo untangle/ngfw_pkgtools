@@ -7,11 +7,12 @@ import argparse
 import datetime
 import git  # FIXME: need >= 2.3, declare in requirements.txt
 import logging
+import os.path as osp
 import re
 import sys
 
 # relative to cwd
-from lib import *
+from lib import full_version, gitutils, repoinfo
 
 
 # constants
@@ -36,7 +37,7 @@ def get_tag_name(version, tagType):
 def findMostRecentTag(product, repo, version, tagType):
     # filter tags by product first; we can't select directly based on
     # the current product name because older tags didn't include that
-    other_products = list_products() - set({product,})
+    other_products = repoinfo.list_products() - set({product,})
     tags = []
     for t in repo.tags:
         other = False
@@ -169,14 +170,14 @@ if __name__ == '__main__':
     tagMsg = "Automated tag creation: version={}, branch={}".format(args.version, new)
 
     # iterate over repositories
-    for repo_info in list_repositories(product):
+    for repo_info in repoinfo.list_repositories(product):
         if repo_info.disable_forward_merge:
             continue
 
         repo_name = repo_info.name
         repo_url = repo_info.git_url
 
-        repo, origin = get_repo(repo_name, repo_url)
+        repo, origin = gitutils.get_repo(repo_name, repo_url)
 
         if not args.manualBoundaries:
             old = findMostRecentTag(product, repo, args.version, args.tagType)
@@ -193,7 +194,7 @@ if __name__ == '__main__':
                 new = osp.join(origin.name, 'master')
 
 
-        for commit in list_commits_between(repo, old, new):
+        for commit in gitutils.list_commits_between(repo, old, new):
             allCommits.append((commit, repo_name, None))
 
             clCommit, tickets = filterCommit(commit, jira_filter)

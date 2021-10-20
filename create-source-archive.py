@@ -7,17 +7,19 @@ import argparse
 import datetime
 import logging
 import os
+import os.path as osp
 import subprocess
 import sys
 import tarfile
 
 # relative to cwd
-from lib import *
+from lib import gitutils, repoinfo
+from lib import NETBOOT_DIR, NETBOOT_HOST, NETBOOT_HTTP_DIR, NETBOOT_USER
 
 
 # constants
-SUBARCHIVE_TPL = '{}-{}.tar.xz'
-REMOTE_ARCHIVE_TPL = "{}_full_source-{}-{}.tar.xz"
+SUBARCHIVE_TPL = '{}_{}.tar.xz'
+REMOTE_ARCHIVE_TPL = "{}_{}_{}.tar.xz"
 
 
 # functions
@@ -106,11 +108,14 @@ if __name__ == '__main__':
 
     subarchives = {}
     # iterate over repositories
-    for repo_name, repo_url in list_repositories(product):
-        repo, origin = get_repo(repo_name, repo_url)
+    for repo_info in repoinfo.list_repositories(product):
+        repo_name = repo_info.name
+        repo_url = repo_info.git_url
+
+        repo, origin = gitutils.get_repo(repo_name, repo_url)
 
         subarchive = SUBARCHIVE_TPL.format(repo_name, branch)
-        archive_repo_lz(repo, subarchive, osp.join(origin.name, branch))
+        gitutils.archive_repo_lz(repo, subarchive, osp.join(origin.name, branch))
 
         logging.info("adding {} to {}".format(subarchive, archive))
         tar.add(subarchive)
