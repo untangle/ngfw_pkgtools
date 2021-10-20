@@ -11,6 +11,5 @@ shutil.rmtree(WORK_DIR, ignore_errors=True)
 YAML_REPOSITORY_INFO = osp.join(os.path.dirname(sys.argv[0]), 'repositories.yaml')
 
 NETBOOT_USER = 'buildbot'
-NETBOOT_HOST = 'netboot-server.untangle.int'
-NETBOOT_HTTP_DIR = 'untangle-images-buster'
-NETBOOT_DIR = osp.join('/data', NETBOOT_HTTP_DIR)
+NETBOOT_HOST = 'package-server.untangle.int'
+NETBOOT_BASE_DIR = '/data'

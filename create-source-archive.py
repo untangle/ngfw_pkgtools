@@ -14,7 +14,7 @@ import tarfile
 
 # relative to cwd
 from lib import gitutils, repoinfo
-from lib import NETBOOT_DIR, NETBOOT_HOST, NETBOOT_HTTP_DIR, NETBOOT_USER
+from lib import NETBOOT_BASE_DIR, NETBOOT_HOST, NETBOOT_USER
 
 
 # constants
@@ -28,29 +28,37 @@ def get_remote_archive_name(product, branch):
     return REMOTE_ARCHIVE_TPL.format(product.lower(), branch, ts)
 
 
-def get_remote_archive_scp_path(product, branch, user=NETBOOT_USER, host=NETBOOT_HOST, directory=NETBOOT_DIR):
+def get_remote_archive_directory(product, branch, directory=NETBOOT_BASE_DIR):
+    return osp.join(directory, '{}-images-buster'.format(product), branch)
+
+
+def get_remote_archive_scp_path(product, branch, user=NETBOOT_USER, host=NETBOOT_HOST):
     dst_name = get_remote_archive_name(product, branch)
-    dst_path = osp.join(directory, branch, dst_name)
-    return '{}@{}:{}'.format(user, host, dst_path)
+    dst_dir = get_remote_archive_directory(product, branch)
+
+    return '{}@{}:{}/{}'.format(user, host, dst_dir, dst_name)
 
 
-def get_remote_archive_url(product, branch, host=NETBOOT_HOST, directory=NETBOOT_HTTP_DIR):
+def get_remote_archive_url(product, branch, directory, host=NETBOOT_HOST):
     dst_name = get_remote_archive_name(product, branch)
     return "http://{}/{}/{}/{}".format(host, directory, branch, dst_name)
 
 
-def upload(archive, branch, user=NETBOOT_USER, host=NETBOOT_HOST, directory=NETBOOT_DIR):
+def upload(archive, branch, user=NETBOOT_USER, host=NETBOOT_HOST):
     dst = get_remote_archive_scp_path(product, branch)
-
     logging.info("uploading to {}".format(dst))
-    cmd = "scp -q {} {}".format(archive, dst)
+    dst_dir = get_remote_archive_directory(product, branch)
+
+    mkdir_cmd = "ssh {}@{} mkdir -p {}".format(user, host, dst_dir)
+    scp_cmd = "scp -q {} {}".format(archive, dst)
     try:
-        subprocess.run(cmd, shell=True, check=True)
+        subprocess.run(mkdir_cmd, shell=True, check=True)
+        subprocess.run(scp_cmd, shell=True, check=True)
     except subprocess.CalledProcessError as e:
         logging.error("could not upload: {}".format(e.output))
         sys.exit(1)
 
-    logging.info("available at {}".format(get_remote_archive_url(product, branch)))
+    logging.info("available at {}".format(get_remote_archive_url(product, branch, dst_dir)))
 
 
 # CL options
