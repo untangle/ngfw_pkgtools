@@ -32,20 +32,21 @@ def get_remote_archive_directory(product, branch, directory=NETBOOT_BASE_DIR):
     return osp.join(directory, '{}-images-buster'.format(product), branch)
 
 
-def get_remote_archive_scp_path(product, branch, user=NETBOOT_USER, host=NETBOOT_HOST):
-    dst_name = get_remote_archive_name(product, branch)
+def get_remote_archive_scp_path(archive_name, product, branch, user=NETBOOT_USER, host=NETBOOT_HOST):
     dst_dir = get_remote_archive_directory(product, branch)
 
-    return '{}@{}:{}/{}'.format(user, host, dst_dir, dst_name)
+    return '{}@{}:{}/{}'.format(user, host, dst_dir, archive_name)
 
 
-def get_remote_archive_url(product, branch, directory, host=NETBOOT_HOST):
-    dst_name = get_remote_archive_name(product, branch)
-    return "http://{}/{}/{}/{}".format(host, directory, branch, dst_name)
+def get_remote_archive_url(archive_name, product, branch, host=NETBOOT_HOST):
+    dst_dir = get_remote_archive_directory(product, branch)
+    return "http://{}/{}/{}".format(host, dst_dir, archive_name)
 
 
 def upload(archive, branch, user=NETBOOT_USER, host=NETBOOT_HOST):
-    dst = get_remote_archive_scp_path(product, branch)
+    archive_name = get_remote_archive_name(product, branch)
+    dst = get_remote_archive_scp_path(archive_name, product, branch)
+
     logging.info("uploading to {}".format(dst))
     dst_dir = get_remote_archive_directory(product, branch)
 
@@ -58,7 +59,7 @@ def upload(archive, branch, user=NETBOOT_USER, host=NETBOOT_HOST):
         logging.error("could not upload: {}".format(e.output))
         sys.exit(1)
 
-    logging.info("available at {}".format(get_remote_archive_url(product, branch, dst_dir)))
+    logging.info("available at {}".format(get_remote_archive_url(archive_name, product, branch)))
 
 
 # CL options
