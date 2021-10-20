@@ -2,111 +2,111 @@ git_base_url: git@github.com:untangle
 
 repositories:
   # NGFW only
-  - name: ngfw_upstream
+  ngfw_upstream:
     products:
-      - name: ngfw
-  - name: ngfw_kernels
+      ngfw:
+  ngfw_kernels:
     products:
-      - name: ngfw
-  - name: ngfw_pkgs
+      ngfw:
+  ngfw_pkgs:
     products:
-      - name: ngfw
-  - name: ngfw_src
+      ngfw:
+  ngfw_src:
     products:
-      - name: ngfw
-  - name: ngfw_vendor-pkgs
+      ngfw:
+  ngfw_vendor-pkgs:
     products:
-      - name: ngfw
-  - name: debian-cloud-images
+      ngfw:
+  debian-cloud-images:
     products:
-      - name: ngfw
+      ngfw:
 
   # MFW only
-  - name: bpfgen
+  bpfgen:
     products:
-      - name: mfw
-  - name: mfw_admin
+      mfw:
+  mfw_admin:
     products:
-      - name: mfw
-  - name: mfw_build
+      mfw:
+  mfw_build:
     contains_versioning_info: true
     disable_forward_merge: true
     products:
-      - name: mfw
-  - name: mfw_feeds
+      mfw:
+  mfw_feeds:
     products:
-      - name: mfw
-  - name: mfw_schema
+      mfw:
+  mfw_schema:
     products:
-      - name: mfw
-  - name: mfw_ui
+      mfw:
+  mfw_ui:
     products:
-      - name: mfw
-  - name: nft_dict
+      mfw:
+  nft_dict:
     products:
-      - name: mfw
-  - name: openwrt
+      mfw:
+  openwrt:
     disable_branch_creation: true
     disable_forward_merge: true
     products:
-      - name: mfw
-  - name: packetd
+      mfw:
+  packetd:
     products:
-      - name: mfw
-  - name: restd
+      mfw:
+  restd:
     products:
-      - name: mfw
+      mfw:
 
   # WAF only
-  - name: client-license-service
+  waf:
     products:
-      - name: mfw
-      - name: waf
-  - name: waf
+      waf:
+  waf_pkgs:
     products:
-      - name: waf
-  - name: waf_pkgs
+      waf:
+  waf_ui:
     products:
-      - name: waf
-  - name: waf_ui
-    products:
-      - name: waf
+      waf:
 
   # used in multiple products
-  - name: bctid
+  client-license-service:
     products:
-      - name: mfw
-      - name: ngfw
-  - name: classd
+      mfw:
+      waf:
+  bctid:
     products:
-      - name: mfw
-      - name: ngfw
-  - name: ngfw_hades-pkgs
+      mfw:
+      ngfw:
+  classd:
     products:
-      - name: mfw
-      - name: ngfw
-  - name: ngfw_imgtools
+      mfw:
+      ngfw:
+  ngfw_hades-pkgs:
     products:
-      - name: ngfw
-      - name: waf
-  - name: ngfw_pkgtools
+      mfw:
+      ngfw:
+  ngfw_imgtools:
+    products:
+      ngfw:
+      waf:
+  ngfw_pkgtools:
     contains_versioning_info: true
     disable_forward_merge: true
     products:
-      - name: mfw
-      - name: ngfw
-      - name: waf
+      mfw:
+      ngfw:
+      waf:
         default_branch: waf-master
-  - name: runtests
+  runtests:
     products:
-      - name: mfw
-      - name: ngfw
-  - name: support-diagnostics
+      mfw:
+      ngfw:
+  support-diagnostics:
     products:
-      - name: mfw
-      - name: ngfw
-  - name: sync-settings
+      mfw:
+      ngfw:
+  sync-settings:
     products:
-      - name: mfw
-      - name: ngfw
-      - name: waf
+      mfw:
+      ngfw:
+      waf:

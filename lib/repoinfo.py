@@ -1,3 +1,4 @@
+import logging
 import yaml
 
 from dataclasses import dataclass
@@ -35,17 +36,30 @@ def list_repositories(product):
     all_repositories = y['repositories']
 
     results = []
-    for r in all_repositories:
-        for p in r['products']:
-            if p['name'] == product:
-                r['git_base_url'] = r.get('git_base_url', y['git_base_url'])
-                r['default_branch'] = p.get('default_branch', 'master')
-                r.pop('products')
+    for name, r in all_repositories.items():
+        logging.debug("repoinfo looking at {} ({})".format(name, r))
 
-                repo = RepositoryInfo(**r)
-                results.append(repo)
+        products = r['products']
+        if product not in products:
+            # this repository is not used by the target product
+            continue
+
+        p = products[product]
+        if not p:
+            p = {}  # or later .get will fail on None
+
+        # massage record to match RepositoryInfo
+        r['name'] = name
+        r['git_base_url'] = r.get('git_base_url', y['git_base_url'])
+        r['default_branch'] = p.get('default_branch', 'master')
+        r.pop('products')
+
+        repo = RepositoryInfo(**r)
+        results.append(repo)
 
     results.sort(reverse=True, key=lambda r: r.contains_versioning_info)
+    logging.debug("repositories for product {}: {}".format(product, results))
+
     return results
 
 
@@ -54,7 +68,7 @@ def list_products():
     all_repositories = y['repositories']
 
     products = set()
-    for r in all_repositories:
+    for r in all_repositories.values():
         for p in r['products']:
             products.add(p['name'])
 

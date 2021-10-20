@@ -16,7 +16,7 @@ def get_repo(repo_name, repo_url, base_dir=WORK_DIR, origin='origin'):
 
     d = osp.join(base_dir, repo_name)
 
-    logging.info("looking at {}".format(repo_url))
+    logging.info("get_repo for {}".format(repo_url))
 
     if osp.isdir(d):
         logging.info("using existing {} ".format(d))
