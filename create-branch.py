@@ -16,7 +16,7 @@ PUBLIC_VERSION_FILE = 'resources/PUBVERSION'
 
 
 # functions
-def set_resources_distribution(distribution, repo):
+def set_resources_distribution(distribution, version, repo):
     path = osp.join(WORK_DIR, 'ngfw_pkgtools', DISTRIBUTION_FILE)
     with open(path, 'w') as f:
         f.write(distribution + '\n')
@@ -27,7 +27,7 @@ def set_resources_distribution(distribution, repo):
     logging.info("on branch {}, {}".format(repo.head.reference, msg.lower()))
 
 
-def set_resources_version(version, repo):
+def set_resources_version(distribution, version, repo):
     path = osp.join(WORK_DIR, 'ngfw_pkgtools', PUBLIC_VERSION_FILE)
     with open(path, 'w') as f:
         f.write(version + '\n')
@@ -73,7 +73,7 @@ parser.add_argument('--branch',
 parser.add_argument('--product',
                     dest='product',
                     action='store',
-                    choices=('ngfw', 'waf'),
+                    choices=('mfw', 'ngfw', 'waf'),
                     required=True,
                     default=None,
                     metavar="PRODUCT",
@@ -121,20 +121,25 @@ if __name__ == '__main__':
         new_branch = repo.create_head(branch)
         new_branch.checkout()
 
-        if repo_name == 'ngfw_pkgtools':
-            set_resources_distribution(new_branch.name, repo)
+        update_pkgtools = repo_name == 'ngfw_pkgtools' and product != 'mfw'
+        update_mfw_build = repo_name == 'mfw_build' and product == 'mfw'
+
+        if update_pkgtools:
+            set_resources_distribution(new_branch.name, new_version, repo)
+        elif update_mfw_build:
+            logging.error('FIXME')
 
         # push
         if not simulate:
             refspec = "{}:{}".format(new_branch, new_branch)
             origin.push(refspec)
 
-        if repo_name == 'ngfw_pkgtools':
+        if update_pkgtools:
             default_branch_name = repo_info.default_branch
             logging.info('checking out branch {}'.format(default_branch_name))
             default_branch = repo.heads[default_branch_name]
             default_branch.checkout()
-            set_resources_version(new_version, repo)
+            set_resources_version(new_branch.name, new_version, repo)
             if not simulate:
                 refspec = "{}:{}".format(default_branch, default_branch)
                 origin.push(refspec)
