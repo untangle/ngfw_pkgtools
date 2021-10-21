@@ -58,7 +58,7 @@ def merge(repository, branchFrom, branchTo):
     sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN), postData = postData)
 
     if not sc:
-        success = False
+        success = True
         status = 'SKIPPED: no comparison could be made'
     elif sc == 204:
         success = True
@@ -148,6 +148,7 @@ if __name__ == '__main__':
 
         if args.merge:
             success, status = merge(repository, branchFrom, branchTo)
+            logging.debug("For {}: success={}, status={}".format(repository, success, status))
             s.append(OUTPUT_MERGE_TPL.format(status=status))
             if success:
                 print('\n'.join(s))
