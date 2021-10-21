@@ -55,6 +55,9 @@ repositories:
   packetd:
     products:
       mfw:
+  reportd:
+    products:
+      mfw:
   restd:
     products:
       mfw:
