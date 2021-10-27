@@ -17,52 +17,20 @@ PUBLIC_VERSION_FILE = 'resources/PUBVERSION'
 
 
 # functions
-def do_commit(repo, f, msg):
-    repo.index.add(f)
-    repo.index.commit(msg)
-    logging.info("on branch {}, {}".format(repo.head.reference, msg))
-
-
-def set_resources_distribution(branch, version, repo, file_name):
-    path = osp.join(WORK_DIR, 'ngfw_pkgtools', file_name)
-    with open(path, 'w') as f:
-        f.write(branch + '\n')
-
-    msg = "{}: updating to {}".format(file_name, branch)
-    do_commit(repo, file_name, msg)
-
-
-def set_resources_full_version(branch, version, repo, file_name):
-    path = osp.join(WORK_DIR, 'ngfw_pkgtools', file_name)
-    full_version = '{}.0'.format(version)
-    with open(path, 'w') as f:
-        f.write(full_version + '\n')
-
-    msg = "{}: updating to {}".format(file_name, full_version)
-    do_commit(repo, file_name, msg)
-
-
-def set_resources_public_version(branch, version, repo, file_name):
-    path = osp.join(WORK_DIR, 'ngfw_pkgtools', file_name)
-    with open(path, 'w') as f:
-        f.write(version + '\n')
-
-    msg = "{}: updating to {}".format(file_name, version)
-    do_commit(repo, file_name, msg)
-
-
-def set_feeds_branch(branch, version, repo, file_name):
-    path = osp.join(WORK_DIR, 'mfw_build', file_name)
+def set_versioning_value(regex, value, repo, file_name):
+    path = osp.join(repo.working_dir, file_name)
     with open(path, 'r') as f:
         lines = f.readlines()
 
     with open(path, 'w') as f:
         for line in lines:
-            line = re.sub(r's/(?<=mfw_feeds.git).*', branch, line)
+            line = re.sub(regex, value, line)
             f.write(line)
 
-    msg = "{}: updating to {}".format(file_name, branch)
-    do_commit(repo, file_name, msg)
+    msg = "{}: updating to {}".format(file_name, value)
+    repo.index.add(f)
+    repo.index.commit(msg)
+    logging.info("on branch {}, {}".format(repo.head.reference, msg))
 
 
 # CL options
@@ -147,9 +115,9 @@ if __name__ == '__main__':
         update_mfw_build = repo_name == 'mfw_build' and product == 'mfw'
 
         if update_pkgtools:
-            set_resources_distribution(new_branch.name, new_version, repo, DISTRIBUTION_FILE)
+            set_versioning_value(r'.+', new_branch.name, repo, PUBLIC_VERSION_FILE)
         elif update_mfw_build:
-            set_feeds_branch(new_branch.name, new_version, repo, 'feeds.conf.mfw')
+            set_versioning_value(r'(?<=mfw_feeds.git).*', ';{}'.format(new_branch.name), repo, 'feeds.conf.mfw')
 
         # push
         if not simulate:
@@ -161,8 +129,8 @@ if __name__ == '__main__':
             logging.info('checking out branch {}'.format(default_branch_name))
             default_branch = repo.heads[default_branch_name]
             default_branch.checkout()
-            set_resources_full_version(new_branch.name, new_version, repo, FULL_VERSION_FILE)
-            set_resources_public_version(new_branch.name, new_version, repo, PUBLIC_VERSION_FILE)
+            set_versioning_value(r'.+', '{}.0'.format(new_version), repo, FULL_VERSION_FILE)
+            set_versioning_value(r'.+', new_version, repo, PUBLIC_VERSION_FILE)
             if not simulate:
                 refspec = "{}:{}".format(default_branch, default_branch)
                 origin.push(refspec)
