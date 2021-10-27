@@ -11,14 +11,16 @@ from lib import gitutils, simple_version, WORK_DIR, repoinfo
 
 
 # functions
-def set_versioning_value(regex, value, repo, file_name):
+def set_versioning_value(vr, repo, locals_dict):
+    file_name = vr.name
     path = osp.join(repo.working_dir, file_name)
+    value = vr.replacement.format(**locals_dict)
     with open(path, 'r') as f:
         lines = f.readlines()
 
     with open(path, 'w') as f:
         for line in lines:
-            line = re.sub(regex, value, line)
+            line = re.sub(vr.regex, vr.replacement, line)
             f.write(line)
 
     msg = "{}: updating to {}".format(file_name, value)
@@ -108,7 +110,7 @@ if __name__ == '__main__':
 
         for vr in repo_info.versioned_resources:
             if vr.change_on_release_branch:
-                set_versioning_value(vr.regex, vr.replacement.format(**locals()), repo, vr.name)
+                set_versioning_value(vr, repo, locals())
 
         # push
         if not simulate:
@@ -121,7 +123,7 @@ if __name__ == '__main__':
             logging.info('checking out branch {}'.format(repo_default_branch))
             default_branch = repo.heads[repo_default_branch]
             default_branch.checkout()
-            set_versioning_value(vr.regex, vr.replacement.format(**locals()), repo, vr.name)
+            set_versioning_value(vr, repo, locals())
 
             if not simulate:
                 refspec = "{}:{}".format(default_branch, default_branch)
