@@ -55,6 +55,7 @@ def list_repositories(product):
         r['name'] = name
         r['git_base_url'] = r.get('git_base_url', y['git_base_url'])
         r['default_branch'] = p.get('default_branch', 'master')
+        r['disable_branch_creation'] = p.get('disable_branch_creation', False)
         r.pop('products')
 
         repo = RepositoryInfo(**r)
