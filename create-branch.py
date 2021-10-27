@@ -97,8 +97,9 @@ if __name__ == '__main__':
 
         repo_name = repo_info.name
         repo_url = repo_info.git_url
+        repo_default_branch = repo_info.default_branch
 
-        repo, origin = gitutils.get_repo(repo_name, repo_url)
+        repo, origin = gitutils.get_repo(repo_name, repo_url, branch=repo_default_branch)
 
         # checkout new branch
         logging.info('creating branch {}'.format(branch))
@@ -114,9 +115,8 @@ if __name__ == '__main__':
             origin.push(refspec)
 
         for file_name, v in repo_info.versioned_resources_on_master_branch.items():
-            default_branch_name = repo_info.default_branch
-            logging.info('checking out branch {}'.format(default_branch_name))
-            default_branch = repo.heads[default_branch_name]
+            logging.info('checking out branch {}'.format(repo_default_branch))
+            default_branch = repo.heads[repo_default_branch]
             default_branch.checkout()
             set_versioning_value(v['regex'], v['replacement'].format(**locals()), repo, file_name)
 

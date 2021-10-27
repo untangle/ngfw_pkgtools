@@ -9,7 +9,7 @@ import os.path as osp
 from .constants import WORK_DIR
 
 
-def get_repo(repo_name, repo_url, base_dir=WORK_DIR, origin='origin'):
+def get_repo(repo_name, repo_url, base_dir=WORK_DIR, origin='origin', branch='master'):
     # create base_dir if needed
     if not osp.isdir(base_dir):
         os.makedirs(base_dir)
@@ -23,9 +23,10 @@ def get_repo(repo_name, repo_url, base_dir=WORK_DIR, origin='origin'):
         r = git.Repo(d)
         o = r.remote(origin)
         o.fetch()
+        r.heads[branch].checkout()
     else:
-        logging.info("cloning from remote into {} ".format(d))
-        r = git.Repo.clone_from(repo_url, d)
+        logging.info("cloning from remote into {} on branch {}".format(d, branch))
+        r = git.Repo.clone_from(repo_url, d, branch=branch)
         o = r.remote(origin)
 
     return r, o
