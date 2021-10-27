@@ -1,7 +1,8 @@
 import logging
 import yaml
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Dict
 
 from .constants import *
 
@@ -13,7 +14,8 @@ class RepositoryInfo:
     git_base_url: str
     git_url: str = ''
     default_branch: str = 'master'
-    contains_versioning_info: bool = False
+    versioned_resources_on_release_branch: Dict = field(default_factory=lambda: {})
+    versioned_resources_on_master_branch: Dict = field(default_factory=lambda: {})
     disable_branch_creation: bool = False
     disable_forward_merge: bool = False
     private: bool = False
@@ -58,7 +60,7 @@ def list_repositories(product):
         repo = RepositoryInfo(**r)
         results.append(repo)
 
-    results.sort(reverse=True, key=lambda r: r.contains_versioning_info)
+    results.sort(reverse=True, key=lambda r: r.versioned_resources_on_release_branch != {})
     logging.debug("repositories for product {}: {}".format(product, results))
 
     return results

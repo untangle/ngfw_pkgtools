@@ -10,12 +10,6 @@ import sys
 from lib import gitutils, simple_version, WORK_DIR, repoinfo
 
 
-# constants
-DISTRIBUTION_FILE = 'resources/DISTRIBUTION'
-FULL_VERSION_FILE = 'resources/VERSION'
-PUBLIC_VERSION_FILE = 'resources/PUBVERSION'
-
-
 # functions
 def set_versioning_value(regex, value, repo, file_name):
     path = osp.join(repo.working_dir, file_name)
@@ -28,7 +22,7 @@ def set_versioning_value(regex, value, repo, file_name):
             f.write(line)
 
     msg = "{}: updating to {}".format(file_name, value)
-    repo.index.add(f)
+    repo.index.add(file_name)
     repo.index.commit(msg)
     logging.info("on branch {}, {}".format(repo.head.reference, msg))
 
@@ -85,7 +79,7 @@ if __name__ == '__main__':
 
     product = args.product
     branch = args.branch
-    new_version = args.new_version
+    version = args.new_version
     simulate = args.simulate
 
     if not args.new_version:
@@ -111,26 +105,21 @@ if __name__ == '__main__':
         new_branch = repo.create_head(branch)
         new_branch.checkout()
 
-        update_pkgtools = repo_name == 'ngfw_pkgtools' and product != 'mfw'
-        update_mfw_build = repo_name == 'mfw_build' and product == 'mfw'
-
-        if update_pkgtools:
-            set_versioning_value(r'.+', new_branch.name, repo, PUBLIC_VERSION_FILE)
-        elif update_mfw_build:
-            set_versioning_value(r'(?<=mfw_feeds.git).*', ';{}'.format(new_branch.name), repo, 'feeds.conf.mfw')
+        for file_name, v in repo_info.versioned_resources_on_release_branch.items():
+            set_versioning_value(v['regex'], v['replacement'].format(**locals()), repo, file_name)
 
         # push
         if not simulate:
             refspec = "{}:{}".format(new_branch, new_branch)
             origin.push(refspec)
 
-        if update_pkgtools:
+        for file_name, v in repo_info.versioned_resources_on_master_branch.items():
             default_branch_name = repo_info.default_branch
             logging.info('checking out branch {}'.format(default_branch_name))
             default_branch = repo.heads[default_branch_name]
             default_branch.checkout()
-            set_versioning_value(r'.+', '{}.0'.format(new_version), repo, FULL_VERSION_FILE)
-            set_versioning_value(r'.+', new_version, repo, PUBLIC_VERSION_FILE)
+            set_versioning_value(v['regex'], v['replacement'].format(**locals()), repo, file_name)
+
             if not simulate:
                 refspec = "{}:{}".format(default_branch, default_branch)
                 origin.push(refspec)

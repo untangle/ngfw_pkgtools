@@ -32,7 +32,10 @@ repositories:
     products:
       mfw:
   mfw_build:
-    contains_versioning_info: true
+    versioned_resources_on_release_branch:
+      feeds.conf.mfw:
+        regex: 'mfw_feeds.git.*'
+        replacement: 'mfw_feeds.git;{branch}'
     disable_forward_merge: true
     products:
       mfw:
@@ -108,7 +111,17 @@ repositories:
       ngfw:
       waf:
   ngfw_pkgtools:
-    contains_versioning_info: true
+    versioned_resources_on_release_branch:
+      resources/DISTRIBUTION:
+        regex: '.+'
+        replacement: '{branch}'
+    versioned_resources_on_master_branch:
+      resources/VERSION:
+        regex: '.+'
+        replacement: '{version}.0'
+      resources/PUBVERSION:
+        regex: '.+'
+        replacement: '{version}'
     disable_forward_merge: true
     products:
       mfw:
