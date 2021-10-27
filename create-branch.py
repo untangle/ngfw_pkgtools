@@ -12,47 +12,47 @@ from lib import gitutils, simple_version, WORK_DIR, repoinfo
 
 # constants
 DISTRIBUTION_FILE = 'resources/DISTRIBUTION'
-VERSION_FILE = 'resources/VERSION'
+FULL_VERSION_FILE = 'resources/VERSION'
 PUBLIC_VERSION_FILE = 'resources/PUBVERSION'
 
 
 # functions
-def set_resources_distribution(branch, version, repo):
-    path = osp.join(WORK_DIR, 'ngfw_pkgtools', DISTRIBUTION_FILE)
+def do_commit(repo, f, msg):
+    repo.index.add(f)
+    repo.index.commit(msg)
+    logging.info("on branch {}, {}".format(repo.head.reference, msg))
+
+
+def set_resources_distribution(branch, version, repo, file_name):
+    path = osp.join(WORK_DIR, 'ngfw_pkgtools', file_name)
     with open(path, 'w') as f:
         f.write(branch + '\n')
 
-    msg = "Updating resources: distribution={}".format(branch)
-    repo.index.add(DISTRIBUTION_FILE)
-    repo.index.commit(msg)
-    logging.info("on branch {}, {}".format(repo.head.reference, msg.lower()))
+    msg = "{}: updating to {}".format(file_name, branch)
+    do_commit(repo, file_name, msg)
 
 
-def set_resources_full_version(branch, version, repo):
-    path = osp.join(WORK_DIR, 'ngfw_pkgtools', VERSION_FILE)
+def set_resources_full_version(branch, version, repo, file_name):
+    path = osp.join(WORK_DIR, 'ngfw_pkgtools', file_name)
     full_version = '{}.0'.format(version)
     with open(path, 'w') as f:
         f.write(full_version + '\n')
 
-    msg = "Updating resources: full_version={}".format(full_version)
-    repo.index.add(VERSION_FILE)
-    repo.index.commit(msg)
-    logging.info("on branch {}, {}".format(repo.head.reference, msg.lower()))
+    msg = "{}: updating to {}".format(file_name, full_version)
+    do_commit(repo, file_name, msg)
 
 
-def set_resources_public_version(branch, version, repo):
-    path = osp.join(WORK_DIR, 'ngfw_pkgtools', PUBLIC_VERSION_FILE)
+def set_resources_public_version(branch, version, repo, file_name):
+    path = osp.join(WORK_DIR, 'ngfw_pkgtools', file_name)
     with open(path, 'w') as f:
         f.write(version + '\n')
 
-    msg = "Updating resources: public_version={}".format(version)
-    repo.index.add(PUBLIC_VERSION_FILE)
-    repo.index.commit(msg)
-    logging.info("on branch {}, {}".format(repo.head.reference, msg.lower()))
+    msg = "{}: updating to {}".format(file_name, version)
+    do_commit(repo, file_name, msg)
 
 
-def set_feeds_branch(branch, version, repo):
-    path = osp.join(WORK_DIR, 'mfw_build', 'feeds.conf.mfw')
+def set_feeds_branch(branch, version, repo, file_name):
+    path = osp.join(WORK_DIR, 'mfw_build', file_name)
     with open(path, 'r') as f:
         lines = f.readlines()
 
@@ -60,6 +60,9 @@ def set_feeds_branch(branch, version, repo):
         for line in lines:
             line = re.sub(r's/(?<=mfw_feeds.git).*', branch, line)
             f.write(line)
+
+    msg = "{}: updating to {}".format(file_name, branch)
+    do_commit(repo, file_name, msg)
 
 
 # CL options
@@ -144,9 +147,9 @@ if __name__ == '__main__':
         update_mfw_build = repo_name == 'mfw_build' and product == 'mfw'
 
         if update_pkgtools:
-            set_resources_distribution(new_branch.name, new_version, repo)
+            set_resources_distribution(new_branch.name, new_version, repo, DISTRIBUTION_FILE)
         elif update_mfw_build:
-            set_feeds_branch(new_branch.name, new_version, repo)
+            set_feeds_branch(new_branch.name, new_version, repo, 'feeds.conf.mfw')
 
         # push
         if not simulate:
@@ -158,8 +161,8 @@ if __name__ == '__main__':
             logging.info('checking out branch {}'.format(default_branch_name))
             default_branch = repo.heads[default_branch_name]
             default_branch.checkout()
-            set_resources_full_version(new_branch.name, new_version, repo)
-            set_resources_public_version(new_branch.name, new_version, repo)
+            set_resources_full_version(new_branch.name, new_version, repo, FULL_VERSION_FILE)
+            set_resources_public_version(new_branch.name, new_version, repo, PUBLIC_VERSION_FILE)
             if not simulate:
                 refspec = "{}:{}".format(default_branch, default_branch)
                 origin.push(refspec)
