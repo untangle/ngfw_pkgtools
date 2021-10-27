@@ -3,6 +3,7 @@
 import argparse
 import logging
 import os.path as osp
+import re
 import sys
 
 # relative to cwd
@@ -16,31 +17,49 @@ PUBLIC_VERSION_FILE = 'resources/PUBVERSION'
 
 
 # functions
-def set_resources_distribution(distribution, version, repo):
+def set_resources_distribution(branch, version, repo):
     path = osp.join(WORK_DIR, 'ngfw_pkgtools', DISTRIBUTION_FILE)
     with open(path, 'w') as f:
-        f.write(distribution + '\n')
+        f.write(branch + '\n')
 
-    msg = "Updating resources: distribution={}".format(distribution)
+    msg = "Updating resources: distribution={}".format(branch)
     repo.index.add(DISTRIBUTION_FILE)
     repo.index.commit(msg)
     logging.info("on branch {}, {}".format(repo.head.reference, msg.lower()))
 
 
-def set_resources_version(distribution, version, repo):
+def set_resources_full_version(branch, version, repo):
+    path = osp.join(WORK_DIR, 'ngfw_pkgtools', VERSION_FILE)
+    full_version = '{}.0'.format(version)
+    with open(path, 'w') as f:
+        f.write(full_version + '\n')
+
+    msg = "Updating resources: full_version={}".format(full_version)
+    repo.index.add(VERSION_FILE)
+    repo.index.commit(msg)
+    logging.info("on branch {}, {}".format(repo.head.reference, msg.lower()))
+
+
+def set_resources_public_version(branch, version, repo):
     path = osp.join(WORK_DIR, 'ngfw_pkgtools', PUBLIC_VERSION_FILE)
     with open(path, 'w') as f:
         f.write(version + '\n')
 
-    path = osp.join(WORK_DIR, 'ngfw_pkgtools', VERSION_FILE)
-    with open(path, 'w') as f:
-        f.write(version + '.0' + '\n')
-
-    msg = "Updating resources: version={}".format(version)
+    msg = "Updating resources: public_version={}".format(version)
     repo.index.add(PUBLIC_VERSION_FILE)
-    repo.index.add(VERSION_FILE)
     repo.index.commit(msg)
     logging.info("on branch {}, {}".format(repo.head.reference, msg.lower()))
+
+
+def set_feeds_branch(branch, version, repo):
+    path = osp.join(WORK_DIR, 'mfw_build', 'feeds.conf.mfw')
+    with open(path, 'r') as f:
+        lines = f.readlines()
+
+    with open(path, 'w') as f:
+        for line in lines:
+            line = re.sub(r's/(?<=mfw_feeds.git).*', branch, line)
+            f.write(line)
 
 
 # CL options
@@ -127,7 +146,7 @@ if __name__ == '__main__':
         if update_pkgtools:
             set_resources_distribution(new_branch.name, new_version, repo)
         elif update_mfw_build:
-            logging.error('FIXME')
+            set_feeds_branch(new_branch.name, new_version, repo)
 
         # push
         if not simulate:
@@ -139,7 +158,8 @@ if __name__ == '__main__':
             logging.info('checking out branch {}'.format(default_branch_name))
             default_branch = repo.heads[default_branch_name]
             default_branch.checkout()
-            set_resources_version(new_branch.name, new_version, repo)
+            set_resources_full_version(new_branch.name, new_version, repo)
+            set_resources_public_version(new_branch.name, new_version, repo)
             if not simulate:
                 refspec = "{}:{}".format(default_branch, default_branch)
                 origin.push(refspec)
