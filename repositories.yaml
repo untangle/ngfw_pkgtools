@@ -3,6 +3,7 @@ git_base_url: git@github.com:untangle
 repositories:
   # NGFW only
   ngfw_upstream:
+    private: true
     products:
       ngfw:
   ngfw_kernels:
@@ -27,6 +28,7 @@ repositories:
     products:
       mfw:
   mfw_admin:
+    private: true
     products:
       mfw:
   mfw_build:
@@ -45,6 +47,7 @@ repositories:
     products:
       mfw:
   nft_dict:
+    private: true
     products:
       mfw:
   openwrt:
@@ -53,12 +56,15 @@ repositories:
     products:
       mfw:
   packetd:
+    private: true
     products:
       mfw:
   reportd:
+    private: true
     products:
       mfw:
   restd:
+    private: true
     products:
       mfw:
 
@@ -118,6 +124,7 @@ repositories:
       mfw:
       ngfw:
   sync-settings:
+    private: true
     products:
       mfw:
       ngfw:
