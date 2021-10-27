@@ -106,19 +106,22 @@ if __name__ == '__main__':
         new_branch = repo.create_head(branch)
         new_branch.checkout()
 
-        for file_name, v in repo_info.versioned_resources_on_release_branch.items():
-            set_versioning_value(v['regex'], v['replacement'].format(**locals()), repo, file_name)
+        for vr in repo_info.versioned_resources:
+            if vr.change_on_release_branch:
+                set_versioning_value(vr.regex, vr.replacement.format(**locals()), repo, vr.name)
 
         # push
         if not simulate:
             refspec = "{}:{}".format(new_branch, new_branch)
             origin.push(refspec)
 
-        for file_name, v in repo_info.versioned_resources_on_master_branch.items():
+        for vr in repo_info.versioned_resources:
+            if vr.change_on_release_branch:
+                continue
             logging.info('checking out branch {}'.format(repo_default_branch))
             default_branch = repo.heads[repo_default_branch]
             default_branch.checkout()
-            set_versioning_value(v['regex'], v['replacement'].format(**locals()), repo, file_name)
+            set_versioning_value(vr.regex, vr.replacement.format(**locals()), repo, vr.name)
 
             if not simulate:
                 refspec = "{}:{}".format(default_branch, default_branch)
