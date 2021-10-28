@@ -148,7 +148,7 @@ if __name__ == '__main__':
     logging.info("started with {}".format(" ".join(sys.argv[1:])))
 
     if args.distribution:
-        version = re.match(r'^.*(\d+\.\d+.\d+)', args.distribution).groups()[0]
+        version = re.match(r'^.+-(\d+\.\d+.\d+)', args.distribution).groups()[0]
     else:
         version = args.version
 
