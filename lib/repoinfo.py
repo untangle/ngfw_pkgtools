@@ -49,7 +49,7 @@ class VersionedResourceTag(VersionedResource):
     def set_versioning_value(self, repo, locals_dict):
         value = self.value.format(**locals_dict)        
         msg = "tagging {}".format(value)
-        # FIXME: annotate tag
+        # FIXME: create empty commit first
         repo.create_tag(value, message=msg)
         # FIXME: push tags
         logging.info("on branch {}, {}".format(repo.head.reference, msg))
@@ -65,6 +65,7 @@ class RepositoryInfo:
     default_branch: str = 'master'
     disable_branch_creation: bool = False
     disable_forward_merge: bool = False
+    skip_versioning_entirely: bool = False
     private: bool = False
 
     def __post_init__(self):
@@ -98,11 +99,13 @@ def list_repositories(product):
         if not p:
             p = {}  # or later .get will fail on None
 
-        # massage record to match RepositoryInfo
+        # 2 extra records to match RepositoryInfo
         r['name'] = name
         r['git_base_url'] = r.get('git_base_url', y['git_base_url'])
+        # get those product-specific attributes
         r['default_branch'] = p.get('default_branch', 'master')
         r['disable_branch_creation'] = p.get('disable_branch_creation', False)
+        r['skip_versioning_entirely'] = p.get('skip_versioning_entirely', False)
         r.pop('products')
 
         versioned_resources = []

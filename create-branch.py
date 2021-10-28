@@ -76,6 +76,10 @@ if __name__ == '__main__':
 
     # iterate over repositories
     for repo_info in repoinfo.list_repositories(product):
+        logging.debug(repo_info)
+        if repo_info.skip_versioning_entirely:
+            continue
+
         repo_name = repo_info.name
         repo_url = repo_info.git_url
         repo_default_branch = repo_info.default_branch

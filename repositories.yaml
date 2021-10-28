@@ -141,9 +141,7 @@ repositories:
         change_on_release_branch: false
     products:
       mfw:
-        # FIXME: for pkgtools it means "do nothing", but for openwrt it
-        # means "only do versioning on master"
-        disable_branch_creation: true
+        skip_versioning_entirely: true
       ngfw:
       waf:
         default_branch: waf-master
