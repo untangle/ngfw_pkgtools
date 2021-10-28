@@ -2,8 +2,6 @@
 
 import argparse
 import logging
-import os.path as osp
-import re
 import sys
 
 # relative to cwd
@@ -11,22 +9,6 @@ from lib import gitutils, simple_version, WORK_DIR, repoinfo
 
 
 # functions
-def set_versioning_value(vr, repo, locals_dict):
-    file_name = vr.name
-    path = osp.join(repo.working_dir, file_name)
-    value = vr.replacement.format(**locals_dict)
-    with open(path, 'r') as f:
-        lines = f.readlines()
-
-    with open(path, 'w') as f:
-        for line in lines:
-            line = re.sub(vr.regex, vr.replacement, line)
-            f.write(line)
-
-    msg = "{}: updating to {}".format(file_name, value)
-    repo.index.add(file_name)
-    repo.index.commit(msg)
-    logging.info("on branch {}, {}".format(repo.head.reference, msg))
 
 
 # CL options
@@ -94,28 +76,26 @@ if __name__ == '__main__':
 
     # iterate over repositories
     for repo_info in repoinfo.list_repositories(product):
-        if repo_info.disable_branch_creation:
-            continue
-
         repo_name = repo_info.name
         repo_url = repo_info.git_url
         repo_default_branch = repo_info.default_branch
 
         repo, origin = gitutils.get_repo(repo_name, repo_url, branch=repo_default_branch)
 
-        # checkout new branch
-        logging.info('creating branch {}'.format(branch))
-        new_branch = repo.create_head(branch)
-        new_branch.checkout()
+        if not repo_info.disable_branch_creation:
+            # checkout new branch
+            logging.info('creating branch {}'.format(branch))
+            new_branch = repo.create_head(branch)
+            new_branch.checkout()
 
-        for vr in repo_info.versioned_resources:
-            if vr.change_on_release_branch:
-                set_versioning_value(vr, repo, locals())
+            for vr in repo_info.versioned_resources:
+                if vr.change_on_release_branch:
+                    vr.set_versioning_value(repo, locals())
 
-        # push
-        if not simulate:
-            refspec = "{}:{}".format(new_branch, new_branch)
-            origin.push(refspec)
+            # push
+            if not simulate:
+                refspec = "{}:{}".format(new_branch, new_branch)
+                origin.push(refspec)
 
         for vr in repo_info.versioned_resources:
             if vr.change_on_release_branch:
@@ -123,7 +103,7 @@ if __name__ == '__main__':
             logging.info('checking out branch {}'.format(repo_default_branch))
             default_branch = repo.heads[repo_default_branch]
             default_branch.checkout()
-            set_versioning_value(vr, repo, locals())
+            vr.set_versioning_value(repo, locals())
 
             if not simulate:
                 refspec = "{}:{}".format(default_branch, default_branch)

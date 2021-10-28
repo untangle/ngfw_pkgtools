@@ -33,8 +33,9 @@ repositories:
       mfw:
   mfw_build:
     versioned_resources:
-      - name: feeds.conf.mfw
+      - name: feeds definitions
         resource_type: file
+        path: feeds.conf.mfw
         regex: 'mfw_feeds.git.*'
         replacement: 'mfw_feeds.git;{branch}'
         change_on_release_branch: true
@@ -56,10 +57,15 @@ repositories:
     products:
       mfw:
   openwrt:
-    disable_branch_creation: true
     disable_forward_merge: true
+    versioned_resources:
+      - name: version tag
+        resource_type: tag
+        value: 'v{version}'
+        change_on_release_branch: false
     products:
       mfw:
+        disable_branch_creation: true
   packetd:
     private: true
     products:
@@ -115,23 +121,28 @@ repositories:
   ngfw_pkgtools:
     disable_forward_merge: true
     versioned_resources:
-      - name: resources/DISTRIBUTION
+      - name: distribution
         resource_type: file
+        path: resources/DISTRIBUTION
         regex: '.+'
         replacement: '{branch}'
         change_on_release_branch: true
-      - name: resources/VERSION
+      - name: full version
         resource_type: file
+        path: resources/VERSION
         regex: '.+'
         replacement: '{version}.0'
         change_on_release_branch: false
-      - name: resources/PUBVERSION
+      - name: public version
         resource_type: file
+        path: resources/PUBVERSION
         regex: '.+'
         replacement: '{version}'
         change_on_release_branch: false
     products:
       mfw:
+        # FIXME: for pkgtools it means "do nothing", but for openwrt it
+        # means "only do versioning on master"
         disable_branch_creation: true
       ngfw:
       waf:
