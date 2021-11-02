@@ -38,7 +38,7 @@ class VersionedResourceFile(VersionedResource):
         msg = "{}: updating to {}".format(file_name, value)
         repo.index.add(file_name)
         repo.index.commit(msg)
-        logging.info("on branch {}, {}".format(repo.head.reference, msg))
+        logging.info("on branch {}, commit with message '{}'".format(repo.head.reference, msg))
 
 
 @dataclass
@@ -48,11 +48,16 @@ class VersionedResourceTag(VersionedResource):
 
     def set_versioning_value(self, repo, locals_dict):
         value = self.value.format(**locals_dict)        
-        msg = "tagging {}".format(value)
-        # FIXME: create empty commit first
+        msg = "Release branching: new version is {}".format(value)
+
+        # create empty commit first, to make sure the upcoming tag
+        # does not also apply to the release branch
+        repo.index.commit(msg)
+        logging.info("on branch {}, commit with message '{}'".format(repo.head.reference, msg))
+
         repo.create_tag(value, message=msg)
         # FIXME: push tags
-        logging.info("on branch {}, {}".format(repo.head.reference, msg))
+        logging.info("on branch {}, tag value with message '{}'".format(repo.head.reference, msg))
 
 
 @dataclass
