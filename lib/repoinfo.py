@@ -72,8 +72,8 @@ class RepositoryInfo:
         self.git_url = osp.join(self.git_base_url, self.name)
 
 
-def read_source_info():
-    with open(YAML_REPOSITORY_INFO) as f:
+def read_source_info(yaml_file=YAML_REPOSITORY_INFO):
+    with open(yaml_file) as f:
         try:
             y = yaml.load(f, Loader=yaml.FullLoader)
         except AttributeError:
@@ -82,8 +82,8 @@ def read_source_info():
     return y
 
 
-def list_repositories(product):
-    y = read_source_info()
+def list_repositories(product, yaml_file=YAML_REPOSITORY_INFO):
+    y = read_source_info(yaml_file)
     all_repositories = y['repositories']
 
     results = []
@@ -125,8 +125,8 @@ def list_repositories(product):
     return results
 
 
-def list_products():
-    y = read_source_info()
+def list_products(yaml_file=YAML_REPOSITORY_INFO):
+    y = read_source_info(yaml_file)
     all_repositories = y['repositories']
 
     products = set()
