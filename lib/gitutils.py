@@ -45,6 +45,15 @@ def create_tag(repo, tag_name, msg):
     logging.info("on branch {}, tag {} with message '{}'".format(repo.head.reference, tag_name, msg))
 
 
+def push(origin, refspecs, simulate=True):
+    if not simulate:
+        logging.info("pushing refspecs {}".format(refspecs))
+        for refspec in refspecs:
+            origin.push(refspec)
+    else:
+        logging.info("would push refspecs {}".format(refspecs))
+
+
 def list_commits_between(repo, old, new):
     sl = "{}...{}".format(old, new)
     logging.info("running git log {}".format(sl))

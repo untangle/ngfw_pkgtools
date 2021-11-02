@@ -93,35 +93,29 @@ if __name__ == '__main__':
             new_branch.checkout()
 
             # version resources on new branch
-            refspecs = []
+            refspecs = set()
             for vr in repo_info.versioned_resources:
                 if vr.change_on_release_branch:
                     rs = vr.set_versioning_value(repo, locals())
-                    refspecs.extend(rs)
+                    refspecs.update(rs)
 
-            # push
-            if not simulate:
-                logging.info("pushing refspecs {}".format(refspecs))
-                for refspec in refspecs:
-                    origin.push(refspec)
-            else:
-                logging.info("would push refspecs {}".format(refspecs))
+            if refspecs:  # push
+                gitutils.push(origin, refspecs, simulate)
                         
         # version resources on master branch
-        refspecs = []
+        refspecs = set()
         for vr in repo_info.versioned_resources:
             if vr.change_on_release_branch:
                 continue
-            logging.info('checking out branch {}'.format(repo_default_branch))
-            default_branch = repo.heads[repo_default_branch]
-            default_branch.checkout()
-            rs = vr.set_versioning_value(repo, locals())
-            refspecs.extend(rs)
 
-            # push
-            if not simulate:
-                logging.info("pushing refspecs {}".format(refspecs))
-                for refspec in refspecs:
-                    origin.push(refspec)
-            else:
-                logging.info("would push refspecs {}".format(refspecs))
+            if repo.head.reference.name != repo_default_branch:
+                logging.info('on branch {}'.format(repo.head.reference))
+                logging.info('checking out branch {}'.format(repo_default_branch))
+                default_branch = repo.heads[repo_default_branch]
+                default_branch.checkout()
+
+            rs = vr.set_versioning_value(repo, locals())
+            refspecs.update(rs)
+
+        if refspecs:  # push
+            gitutils.push(origin, refspecs, simulate)
