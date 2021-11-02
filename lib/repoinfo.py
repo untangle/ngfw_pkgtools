@@ -71,6 +71,7 @@ class RepositoryInfo:
     versioned_resources: List[VersionedResource]
     git_url: str = ''
     default_branch: str = 'master'
+    obsolete: bool = False
     disable_branch_creation: bool = False
     disable_forward_merge: bool = False
     skip_versioning_entirely: bool = False
@@ -90,13 +91,16 @@ def read_source_info(yaml_file=YAML_REPOSITORY_INFO):
     return y
 
 
-def list_repositories(product, yaml_file=YAML_REPOSITORY_INFO):
+def list_repositories(product, yaml_file=YAML_REPOSITORY_INFO, include_obsolete=False):
     y = read_source_info(yaml_file)
     all_repositories = y['repositories']
 
     results = []
     for name, r in all_repositories.items():
         logging.debug("repoinfo looking at {} ({})".format(name, r))
+
+        if r.get('obsolete', False) and not include_obsolete:
+            continue
 
         products = r['products']
         if product not in products:

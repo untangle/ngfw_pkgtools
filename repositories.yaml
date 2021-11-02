@@ -27,10 +27,6 @@ repositories:
   bpfgen:
     products:
       mfw:
-  mfw_admin:
-    private: true
-    products:
-      mfw:
   mfw_build:
     versioned_resources:
       - name: feeds definitions
@@ -159,3 +155,10 @@ repositories:
       mfw:
       ngfw:
       waf:
+
+  # obsolete
+  mfw_admin:
+    obsolete: true
+    private: true
+    products:
+      mfw:
