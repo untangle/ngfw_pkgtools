@@ -32,6 +32,19 @@ def get_repo(repo_name, repo_url, base_dir=WORK_DIR, origin='origin', branch='ma
     return r, o
 
 
+def create_commit(repo, files, msg):
+    for f in files:
+        repo.index.add(f)
+
+    repo.index.commit(msg)
+    logging.info("on branch {}, commit files {} with message '{}'".format(repo.head.reference, list(files), msg))
+
+
+def create_tag(repo, tag_name, msg):
+    repo.create_tag(tag_name, message=msg)
+    logging.info("on branch {}, tag {} with message '{}'".format(repo.head.reference, tag_name, msg))
+
+
 def list_commits_between(repo, old, new):
     sl = "{}...{}".format(old, new)
     logging.info("running git log {}".format(sl))

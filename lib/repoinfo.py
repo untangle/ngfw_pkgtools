@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import List
 
 from .constants import *
+from . import gitutils
 
 
 @dataclass
@@ -36,9 +37,7 @@ class VersionedResourceFile(VersionedResource):
                 f.write(line)
 
         msg = "{}: updating to {}".format(file_name, value)
-        repo.index.add(file_name)
-        repo.index.commit(msg)
-        logging.info("on branch {}, commit with message '{}'".format(repo.head.reference, msg))
+        gitutils.create_commit(repo, (file_name,), msg)
 
 
 @dataclass
@@ -47,17 +46,15 @@ class VersionedResourceTag(VersionedResource):
     value: str
 
     def set_versioning_value(self, repo, locals_dict):
-        value = self.value.format(**locals_dict)        
-        msg = "Release branching: new version is {}".format(value)
+        tag_name = self.value.format(**locals_dict)
+        msg = "Release branching: new version is {}".format(tag_name)
 
         # create empty commit first, to make sure the upcoming tag
         # does not also apply to the release branch
-        repo.index.commit(msg)
-        logging.info("on branch {}, commit with message '{}'".format(repo.head.reference, msg))
+        gitutils.create_commit(repo, (), msg)
 
-        repo.create_tag(value, message=msg)
+        gitutils.create_tag(repo, tag_name, msg)
         # FIXME: push tags
-        logging.info("on branch {}, tag value with message '{}'".format(repo.head.reference, msg))
 
 
 @dataclass
