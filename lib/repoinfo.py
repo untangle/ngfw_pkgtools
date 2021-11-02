@@ -39,6 +39,9 @@ class VersionedResourceFile(VersionedResource):
         msg = "{}: updating to {}".format(file_name, value)
         gitutils.create_commit(repo, (file_name,), msg)
 
+        refspec = "{}:{}".format(repo.head.reference, repo.head.reference)
+        return (refspec,)
+
 
 @dataclass
 class VersionedResourceTag(VersionedResource):
@@ -54,7 +57,10 @@ class VersionedResourceTag(VersionedResource):
         gitutils.create_commit(repo, (), msg)
 
         gitutils.create_tag(repo, tag_name, msg)
-        # FIXME: push tags
+
+        refspecs = ("{}:{}".format(repo.head.reference, repo.head.reference),
+                    "{}:{}".format(tag_name, tag_name))
+        return refspecs
 
 
 @dataclass

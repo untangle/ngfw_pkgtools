@@ -92,29 +92,36 @@ if __name__ == '__main__':
             new_branch = repo.create_head(branch)
             new_branch.checkout()
 
+            # version resources on new branch
+            refspecs = []
             for vr in repo_info.versioned_resources:
                 if vr.change_on_release_branch:
-                    vr.set_versioning_value(repo, locals())
+                    rs = vr.set_versioning_value(repo, locals())
+                    refspecs.extend(rs)
 
             # push
-            refspec = "{}:{}".format(new_branch, new_branch)
             if not simulate:
-                logging.info("pushing refspecs {}".format(refspec))
-                origin.push(refspec)
+                logging.info("pushing refspecs {}".format(refspecs))
+                for refspec in refspecs:
+                    origin.push(refspec)
             else:
-                logging.info("would push refspecs {}".format(refspec))
+                logging.info("would push refspecs {}".format(refspecs))
                         
+        # version resources on master branch
+        refspecs = []
         for vr in repo_info.versioned_resources:
             if vr.change_on_release_branch:
                 continue
             logging.info('checking out branch {}'.format(repo_default_branch))
             default_branch = repo.heads[repo_default_branch]
             default_branch.checkout()
-            vr.set_versioning_value(repo, locals())
+            rs = vr.set_versioning_value(repo, locals())
+            refspecs.extend(rs)
 
-            refspec = "{}:{}".format(default_branch, default_branch)
+            # push
             if not simulate:
-                logging.info("pushing refspecs {}".format(refspec))
-                origin.push(refspec)
+                logging.info("pushing refspecs {}".format(refspecs))
+                for refspec in refspecs:
+                    origin.push(refspec)
             else:
-                logging.info("would push refspecs {}".format(refspec))
+                logging.info("would push refspecs {}".format(refspecs))
