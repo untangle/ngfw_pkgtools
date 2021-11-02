@@ -97,10 +97,13 @@ if __name__ == '__main__':
                     vr.set_versioning_value(repo, locals())
 
             # push
+            refspec = "{}:{}".format(new_branch, new_branch)
             if not simulate:
-                refspec = "{}:{}".format(new_branch, new_branch)
+                logging.info("pushing refspecs {}".format(refspec))
                 origin.push(refspec)
-
+            else:
+                logging.info("would push refspecs {}".format(refspec))
+                        
         for vr in repo_info.versioned_resources:
             if vr.change_on_release_branch:
                 continue
@@ -109,6 +112,9 @@ if __name__ == '__main__':
             default_branch.checkout()
             vr.set_versioning_value(repo, locals())
 
+            refspec = "{}:{}".format(default_branch, default_branch)
             if not simulate:
-                refspec = "{}:{}".format(default_branch, default_branch)
+                logging.info("pushing refspecs {}".format(refspec))
                 origin.push(refspec)
+            else:
+                logging.info("would push refspecs {}".format(refspec))
