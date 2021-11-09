@@ -7,29 +7,63 @@ import argparse
 import datetime
 import logging
 import os
+import os.path as osp
 import subprocess
 import sys
 import tarfile
 
 # relative to cwd
-from lib import *
+from lib import gitutils, repoinfo
+from lib import NETBOOT_BASE_DIR, NETBOOT_HOST, NETBOOT_USER
 
 
 # constants
-SUBARCHIVE_TPL = '{}-{}.tar.xz'
-REMOTE_ARCHIVE_TPL = "{}_full_source-{}-{}.tar.xz"
+SUBARCHIVE_TPL = '{}_{}.tar.xz'
+REMOTE_ARCHIVE_TPL = "{}_{}_{}.tar.xz"
 
 
 # functions
-def fullVersion(o):
-    if len(o.split('.')) != 3:
-        raise argparse.ArgumentTypeError("Not a valid full version (x.y.z)")
-    else:
-        return o
+def get_remote_archive_name(product, branch):
+    ts = datetime.datetime.now().strftime('%Y%m%dT%H%M')
+    return REMOTE_ARCHIVE_TPL.format(product.lower(), branch, ts)
+
+
+def get_remote_archive_directory(product, branch, directory=NETBOOT_BASE_DIR):
+    return osp.join(directory, '{}-images-buster'.format(product), branch)
+
+
+def get_remote_archive_scp_path(archive_name, product, branch, user=NETBOOT_USER, host=NETBOOT_HOST):
+    dst_dir = get_remote_archive_directory(product, branch)
+
+    return '{}@{}:{}/{}'.format(user, host, dst_dir, archive_name)
+
+
+def get_remote_archive_url(archive_name, product, branch, host=NETBOOT_HOST):
+    dst_dir = get_remote_archive_directory(product, branch)
+    return "http://{}/{}/{}".format(host, dst_dir, archive_name)
+
+
+def upload(archive, branch, user=NETBOOT_USER, host=NETBOOT_HOST):
+    archive_name = get_remote_archive_name(product, branch)
+    dst = get_remote_archive_scp_path(archive_name, product, branch)
+
+    logging.info("uploading to {}".format(dst))
+    dst_dir = get_remote_archive_directory(product, branch)
+
+    mkdir_cmd = "ssh {}@{} mkdir -p {}".format(user, host, dst_dir)
+    scp_cmd = "scp -q {} {}".format(archive, dst)
+    try:
+        subprocess.run(mkdir_cmd, shell=True, check=True)
+        subprocess.run(scp_cmd, shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        logging.error("could not upload: {}".format(e.output))
+        sys.exit(1)
+
+    logging.info("available at {}".format(get_remote_archive_url(archive_name, product, branch)))
 
 
 # CL options
-parser = argparse.ArgumentParser(description='Create archive for {}'.format(PROJECT))
+parser = argparse.ArgumentParser(description='Create full source archive for product')
 
 parser.add_argument('--log-level', dest='logLevel',
                     choices=['debug', 'info', 'warning'],
@@ -45,50 +79,18 @@ parser.add_argument('--upload', dest='upload',
                     action='store_true',
                     default=False,
                     help='upload to package-server (default=no)')
-parser.add_argument('--version', dest='version',
+parser.add_argument('--product', dest='product', action='store',
+                    choices=('ngfw', 'waf'),
+                    required=True,
+                    default=None,
+                    metavar="PRODUCT",
+                    help='product name')
+parser.add_argument('--branch', dest='branch',
                     action='store',
                     required=True,
                     default=None,
-                    metavar="VERSION",
-                    type=full_version,
-                    help='the version on which to base the archive. It needs to be of the form x.y.z, that means including the bugfix revision')
-
-
-def fullVersion(o):
-    if len(o.split('.')) != 3:
-        raise argparse.ArgumentTypeError("Not a valid full version (x.y.z)")
-    else:
-        return o
-
-
-def get_remote_archive_name(version):
-    ts = datetime.datetime.now().strftime('%Y%m%dT%H%M')
-    return REMOTE_ARCHIVE_TPL.format(PROJECT.lower(), version, ts)
-
-
-def get_remote_archive_scp_path(version, user=NETBOOT_USER, host=NETBOOT_HOST, directory=NETBOOT_DIR):
-    dst_name = get_remote_archive_name(version)
-    dst_path = osp.join(directory, version, dst_name)
-    return '{}@{}:{}'.format(user, host, dst_path)
-
-
-def get_remote_archive_url(version, host=NETBOOT_HOST, directory=NETBOOT_HTTP_DIR):
-    dst_name = get_remote_archive_name(version)
-    return "http://{}/{}/{}/{}".format(host, directory, version, dst_name)
-
-
-def upload(archive, version, user=NETBOOT_USER, host=NETBOOT_HOST, directory=NETBOOT_DIR):
-    dst = get_remote_archive_scp_path(version)
-
-    logging.info("uploading to {}".format(dst))
-    cmd = "scp -q {} {}".format(archive, dst)
-    try:
-        rc = subprocess.run(cmd, shell=True, check=True)
-    except subprocess.CalledProcessError:
-        logging.error("could not upload")
-        sys.exit(rc)
-
-    logging.info("available at {}".format(get_remote_archive_url(version)))
+                    metavar="branch",
+                    help='the branch on which to base the archive')
 
 
 # main
@@ -105,10 +107,9 @@ if __name__ == '__main__':
     # go
     logging.info("started with {}".format(" ".join(sys.argv[1:])))
 
-    # derive remote branch name from version
-    version = args.version
-    majorMinor = '.'.join(version.split(".")[0:2])  # FIXME
-    branch = BRANCH_TPL.format(majorMinor)
+    # derive remote branch name from branch
+    product = args.product
+    branch = args.branch
 
     # open main uncompressed archive
     archive = args.archive
@@ -116,11 +117,14 @@ if __name__ == '__main__':
 
     subarchives = {}
     # iterate over repositories
-    for name in ('ngfw_src', 'ngfw_pkgs', 'ngfw_kernels'):
-        repo, origin = get_repo(name)
+    for repo_info in repoinfo.list_repositories(product):
+        repo_name = repo_info.name
+        repo_url = repo_info.git_url
 
-        subarchive = SUBARCHIVE_TPL.format(name, version)
-        archive_repo_lz(repo, subarchive, branch)
+        repo, origin = gitutils.get_repo(repo_name, repo_url)
+
+        subarchive = SUBARCHIVE_TPL.format(repo_name, branch)
+        gitutils.archive_repo_lz(repo, subarchive, osp.join(origin.name, branch))
 
         logging.info("adding {} to {}".format(subarchive, archive))
         tar.add(subarchive)
@@ -130,6 +134,6 @@ if __name__ == '__main__':
     logging.info("created {}".format(archive))
 
     if args.upload:
-        upload(archive, version)
+        upload(archive, branch)
 
     logging.info("done")

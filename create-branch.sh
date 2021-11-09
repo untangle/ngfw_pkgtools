@@ -24,7 +24,7 @@ set_resources_distribution() {
 
 ## constants
 GIT_BASE_URL="git@github.com:untangle"
-NGFW_REPOSITORIES="ngfw_src ngfw_pkgs ngfw_hades-pkgs ngfw_vendor-pkgs ngfw_imgtools ngfw_kernels debian-cloud-images ngfw_upstream sync-settings classd runtests"
+NGFW_REPOSITORIES="ngfw_src ngfw_pkgs ngfw_hades-pkgs ngfw_vendor-pkgs ngfw_imgtools ngfw_kernels debian-cloud-images ngfw_upstream sync-settings classd runtests support-diagnostics"
 WAF_REPOSITORIES="sync-settings client-license-service waf waf_pkgs waf_ui ngfw_imgtools"
 
 ## main
@@ -63,7 +63,7 @@ rm -rf "${tmp_dir}"
 mkdir -p "$tmp_dir"
 pushd $tmp_dir
 
-# branch pkgtools and update branch in resources/
+# branch pkgtools, and update distribution in resources/
 git clone ${GIT_BASE_URL}/ngfw_pkgtools
 pushd ngfw_pkgtools
 git checkout -t origin/${pkgtools_branch}
@@ -82,7 +82,7 @@ for repository in ${repositories} ; do
   popd
 done
 
-# set new version in pkgtools/resources
+# in pkgtools's master branch, set new version in resources/
 pushd ngfw_pkgtools
 git checkout ${pkgtools_branch}
 set_resources_version $NEW_VERSION_NUMBER
