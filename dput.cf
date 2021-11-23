@@ -28,6 +28,36 @@ run_dinstall = 0
 run_lintian = 0
 check_version = 0
 
+[package-server_bullseye_ftp]
+fqdn = package-server
+method = ftp
+login = anonymous
+incoming = /bullseye/incoming
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+
+[package-server_bullseye_scp]
+fqdn = package-server
+method = scp
+login = buildbot
+incoming = /var/www/public/bullseye/incoming
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+
+[package-server-dev_bullseye_scp]
+fqdn = package-server
+method = scp
+login = buildbot
+incoming = /srv/ngfw_dev-repository/incoming/bullseye
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+
 [local_curdir]
 method = local
 incoming = .
