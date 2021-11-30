@@ -93,14 +93,13 @@ if __name__ == '__main__':
             new_branch.checkout()
 
             # version resources on new branch
-            refspecs = set()
             for vr in repo_info.versioned_resources:
                 if vr.change_on_release_branch:
-                    rs = vr.set_versioning_value(repo, locals())
-                    refspecs.update(rs)
+                    vr.set_versioning_value(repo, locals())
 
-            if refspecs:  # push
-                gitutils.push(origin, refspecs, simulate)
+            # push new branch
+            refspec = '{}:{}'.format(new_branch, new_branch)
+            gitutils.push(origin, refspec , simulate)
                         
         # version resources on master branch
         refspecs = set()
