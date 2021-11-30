@@ -29,7 +29,7 @@ class VersionedResourceFile(VersionedResource):
 
         with open(path, 'w') as f:
             for line in lines:
-                line = re.sub(self.regex, self.replacement, line)
+                line = re.sub(self.regex, value, line)
                 f.write(line)
 
         msg = "{}: updating to {}".format(file_name, value)
