@@ -98,8 +98,8 @@ if __name__ == '__main__':
                     vr.set_versioning_value(repo, locals())
 
             # push new branch
-            refspec = '{}:{}'.format(new_branch, new_branch)
-            gitutils.push(origin, refspec , simulate)
+            refspecs = ['{}:{}'.format(new_branch, new_branch),]
+            gitutils.push(origin, refspecs, simulate)
                         
         # version resources on master branch
         refspecs = set()
