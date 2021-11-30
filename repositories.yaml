@@ -61,7 +61,7 @@ repositories:
         change_on_release_branch: false
     products:
       mfw:
-        disable_branch_creation: true
+        disable_branch_creation: false
   packetd:
     private: true
     products:
