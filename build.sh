@@ -221,20 +221,26 @@ fi
 apt-get update -q
 
 # ssh
-if [[ "$SSH_KEY" =~ /tmp/ ]] ; then
+mkdir -p ~/.ssh
+if [[ -n "$SSH_KEY" ]] ; then
   eval $(ssh-agent)
   ssh-add $SSH_KEY
-  mkdir -p ~/.ssh
   cat >> ~/.ssh/config <<EOF
 Host *
-  IdentityFile /tmp/travis-buildbot.rsa
+  IdentityFile ${SSH_KEY}
   StrictHostKeyChecking no
 EOF
+else # ssh-agent is handled by the caller
+  cat >> ~/.ssh/config <<EOF
+Host *
+  StrictHostKeyChecking no
+EOF
+
 fi
 
 if [[ "$1" == "setup-only" ]] ; then
- # we're not interested in building packages
- exit 0
+  # we're not interested in building packages
+  exit 0
 fi
 
 # update apt-show-versions cache
