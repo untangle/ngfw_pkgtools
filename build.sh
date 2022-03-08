@@ -238,7 +238,7 @@ EOF
 
 fi
 
-if [[ "$1" == "setup-only" ]] ; then
+if [[ $1 = "-s" ]] || [[ "$1" == "setup-only" ]] ; then
   # we're not interested in building packages
   exit 0
 fi
