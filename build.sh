@@ -155,10 +155,10 @@ do-build() {
     if [[ "$pkg" != "d-i" && $reason != "FAILURE" && -n "$UPLOAD" && "$UPLOAD" != 0 ]] ; then
       changes_file=../${source_name}_$(perl -pe 's/^.+://' ${VERSION_FILE})*.changes
 
-      if [[ "$UPLOAD" != "local" ]] ; then
+      if [[ "$UPLOAD" =~ "local" ]] ; then
+	dput_profile=${UPLOAD}
+      else
 	dput_profile=${DPUT_BASE_PROFILE}_${REPOSITORY}_${UPLOAD}
-      elif [[ $pkg = . ]] ; then
-	dput_profile=local_curdir
       fi
 
       if [[ -n "$dput_profile" ]] ; then
