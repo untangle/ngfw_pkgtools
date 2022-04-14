@@ -27,6 +27,10 @@ repositories:
   bpfgen:
     products:
       mfw:
+  discoverd:
+    private: true
+    products:
+      mfw:
   mfw_build:
     versioned_resources:
       - name: feeds definitions
