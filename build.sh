@@ -162,6 +162,7 @@ do-build() {
       fi
 
       if [[ -n "$dput_profile" ]] ; then
+	apt install -y dput
 	dput -c ${PKGTOOLS}/dput.cf $dput_profile $changes_file || reason="FAILURE"
       fi
     fi
