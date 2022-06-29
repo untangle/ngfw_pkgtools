@@ -24,9 +24,6 @@ repositories:
       ngfw:
 
   # MFW only
-  bpfgen:
-    products:
-      mfw:
   discoverd:
     private: true
     products:
