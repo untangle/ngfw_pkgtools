@@ -75,6 +75,10 @@ repositories:
     private: true
     products:
       mfw:
+  wan-utils:
+    private: true
+    products:
+      mfw:
 
   # WAF only
   waf:
