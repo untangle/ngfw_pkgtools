@@ -1,4 +1,4 @@
-git_base_url: git@github.com:untangle
+default_git_base_url: git@github.com:untangle
 
 repositories:
   # NGFW only

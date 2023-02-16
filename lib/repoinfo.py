@@ -58,7 +58,7 @@ def list_repositories(product, yaml_file=YAML_REPOSITORY_INFO, include_obsolete=
 
         # 2 extra records to match RepositoryInfo
         r['name'] = name
-        r['git_base_url'] = r.get('git_base_url', y['git_base_url'])
+        r['git_base_url'] = r.get('git_base_url', y['default_git_base_url'])
         # get those product-specific attributes
         r['default_branch'] = p.get('default_branch', 'master')
         r['disable_branch_creation'] = p.get('disable_branch_creation', False)
