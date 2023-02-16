@@ -37,6 +37,10 @@ repositories:
     git_base_url: git@github.com:aristanetworks
     products:
       mfw:
+  libpktdpdk:
+    private: true
+    products:
+      mfw:
   mfw_build:
     versioned_resources:
       - name: feeds definitions
