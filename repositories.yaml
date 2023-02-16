@@ -24,6 +24,10 @@ repositories:
       ngfw:
 
   # MFW only
+  alertd:
+    private: true
+    products:
+      mfw:
   discoverd:
     private: true
     products:
