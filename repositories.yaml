@@ -28,6 +28,10 @@ repositories:
     private: true
     products:
       mfw:
+  bess:
+    private: true
+    products:
+      mfw:
   discoverd:
     private: true
     products:
