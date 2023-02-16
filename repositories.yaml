@@ -79,6 +79,10 @@ repositories:
     private: true
     products:
       mfw:
+ alertd:
+    private: true
+    products:
+      mfw:
 
   # WAF only
   waf:
