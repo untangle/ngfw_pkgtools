@@ -6,7 +6,7 @@ PKGTOOLS=$(dirname $0)
 PKGTOOLS_VERSION=$(git rev-parse --short HEAD)
 
 REMOTE_USER="root"
-REMOTE_SERVER="updates.untangle.com"
+REMOTE_SERVER="54.185.60.73"
 SSH_COMMAND="ssh -t ${REMOTE_USER}@${REMOTE_SERVER}"
 if [ $(hostname) != "pkgs" ] ; then
   REMOTE_PKGTOOLS=$(mktemp -d /tmp/pkgtools.XXXXXXXXXXXXXXX)
