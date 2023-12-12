@@ -26,7 +26,7 @@ parser.add_argument('--simulate',
 parser.add_argument('--new-version',
                     dest='new_version',
                     action='store',
-                    required=True,
+                    required=False,
                     default=None,
                     metavar="NEW_VERSION",
                     type=simple_version,
@@ -66,12 +66,8 @@ if __name__ == '__main__':
     version = args.new_version
     simulate = args.simulate
 
-    if not args.new_version:
-        logging.error("not a valid simple version (x.y)")
-        sys.exit(1)
-
-    if not args.branch.startswith("{}-".format(product)):
-        logging.error("branch name must start with product name")
+    if version and not branch.startswith("{}-".format(product)):
+        logging.error("branch name must start with product name when new version is given")
         sys.exit(1)
 
     # iterate over repositories
@@ -103,18 +99,19 @@ if __name__ == '__main__':
 
         # version resources on master branch
         refspecs = set()
-        for vr in repo_info.versioned_resources:
-            if vr.change_on_release_branch:
-                continue
+        if version:
+            for vr in repo_info.versioned_resources:
+                if vr.change_on_release_branch:
+                    continue
 
-            if repo.head.reference.name != repo_default_branch:
-                logging.info('on branch {}'.format(repo.head.reference))
-                logging.info('checking out branch {}'.format(repo_default_branch))
-                default_branch = repo.heads[repo_default_branch]
-                default_branch.checkout()
+                if repo.head.reference.name != repo_default_branch:
+                    logging.info('on branch %s', repo.head.reference)
+                    logging.info('checking out branch %s', repo_default_branch)
+                    default_branch = repo.heads[repo_default_branch]
+                    default_branch.checkout()
 
-            rs = vr.set_versioning_value(repo, locals())
-            refspecs.update(rs)
+                rs = vr.set_versioning_value(repo, locals())
+                refspecs.update(rs)
 
         if refspecs:  # push
             gitutils.push(origin, refspecs, simulate)
