@@ -5,7 +5,7 @@ import logging
 import sys
 
 # relative to cwd
-from lib import gitutils, simple_version, WORK_DIR, repoinfo
+from lib import gitutils, simple_version, repoinfo
 
 
 # functions
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     logging.getLogger('').addHandler(console)
 
     # go
-    logging.info("started with {}".format(" ".join(sys.argv[1:])))
+    logging.info("started with %s", " ".join(sys.argv[1:]))
 
     product = args.product
     branch = args.branch
@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
         if not repo_info.disable_branch_creation:
             # checkout new branch
-            logging.info('creating branch {}'.format(branch))
+            logging.info('creating branch %s', branch)
             new_branch = repo.create_head(branch)
             new_branch.checkout()
 
@@ -98,9 +98,9 @@ if __name__ == '__main__':
                     vr.set_versioning_value(repo, locals())
 
             # push new branch
-            refspecs = ['{}:{}'.format(new_branch, new_branch),]
+            refspecs = ['{branch}:{branch}'.format(branch=new_branch),]
             gitutils.push(origin, refspecs, simulate)
-                        
+
         # version resources on master branch
         refspecs = set()
         for vr in repo_info.versioned_resources:
