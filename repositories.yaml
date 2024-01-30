@@ -41,6 +41,10 @@ repositories:
     git_base_url: git@github.com:aristanetworks
     products:
       mfw:
+  golang-shared:
+    private: true
+    products:
+      mfw:
   libpktdpdk:
     private: true
     products:
