@@ -134,10 +134,6 @@ do-build() {
     # set profiles, if any
     if [[ $ARCHITECTURE != $BUILD_ARCHITECTURE ]] ; then
       build_profiles="cross"
-      if [[ $ARCHITECTURE = "arm64" ]] &&  [[ "$pkg" =~ "/linux-" ]] ; then
-	# FIXME: add pkg.linux.notools to profiles for now (NGFW-13152)
-	build_profiles="${build_profiles},pkg.linux.notools"
-      fi
     fi
     if [[ -f debian/untangle-build-profiles ]] ; then
       build_profiles="${build_profiles},$(cat debian/untangle-build-profiles)"
