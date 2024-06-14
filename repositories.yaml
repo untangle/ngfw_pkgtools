@@ -71,6 +71,10 @@ repositories:
     private: true
     products:
       mfw:
+  vuntangle:
+    private: true
+    products:
+      mfw:
   nft_dict:
     private: true
     products:
