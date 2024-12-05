@@ -28,18 +28,8 @@ repositories:
     private: true
     products:
       mfw:
-  bess:
-    private: true
-    git_base_url: git@github.com:aristanetworks
-    products:
-      mfw:
   discoverd:
     private: true
-    products:
-      mfw:
-  dpdk:
-    private: true
-    git_base_url: git@github.com:aristanetworks
     products:
       mfw:
   golang-shared:
