@@ -46,6 +46,13 @@ parser.add_argument('--product',
                     default=None,
                     metavar="PRODUCT",
                     help='product name')
+parser.add_argument('--source-branch',
+                    dest='source_branch',
+                    action='store',
+                    required=False,
+                    default='',
+                    metavar="SOURCE_BRANCH",
+                    help='the branch from which the default branch will be cut')
 
 # main
 if __name__ == '__main__':
@@ -65,6 +72,7 @@ if __name__ == '__main__':
     branch = args.branch
     version = args.new_version
     simulate = args.simulate
+    source_branch = args.source_branch
 
     if version and not branch.startswith("{}-".format(product)):
         logging.error("branch name must start with product name when new version is given")
@@ -79,6 +87,9 @@ if __name__ == '__main__':
         repo_name = repo_info.name
         repo_url = repo_info.git_url
         repo_default_branch = repo_info.default_branch
+        # overwrite the branch which will be used
+        if source_branch != "":
+            repo_default_branch = source_branch
 
         repo, origin = gitutils.get_repo(repo_name, repo_url, branch=repo_default_branch)
 
