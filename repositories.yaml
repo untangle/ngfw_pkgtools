@@ -95,6 +95,10 @@ repositories:
     private: true
     products:
       mfw:
+  secret_manager:
+    private: true
+    products:
+      mfw:
 
   # WAF only
   waf:
