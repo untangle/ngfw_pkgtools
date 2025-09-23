@@ -113,7 +113,7 @@ parser.add_argument('--branch-to', dest='branchTo',
 target = parser.add_mutually_exclusive_group(required=True)
 target.add_argument('--product', type=str, dest='product',
                     metavar='PRODUCT',
-                    choices=('mfw', 'ngfw', 'waf'),
+                    choices=('mfw', 'ngfw', 'waf', 'efw'),
                     help='product to work on (mfw or ngfw)')
 target.add_argument('--repositories', type=str, dest='repositories',
                     nargs='*',
