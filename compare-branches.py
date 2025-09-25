@@ -5,6 +5,8 @@ import logging
 import os
 import requests
 import sys
+import time
+from datetime import datetime
 
 # relative to cwd
 from lib import repoinfo
@@ -14,6 +16,9 @@ from lib import repoinfo
 GITHUB_BASE_URL = 'https://api.github.com/repos/untangle/{repository}'
 GITHUB_COMPARE_URL = GITHUB_BASE_URL + '/compare/{branchTo}...{branchFrom}'
 GITHUB_MERGE_URL = GITHUB_BASE_URL + '/merges'
+GITHUB_PR_URL = GITHUB_BASE_URL + '/pulls'
+GITHUB_CREATE_BRANCH_URL = GITHUB_BASE_URL + '/git/refs'
+GITHUB_GET_BRANCH_URL = GITHUB_BASE_URL + '/branches/{branch}'
 GITHUB_HEADERS = {'Accept' : 'application/vnd.github.loki-preview+json' }
 GITHUB_USER = 'untangle-bot'
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -29,6 +34,21 @@ def getCompareUrl(repository, branchFrom, branchTo):
                                      branchFrom=branchFrom,
                                      branchTo=branchTo)
 
+def getPrUrl(repository):
+    return GITHUB_PR_URL.format(repository=repository)
+
+def getPrBody(date, newBranch, branchTo):
+    return {'title': 'Merge PR for '+date, 'body': 'PR opened by jenkins', 'head':newBranch, 'base':branchTo}
+
+def getBranchUrl(repository):
+    return GITHUB_CREATE_BRANCH_URL.format(repository=repository)
+
+def getBranchBody(newBranch, commitSha):
+    return {'ref':'refs/heads/'+newBranch,'sha':commitSha}
+
+def getHeadShaUrl(repository, branch):
+    return GITHUB_GET_BRANCH_URL.format(repository = repository,
+                                        branch=branch)
 
 def getJson(url, headers, auth, postData = None):
     if postData:
@@ -84,6 +104,28 @@ def compare(repository, branchFrom, branchTo):
 
     return ahead, behind, extra
 
+def createBranch(repository, branchTo):
+    url = getBranchUrl(repository)
+    newBranch = "testing-branch-{date}-{time}".format(date=datetime.today().strftime('%Y-%m-%d'), time=time.time_ns())
+
+    sha = getHeadSha(repository, branchTo)
+    logging.debug("got sha: {sha}".format(sha=sha))
+    postData = getBranchBody(newBranch, sha)
+    sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN), postData = postData)
+
+    return success, newBranch
+
+def getHeadSha(repository, branch):
+    url = getHeadShaUrl(repository, branch)
+    sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN))
+
+    if not sc:
+        logging.debug("idk what this means?")
+    elif sc == 200:
+        return jsonData['commit'].get('sha')
+    else:
+        logging.debug("unable to get branch sha; exit")
+        exit(1)
 
 # CL options
 parser = argparse.ArgumentParser(description='''List differences
@@ -101,6 +143,10 @@ parser.add_argument('--merge', dest='merge',
                     action='store_true',
                     default=False,
                     help='try to merge first (default=False)')
+parser.add_argument('--pull-request', dest='openpr',
+                    action='store_true',
+                    default=False,
+                    help='open PR on failed merges (default=False)')
 parser.add_argument('--branch-from', dest='branchFrom',
                     required=True,
                     metavar="BRANCH_FROM",
@@ -114,7 +160,7 @@ target = parser.add_mutually_exclusive_group(required=True)
 target.add_argument('--product', type=str, dest='product',
                     metavar='PRODUCT',
                     choices=('mfw', 'ngfw', 'waf', 'efw'),
-                    help='product to work on (mfw or ngfw)')
+                    help='product to work on')
 target.add_argument('--repositories', type=str, dest='repositories',
                     nargs='*',
                     metavar='REPOSITORIES',
@@ -164,5 +210,15 @@ if __name__ == '__main__':
                                            behind=behind,
                                            extra=extra))
         print('\n'.join(s))
+
+        if args.openpr:
+            # First push the branch up, based on the HEAD of branchTo
+            newBranch = createBranch(repository, branchTo)
+            # Second, open a PR against the branchTo
+            createPR(repository, branchTo, newBranch)
+            # Third, merge the branchFrom into newBranch?
+
+
+
 
     sys.exit(rc)
