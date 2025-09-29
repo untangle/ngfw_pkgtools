@@ -37,8 +37,8 @@ def getCompareUrl(repository, branchFrom, branchTo):
 def getPrUrl(repository):
     return GITHUB_PR_URL.format(repository=repository)
 
-def getPrBody(date, newBranch, branchTo):
-    return {'title': 'Merge PR for '+date, 'body': 'PR opened by jenkins', 'head':newBranch, 'base':branchTo}
+def getPrBody(date, newBranch, branchTo, branchFrom):
+    return {'title': 'Merge PR from {branchFrom} into {branchTo} on {date} '.format(branchFrom=branchFrom, branchTo=branchTo, date=date), 'body': 'PR opened by jenkins', 'head':newBranch, 'base':branchTo}
 
 def getBranchUrl(repository):
     return GITHUB_CREATE_BRANCH_URL.format(repository=repository)
@@ -104,16 +104,23 @@ def compare(repository, branchFrom, branchTo):
 
     return ahead, behind, extra
 
-def createBranch(repository, branchTo):
-    url = getBranchUrl(repository)
-    newBranch = "testing-branch-{date}-{time}".format(date=datetime.today().strftime('%Y-%m-%d'), time=time.time_ns())
+def createPR(repository, branchTo, newBranch, branchFrom):
+    url = getPrUrl(repository)
+    body = getPrBody(datetime.today().strftime("%Y-%m-%d_%H-%M-%S"), newBranch, branchTo, branchFrom)
+    sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN), postData=body)
+    return sc, newBranch
 
-    sha = getHeadSha(repository, branchTo)
-    logging.debug("got sha: {sha}".format(sha=sha))
+def createBranch(repository, branchFrom, branchTo):
+    url = getBranchUrl(repository)
+    newBranch = "automerge-from-{branchFrom}-to-{branchTo}-{date}-{time}".format(branchFrom=branchFrom, branchTo=branchTo, date=datetime.today().strftime('%Y-%m-%d'), time=time.time_ns())
+
+    sha = getHeadSha(repository, branchFrom)
+    logging.debug("got sha: {sha}; creating workspace branch with this...".format(sha=sha))
     postData = getBranchBody(newBranch, sha)
     sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN), postData = postData)
 
-    return success, newBranch
+    logging.debug("new branch is: {newBranch}".format(newBranch=newBranch))
+    return sc, newBranch
 
 def getHeadSha(repository, branch):
     url = getHeadShaUrl(repository, branch)
@@ -212,11 +219,16 @@ if __name__ == '__main__':
         print('\n'.join(s))
 
         if args.openpr:
-            # First push the branch up, based on the HEAD of branchTo
-            newBranch = createBranch(repository, branchTo)
-            # Second, open a PR against the branchTo
-            createPR(repository, branchTo, newBranch)
-            # Third, merge the branchFrom into newBranch?
+            # First push the branch up, based on the HEAD of branchFrom
+            success, newBranch = createBranch(repository, branchFrom, branchTo)
+            if success is False:
+                print("Unable to create new branch - merge manually pls")
+                exit(1)
+            # Last, open a PR against the branchTo
+            success = createPR(repository, branchTo, newBranch, branchFrom)
+            if success is False:
+                print("Unable to create PR - merge manually pls")
+                exit(1)
 
 
 
