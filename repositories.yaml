@@ -28,14 +28,17 @@ repositories:
     private: true
     products:
       mfw:
+      efw:
   discoverd:
     private: true
     products:
       mfw:
+      efw:
   golang-shared:
     private: true
     products:
       mfw:
+      efw:
   libpktdpdk:
     private: true
     products:
@@ -45,8 +48,8 @@ repositories:
       - name: feeds definitions
         resource_type: file
         path: feeds.conf.mfw
-        regex: 'mfw_feeds.git.*'
-        replacement: 'mfw_feeds.git;{branch}'
+        regex: "mfw_feeds.git.*"
+        replacement: "mfw_feeds.git;{branch}"
         change_on_release_branch: true
     disable_forward_merge: true
     products:
@@ -54,17 +57,21 @@ repositories:
   mfw_feeds:
     products:
       mfw:
+      efw:
   mfw_schema:
     products:
       mfw:
+      efw:
   mfw_ui:
     private: true
     products:
       mfw:
+      efw:
   vuntangle:
     private: true
     products:
       mfw:
+      efw:
   nft_dict:
     private: true
     products:
@@ -74,7 +81,7 @@ repositories:
     versioned_resources:
       - name: version tag
         resource_type: tag
-        value: 'v{version}'
+        value: "v{version}"
         change_on_release_branch: false
     products:
       mfw:
@@ -83,14 +90,17 @@ repositories:
     private: true
     products:
       mfw:
+      efw:
   reportd:
     private: true
     products:
       mfw:
+      efw:
   restd:
     private: true
     products:
       mfw:
+      efw:
   wan-utils:
     private: true
     products:
@@ -99,6 +109,7 @@ repositories:
     private: true
     products:
       mfw:
+      efw:
 
   # WAF only
   waf:
@@ -120,11 +131,13 @@ repositories:
     products:
       mfw:
       waf:
+      efw:
   bctid:
     private: true
     products:
       mfw:
       ngfw:
+      efw:
   classd:
     private: true
     products:
@@ -145,20 +158,20 @@ repositories:
       - name: distribution
         resource_type: file
         path: resources/DISTRIBUTION
-        regex: '.+'
-        replacement: '{branch}'
+        regex: ".+"
+        replacement: "{branch}"
         change_on_release_branch: true
       - name: full version
         resource_type: file
         path: resources/VERSION
-        regex: '.+'
-        replacement: '{version}.0'
+        regex: ".+"
+        replacement: "{version}.0"
         change_on_release_branch: false
       - name: public version
         resource_type: file
         path: resources/PUBVERSION
-        regex: '.+'
-        replacement: '{version}'
+        regex: ".+"
+        replacement: "{version}"
         change_on_release_branch: false
     products:
       mfw:
@@ -180,6 +193,7 @@ repositories:
       mfw:
       ngfw:
       waf:
+      efw:
 
   # obsolete
   mfw_admin:
