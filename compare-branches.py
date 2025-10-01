@@ -40,7 +40,7 @@ def getPrUrl(repository: str) -> str:
     return GITHUB_PR_URL.format(repository=repository)
 
 
-def getPrBody(date: str, newBranch: str, branchTo: str, branchFrom: str) -> dict[str, str]:
+def getPrBody(date: str, newBranch: str, branchTo: str, branchFrom: str):
     return {
         "title": "Merge PR from {branchFrom} into {branchTo} on {date} ".format(
             branchFrom=branchFrom, branchTo=branchTo, date=date
