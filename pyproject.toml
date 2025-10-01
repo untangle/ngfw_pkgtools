@@ -1,8 +1,0 @@
-[tool.ruff]
-
-# Same as Black.
-line-length = 99
-indent-width = 4
-
-unsafe-fixes = false
-target-version="py39"

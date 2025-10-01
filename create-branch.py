@@ -5,67 +5,58 @@ import logging
 import sys
 
 # relative to cwd
-from lib import gitutils, repoinfo, simple_version
+from lib import gitutils, simple_version, repoinfo
+
 
 # functions
 
 
 # CL options
-parser = argparse.ArgumentParser(description="""Create release branches""")
-parser.add_argument(
-    "--log-level",
-    dest="logLevel",
-    choices=["debug", "info", "warning"],
-    default="warning",
-    help="level at which to log",
-)
-parser.add_argument(
-    "--simulate",
-    dest="simulate",
-    action="store_true",
-    default=False,
-    help="do not push anything (default=push)",
-)
-parser.add_argument(
-    "--new-version",
-    dest="new_version",
-    action="store",
-    required=False,
-    default=None,
-    metavar="NEW_VERSION",
-    type=simple_version,
-    help="the new public version for the master branch (x.y)",
-)
-parser.add_argument(
-    "--branch",
-    dest="branch",
-    action="store",
-    required=True,
-    default=None,
-    metavar="BRANCH",
-    help="the new branch name (needs to start with the product name",
-)
-parser.add_argument(
-    "--product",
-    dest="product",
-    action="store",
-    choices=("mfw", "ngfw", "waf", "efw"),
-    required=True,
-    default=None,
-    metavar="PRODUCT",
-    help="product name",
-)
+parser = argparse.ArgumentParser(description='''Create release branches''')
+parser.add_argument('--log-level',
+                    dest='logLevel',
+                    choices=['debug', 'info', 'warning'],
+                    default='warning',
+                    help='level at which to log')
+parser.add_argument('--simulate',
+                    dest='simulate',
+                    action='store_true',
+                    default=False,
+                    help='do not push anything (default=push)')
+parser.add_argument('--new-version',
+                    dest='new_version',
+                    action='store',
+                    required=False,
+                    default=None,
+                    metavar="NEW_VERSION",
+                    type=simple_version,
+                    help='the new public version for the master branch (x.y)')
+parser.add_argument('--branch',
+                    dest='branch',
+                    action='store',
+                    required=True,
+                    default=None,
+                    metavar="BRANCH",
+                    help='the new branch name (needs to start with the product name')
+parser.add_argument('--product',
+                    dest='product',
+                    action='store',
+                    choices=('mfw', 'ngfw', 'waf', 'efw'),
+                    required=True,
+                    default=None,
+                    metavar="PRODUCT",
+                    help='product name')
 
 # main
-if __name__ == "__main__":
+if __name__ == '__main__':
     args = parser.parse_args()
 
     # logging
     logging.getLogger().setLevel(getattr(logging, args.logLevel.upper()))
     console = logging.StreamHandler(sys.stderr)
-    formatter = logging.Formatter("[%(asctime)s] changelog: %(levelname)-7s %(message)s")
+    formatter = logging.Formatter('[%(asctime)s] changelog: %(levelname)-7s %(message)s')
     console.setFormatter(formatter)
-    logging.getLogger("").addHandler(console)
+    logging.getLogger('').addHandler(console)
 
     # go
     logging.info("started with %s", " ".join(sys.argv[1:]))
@@ -93,7 +84,7 @@ if __name__ == "__main__":
 
         if not repo_info.disable_branch_creation:
             # checkout new branch
-            logging.info("creating branch %s", branch)
+            logging.info('creating branch %s', branch)
             new_branch = repo.create_head(branch)
             new_branch.checkout()
 
@@ -103,9 +94,7 @@ if __name__ == "__main__":
                     vr.set_versioning_value(repo, locals())
 
             # push new branch
-            refspecs = [
-                "{branch}:{branch}".format(branch=new_branch),
-            ]
+            refspecs = ['{branch}:{branch}'.format(branch=new_branch),]
             gitutils.push(origin, refspecs, simulate)
 
         # version resources on master branch
@@ -116,8 +105,8 @@ if __name__ == "__main__":
                     continue
 
                 if repo.head.reference.name != repo_default_branch:
-                    logging.info("on branch %s", repo.head.reference)
-                    logging.info("checking out branch %s", repo_default_branch)
+                    logging.info('on branch %s', repo.head.reference)
+                    logging.info('checking out branch %s', repo_default_branch)
                     default_branch = repo.heads[repo_default_branch]
                     default_branch.checkout()
 
