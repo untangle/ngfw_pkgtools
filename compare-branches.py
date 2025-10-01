@@ -55,7 +55,7 @@ def getBranchUrl(repository: str) -> str:
     return GITHUB_CREATE_BRANCH_URL.format(repository=repository)
 
 
-def getBranchBody(newBranch: str, commitSha: str) -> dict[str, str]:
+def getBranchBody(newBranch: str, commitSha: str):
     return {"ref": "refs/heads/" + newBranch, "sha": commitSha}
 
 
