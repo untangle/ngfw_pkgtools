@@ -105,7 +105,7 @@ repositories:
     private: true
     products:
       mfw:
-  secret_manager:
+  secret-manager:
     private: true
     products:
       mfw:
