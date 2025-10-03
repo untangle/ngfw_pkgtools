@@ -68,8 +68,8 @@ def getJson(
     url: str,
     headers: Dict[str, str],
     auth: tuple[str, str],
-    postData: typing.Optional[Dict[str, str]] = None,
-) -> tuple[typing.Optional[int], typing.Optional[Dict[str, typing.Any]]]:
+    postData: Optional[Dict[str, str]] = None,
+) -> tuple[Optional[int], Optional[Dict[str, Any]]]:
     if postData:
         r = requests.post(url, headers=headers, auth=auth, json=postData)
     else:
@@ -120,7 +120,7 @@ def merge(repository: str, branchFrom: str, branchTo: str) -> tuple[bool, str]:
 
 def compare(
     repository: str, branchFrom: str, branchTo: str
-) -> tuple[typing.Optional[int], typing.Optional[int], typing.Any]:
+) -> tuple[Optional[int], Optional[int], Any]:
     url = getCompareUrl(repository, branchFrom, branchTo)
     sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN))
     if not sc or not jsonData:
