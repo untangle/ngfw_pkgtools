@@ -7,6 +7,7 @@ import sys
 import time
 import typing
 from datetime import datetime
+from typing import Dict
 
 import requests
 
@@ -40,7 +41,7 @@ def getPrUrl(repository: str) -> str:
     return GITHUB_PR_URL.format(repository=repository)
 
 
-def getPrBody(date: str, newBranch: str, branchTo: str, branchFrom: str) -> dict[str, str]:
+def getPrBody(date: str, newBranch: str, branchTo: str, branchFrom: str) -> Dict[str, str]:
     return {
         "title": "Merge PR from {branchFrom} into {branchTo} on {date} ".format(
             branchFrom=branchFrom, branchTo=branchTo, date=date
@@ -55,7 +56,7 @@ def getBranchUrl(repository: str) -> str:
     return GITHUB_CREATE_BRANCH_URL.format(repository=repository)
 
 
-def getBranchBody(newBranch: str, commitSha: str) -> dict[str, str]:
+def getBranchBody(newBranch: str, commitSha: str) -> Dict[str, str]:
     return {"ref": "refs/heads/" + newBranch, "sha": commitSha}
 
 
@@ -65,10 +66,10 @@ def getHeadShaUrl(repository: str, branch: str) -> str:
 
 def getJson(
     url: str,
-    headers: dict[str, str],
+    headers: Dict[str, str],
     auth: tuple[str, str],
-    postData: typing.Optional[dict[str, str]] = None,
-) -> tuple[typing.Optional[int], typing.Optional[dict[str, typing.Any]]]:
+    postData: typing.Optional[Dict[str, str]] = None,
+) -> tuple[typing.Optional[int], typing.Optional[Dict[str, typing.Any]]]:
     if postData:
         r = requests.post(url, headers=headers, auth=auth, json=postData)
     else:
