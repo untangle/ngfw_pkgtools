@@ -7,7 +7,7 @@ import sys
 import time
 import typing
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 
 import requests
 
@@ -67,9 +67,9 @@ def getHeadShaUrl(repository: str, branch: str) -> str:
 def getJson(
     url: str,
     headers: Dict[str, str],
-    auth: tuple[str, str],
+    auth: Tuple[str, str],
     postData: Optional[Dict[str, str]] = None,
-) -> tuple[Optional[int], Optional[Dict[str, Any]]]:
+) -> Tuple[Optional[int], Optional[Dict[str, Any]]]:
     if postData:
         r = requests.post(url, headers=headers, auth=auth, json=postData)
     else:
@@ -91,7 +91,7 @@ def getJson(
     return sc, jsonData
 
 
-def merge(repository: str, branchFrom: str, branchTo: str) -> tuple[bool, str]:
+def merge(repository: str, branchFrom: str, branchTo: str) -> Tuple[bool, str]:
     url = GITHUB_MERGE_URL.format(repository=repository)
     postData = {
         "base": branchTo,
@@ -120,7 +120,7 @@ def merge(repository: str, branchFrom: str, branchTo: str) -> tuple[bool, str]:
 
 def compare(
     repository: str, branchFrom: str, branchTo: str
-) -> tuple[Optional[int], Optional[int], Any]:
+) -> Tuple[Optional[int], Optional[int], Any]:
     url = getCompareUrl(repository, branchFrom, branchTo)
     sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN))
     if not sc or not jsonData:
@@ -132,7 +132,7 @@ def compare(
     return ahead, behind, extra
 
 
-def createPR(repository: str, branchTo: str, newBranch: str, branchFrom: str) -> tuple[int, str]:
+def createPR(repository: str, branchTo: str, newBranch: str, branchFrom: str) -> Tuple[int, str]:
     url = getPrUrl(repository)
     body = getPrBody(
         datetime.today().strftime("%Y-%m-%d_%H-%M-%S"), newBranch, branchTo, branchFrom
