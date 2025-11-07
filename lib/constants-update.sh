@@ -19,26 +19,3 @@ repreproLocal() {
   echo "Running local command '$@'"
   $PKGTOOLS/${REPREPRO_COMMAND} "$@"
 }
-
-# remoteCommand() {
-#   echo "Running remote command: '$@'"
-#   case "$@" in
-#     *"${REMOTE_PKGTOOLS}"*)
-#       $SSH_COMMAND "$@" ;;
-#     *)
-#       $SSH_COMMAND "cd ${REMOTE_PKGTOOLS} && $@" ;;
-#   esac
-# }
-
-# repreproRemote() {
-#   remoteCommand ${REPREPRO_COMMAND} "$@"
-# }
-
-# copyRemotePkgtools() {
-#   removeRemotePkgtools
-#   rsync -aH $PKGTOOLS/ ${REMOTE_USER}@${REMOTE_SERVER}:${REMOTE_PKGTOOLS}/
-# }
-
-# removeRemotePkgtools() {
-#   remoteCommand "rm -fr ${REMOTE_PKGTOOLS}"
-# }
