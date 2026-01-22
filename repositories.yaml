@@ -24,11 +24,6 @@ repositories:
       ngfw:
 
   # MFW only
-  alertd:
-    private: true
-    products:
-      mfw:
-      efw:
   discoverd:
     private: true
     products:
@@ -87,11 +82,6 @@ repositories:
       mfw:
         disable_branch_creation: false
   packetd:
-    private: true
-    products:
-      mfw:
-      efw:
-  reportd:
     private: true
     products:
       mfw:
