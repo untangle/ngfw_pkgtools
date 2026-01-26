@@ -158,6 +158,13 @@ do-build() {
       fi
 
       if [[ -n "$dput_profile" ]] ; then
+
+  # we message the server so that it logs our IP
+  # if we hit the wall with ACL the admin can check error logs
+  # for the given timestamp from the job and see the IP
+  apt install -y wget
+  wget http://package-server.untangle.int/whoami_zuul || true
+
 	apt install -y dput
 	dput -c ${PKGTOOLS}/dput.cf $dput_profile $changes_file || reason="FAILURE"
       fi
