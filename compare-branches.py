@@ -15,14 +15,14 @@ import requests
 from lib import repoinfo
 
 # constants
-GITHUB_BASE_URL = "https://api.github.com/repos/untangle/{repository}"
+GITHUB_BASE_URL = "https://api.github.com/repos/jsommerville-untangle/{repository}"
 GITHUB_COMPARE_URL = GITHUB_BASE_URL + "/compare/{branchTo}...{branchFrom}"
 GITHUB_MERGE_URL = GITHUB_BASE_URL + "/merges"
 GITHUB_PR_URL = GITHUB_BASE_URL + "/pulls"
 GITHUB_CREATE_BRANCH_URL = GITHUB_BASE_URL + "/git/refs"
 GITHUB_GET_BRANCH_URL = GITHUB_BASE_URL + "/branches/{branch}"
 GITHUB_HEADERS = {"Accept": "application/vnd.github.loki-preview+json"}
-GITHUB_USER = "untangle-bot"
+GITHUB_USER = "jsommerville-untangle"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
 HEADER1_TPL = "{branchFrom} vs. {branchTo}"
 HEADER2_TPL = "    {repository}"
@@ -228,7 +228,7 @@ target.add_argument(
     type=str,
     dest="product",
     metavar="PRODUCT",
-    choices=("mfw", "ngfw", "waf", "efw"),
+    choices=("mfw", "ngfw", "waf", "efw", "velo"),
     help="product to work on",
 )
 target.add_argument(
