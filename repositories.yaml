@@ -34,6 +34,7 @@ repositories:
     products:
       mfw:
       efw:
+      velo:
   libpktdpdk:
     private: true
     products:
@@ -53,10 +54,12 @@ repositories:
     products:
       mfw:
       efw:
+      velo:
   mfw_schema:
     products:
       mfw:
       efw:
+      velo:
   mfw_ui:
     private: true
     products:
@@ -86,11 +89,13 @@ repositories:
     products:
       mfw:
       efw:
+      velo:
   restd:
     private: true
     products:
       mfw:
       efw:
+      velo:
   wan-utils:
     private: true
     products:
@@ -100,6 +105,7 @@ repositories:
     products:
       mfw:
       efw:
+      velo:
 
   # WAF only
   waf:
@@ -184,6 +190,7 @@ repositories:
       ngfw:
       waf:
       efw:
+      velo:
 
   # obsolete
   mfw_admin:
