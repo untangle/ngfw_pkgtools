@@ -2,179 +2,67 @@
 
 import argparse
 import logging
-import os
 import sys
-import time
-import typing
-from datetime import datetime
-from typing import Dict, Any, Optional, Tuple
-
-import requests
+from typing import Optional, Tuple, Any
 
 # relative to cwd
 from lib import repoinfo
+from lib import gerrit_api
+from lib import github_api
 
 # constants
-GITHUB_BASE_URL = "https://api.github.com/repos/jsommerville-untangle/{repository}"
-GITHUB_COMPARE_URL = GITHUB_BASE_URL + "/compare/{branchTo}...{branchFrom}"
-GITHUB_MERGE_URL = GITHUB_BASE_URL + "/merges"
-GITHUB_PR_URL = GITHUB_BASE_URL + "/pulls"
-GITHUB_CREATE_BRANCH_URL = GITHUB_BASE_URL + "/git/refs"
-GITHUB_GET_BRANCH_URL = GITHUB_BASE_URL + "/branches/{branch}"
-GITHUB_HEADERS = {"Accept": "application/vnd.github.loki-preview+json"}
-GITHUB_USER = "jsommerville-untangle"
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
 HEADER1_TPL = "{branchFrom} vs. {branchTo}"
 HEADER2_TPL = "    {repository}"
 OUTPUT_COMPARE_TPL = "        {ahead:>02} ahead, {behind:>02} behind {extra}"
 OUTPUT_MERGE_TPL = "        merge {status}"
 
 
-# functions
-def getCompareUrl(repository: str, branchFrom: str, branchTo: str) -> str:
-    return GITHUB_COMPARE_URL.format(
-        repository=repository, branchFrom=branchFrom, branchTo=branchTo
-    )
-
-
-def getPrUrl(repository: str) -> str:
-    return GITHUB_PR_URL.format(repository=repository)
-
-
-def getPrBody(date: str, newBranch: str, branchTo: str, branchFrom: str) -> Dict[str, str]:
-    return {
-        "title": "Merge PR from {branchFrom} into {branchTo} on {date} ".format(
-            branchFrom=branchFrom, branchTo=branchTo, date=date
-        ),
-        "body": "PR opened by jenkins",
-        "head": newBranch,
-        "base": branchTo,
-    }
-
-
-def getBranchUrl(repository: str) -> str:
-    return GITHUB_CREATE_BRANCH_URL.format(repository=repository)
-
-
-def getBranchBody(newBranch: str, commitSha: str) -> Dict[str, str]:
-    return {"ref": "refs/heads/" + newBranch, "sha": commitSha}
-
-
-def getHeadShaUrl(repository: str, branch: str) -> str:
-    return GITHUB_GET_BRANCH_URL.format(repository=repository, branch=branch)
-
-
-def getJson(
-    url: str,
-    headers: Dict[str, str],
-    auth: Tuple[str, str],
-    postData: Optional[Dict[str, str]] = None,
-) -> Tuple[Optional[int], Optional[Dict[str, Any]]]:
-    if postData:
-        r = requests.post(url, headers=headers, auth=auth, json=postData)
+# Unified interface functions that route to GitHub or Gerrit
+def merge(repository: str, branch_from: str, branch_to: str, repo_type: str = "github") -> Tuple[bool, str]:
+    """Merge branches - routes to GitHub or Gerrit based on repo_type."""
+    if repo_type == "gerrit":
+        return gerrit_api.merge_branches(repository, branch_from, branch_to)
     else:
-        r = requests.get(url, headers=headers, auth=auth)
-
-    sc = r.status_code
-    if sc == 401:
-        logging.error("Couldn't authenticate to GitHub, you need to export a valid GITHUB_TOKEN")
-        sys.exit(1)
-    if sc == 404:
-        logging.debug("Couldn't find URL '{}'".format(url))
-        logging.debug("... it means one of repository/branchFrom/branchTo does not exist")
-        return None, None
-    elif sc == 204:
-        jsonData = None
-    else:
-        jsonData = r.json()
-
-    return sc, jsonData
-
-
-def merge(repository: str, branchFrom: str, branchTo: str) -> Tuple[bool, str]:
-    url = GITHUB_MERGE_URL.format(repository=repository)
-    postData = {
-        "base": branchTo,
-        "head": branchFrom,
-        "commit_message": "Merged by Jenkins",
-    }
-    sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN), postData=postData)
-
-    if not sc:
-        success = True
-        status = "SKIPPED: no comparison could be made"
-    elif sc == 204:
-        success = True
-        status = "SKIPPED: no need to merge"
-    elif sc == 201:
-        success = True
-        if not jsonData:
-            raise RuntimeError("merge(...), sc is 201, but success is None")
-        status = "DONE: commitId=" + jsonData["sha"]
-    else:
-        success = False
-        status = "FAILED: conflicts"
-
-    return success, status
+        return github_api.merge_branches(repository, branch_from, branch_to)
 
 
 def compare(
-    repository: str, branchFrom: str, branchTo: str
+    repository: str, branch_from: str, branch_to: str, repo_type: str = "github"
 ) -> Tuple[Optional[int], Optional[int], Any]:
-    url = getCompareUrl(repository, branchFrom, branchTo)
-    sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN))
-    if not sc or not jsonData:
-        return None, None, None
-
-    ahead, behind = [int(jsonData[x]) for x in ("ahead_by", "behind_by")]
-    extra = "!!! Need to merge !!!" if ahead > 0 else ""
-
-    return ahead, behind, extra
-
-
-def createPR(repository: str, branchTo: str, newBranch: str, branchFrom: str) -> Tuple[int, str]:
-    url = getPrUrl(repository)
-    body = getPrBody(
-        datetime.today().strftime("%Y-%m-%d_%H-%M-%S"), newBranch, branchTo, branchFrom
-    )
-    sc, _ = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN), postData=body)
-    if not sc:
-        raise RuntimeError("createPR(...) returned status code is None")
-    return sc, newBranch
-
-
-def createBranch(repository: str, branchFrom: str, branchTo: str):
-    url = getBranchUrl(repository)
-    newBranch = "automerge-from-{branchFrom}-to-{branchTo}-{date}-{time}".format(
-        branchFrom=branchFrom,
-        branchTo=branchTo,
-        date=datetime.today().strftime("%Y-%m-%d"),
-        time=time.time_ns(),
-    )
-
-    sha = getHeadSha(repository, branchFrom)
-    logging.debug("got sha: {sha}; creating workspace branch with this...".format(sha=sha))
-    postData = getBranchBody(newBranch, sha)
-    sc, _ = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN), postData=postData)
-
-    logging.debug("new branch is: {newBranch}".format(newBranch=newBranch))
-    return sc, newBranch
-
-
-def getHeadSha(repository: str, branch: str) -> str:
-    url = getHeadShaUrl(repository, branch)
-    sc, jsonData = getJson(url, GITHUB_HEADERS, (GITHUB_USER, GITHUB_TOKEN))
-
-    if not sc:
-        logging.debug("idk what this means?")
-        return ""
-    elif sc == 200:
-        if not jsonData:
-            raise RuntimeError("getHeadSha(...), status code is 200, but jsonData is None")
-        return jsonData["commit"].get("sha")
+    """Compare branches - routes to GitHub or Gerrit based on repo_type."""
+    if repo_type == "gerrit":
+        return gerrit_api.compare_branches(repository, branch_from, branch_to)
     else:
-        logging.debug("unable to get branch sha; exit")
-        exit(1)
+        return github_api.compare_branches(repository, branch_from, branch_to)
+
+
+def create_pr(repository: str, branch_to: str, new_branch: str, branch_from: str, repo_type: str = "github") -> Tuple[int, str]:
+    """Create PR/Change - routes to GitHub or Gerrit based on repo_type."""
+    if repo_type == "gerrit":
+        sc, change_id = gerrit_api.create_change(repository, branch_to, branch_from)
+        return sc, change_id if change_id else ""
+    else:
+        return github_api.create_pr(repository, branch_to, new_branch, branch_from)
+
+
+def create_branch(repository: str, branch_from: str, branch_to: str, repo_type: str = "github"):
+    """Create branch - routes to GitHub or Gerrit based on repo_type."""
+    if repo_type == "gerrit":
+        # For Gerrit, we don't create temporary branches the same way
+        # Return a placeholder
+        logging.warning("Branch creation for Gerrit not implemented - using change workflow")
+        return None, None
+    else:
+        return github_api.create_branch(repository, branch_from, branch_to)
+
+
+def get_head_sha(repository: str, branch: str, repo_type: str = "github") -> str:
+    """Get HEAD SHA - routes to GitHub or Gerrit based on repo_type."""
+    if repo_type == "gerrit":
+        sha = gerrit_api.get_branch_revision(repository, branch)
+        return sha if sha else ""
+    else:
+        return github_api.get_branch_revision(repository, branch)
 
 
 # CL options
@@ -253,23 +141,49 @@ if __name__ == "__main__":
     product = args.product
 
     if args.repositories:
-        repositories = args.repositories
+        # When repositories are specified directly, we need to get their info
+        # For now, assume they're all GitHub unless we can look them up
+        repo_objects = []
+        for repo_name in args.repositories:
+            # Try to find the repo in the product's repo list
+            found = False
+            if product:
+                all_repos = repoinfo.list_repositories(product)
+                for r in all_repos:
+                    if r.name == repo_name:
+                        repo_objects.append(r)
+                        found = True
+                        break
+            if not found:
+                # Create a minimal repo object with default values
+                logging.warning(f"Repository {repo_name} not found in product config, assuming GitHub")
+                from dataclasses import dataclass
+                @dataclass
+                class MinimalRepo:
+                    name: str
+                    repo_type: str = "github"
+                    disable_forward_merge: bool = False
+                repo_objects.append(MinimalRepo(name=repo_name))
     else:
-        repositories = [
-            r.name for r in repoinfo.list_repositories(product) if not r.disable_forward_merge
+        repo_objects = [
+            r for r in repoinfo.list_repositories(product) if not r.disable_forward_merge
         ]
 
-    branchFrom, branchTo = args.branchFrom, args.branchTo
+    branch_from, branch_to = args.branchFrom, args.branchTo
     rc = 0
 
-    print(HEADER1_TPL.format(branchFrom=branchFrom, branchTo=branchTo))
+    print(HEADER1_TPL.format(branchFrom=branch_from, branchTo=branch_to))
 
-    for repository in repositories:
+    for repo in repo_objects:
+        repository = repo.name
+        repo_type = getattr(repo, 'repo_type', 'github')
+        
         s = [""]
         s.append(HEADER2_TPL.format(repository=repository))
+        s.append(f"        type: {repo_type}")
 
         if args.merge:
-            success, status = merge(repository, branchFrom, branchTo)
+            success, status = merge(repository, branch_from, branch_to, repo_type)
             logging.debug("For {}: success={}, status={}".format(repository, success, status))
             s.append(OUTPUT_MERGE_TPL.format(status=status))
             if success:
@@ -278,7 +192,7 @@ if __name__ == "__main__":
             else:
                 rc = 1
 
-        ahead, behind, extra = compare(repository, branchFrom, branchTo)
+        ahead, behind, extra = compare(repository, branch_from, branch_to, repo_type)
         if ahead is None:
             continue
 
@@ -286,15 +200,24 @@ if __name__ == "__main__":
         print("\n".join(s))
 
         if args.openpr:
-            # First push the branch up, based on the HEAD of branchFrom
-            success, newBranch = createBranch(repository, branchFrom, branchTo)
-            if success is False:
-                print("Unable to create new branch - merge manually pls")
-                exit(1)
-            # Last, open a PR against the branchTo
-            success = createPR(repository, branchTo, newBranch, branchFrom)
-            if success is False:
-                print("Unable to create PR - merge manually pls")
-                exit(1)
+            if repo_type == "gerrit":
+                # For Gerrit, create a change directly
+                success, change_id = create_pr(repository, branch_to, "", branch_from, repo_type)
+                if not success:
+                    print("Unable to create Gerrit change - merge manually pls")
+                    exit(1)
+                else:
+                    print(f"Created Gerrit change: {change_id}")
+            else:
+                # For GitHub, create branch then PR
+                success, new_branch = create_branch(repository, branch_from, branch_to, repo_type)
+                if success is False:
+                    print("Unable to create new branch - merge manually pls")
+                    exit(1)
+                # Last, open a PR against the branch_to
+                success = create_pr(repository, branch_to, new_branch, branch_from, repo_type)
+                if success is False:
+                    print("Unable to create PR - merge manually pls")
+                    exit(1)
 
     sys.exit(rc)

@@ -1,4 +1,5 @@
 default_git_base_url: git@github.com:untangle
+default_repo_type: github
 
 repositories:
   # NGFW only
@@ -25,6 +26,7 @@ repositories:
 
   # MFW only
   discoverd:
+    repo_type: gerrit
     private: true
     products:
       mfw:
@@ -129,6 +131,7 @@ repositories:
       waf:
       efw:
   bctid:
+    repo_type: gerrit
     private: true
     products:
       mfw:
