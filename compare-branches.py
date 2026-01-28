@@ -9,6 +9,7 @@ from typing import Optional, Tuple, Any
 from lib import repoinfo
 from lib import gerrit_api
 from lib import github_api
+from lib.products import Product
 
 # constants
 HEADER1_TPL = "{branchFrom} vs. {branchTo}"
@@ -116,7 +117,7 @@ target.add_argument(
     type=str,
     dest="product",
     metavar="PRODUCT",
-    choices=("mfw", "ngfw", "waf", "efw", "velo"),
+    choices=Product.choices(),
     help="product to work on",
 )
 target.add_argument(
