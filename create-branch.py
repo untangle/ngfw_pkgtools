@@ -6,6 +6,7 @@ import sys
 
 # relative to cwd
 from lib import gitutils, repoinfo, simple_version
+from lib.products import Product
 
 # functions
 
@@ -49,7 +50,7 @@ parser.add_argument(
     "--product",
     dest="product",
     action="store",
-    choices=("mfw", "ngfw", "waf", "efw"),
+    choices=Product.choices(),
     required=True,
     default=None,
     metavar="PRODUCT",

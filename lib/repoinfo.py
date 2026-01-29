@@ -16,6 +16,7 @@ class RepositoryInfo:
     versioned_resources: List[versioned_resource.VersionedResource]
     git_url: str = ''
     default_branch: str = 'master'
+    repo_type: str = 'github'
     obsolete: bool = False
     disable_branch_creation: bool = False
     disable_forward_merge: bool = False
@@ -59,6 +60,7 @@ def list_repositories(product, yaml_file=YAML_REPOSITORY_INFO, include_obsolete=
         # 2 extra records to match RepositoryInfo
         r['name'] = name
         r['git_base_url'] = r.get('git_base_url', y['default_git_base_url'])
+        r['repo_type'] = r.get('repo_type', y.get('default_repo_type', 'github'))
         # get those product-specific attributes
         r['default_branch'] = p.get('default_branch', 'master')
         r['disable_branch_creation'] = p.get('disable_branch_creation', False)
