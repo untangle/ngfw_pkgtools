@@ -24,11 +24,6 @@ repositories:
       ngfw:
 
   # MFW only
-  alertd:
-    private: true
-    products:
-      mfw:
-      efw:
   discoverd:
     private: true
     products:
@@ -39,6 +34,7 @@ repositories:
     products:
       mfw:
       efw:
+      velo:
   libpktdpdk:
     private: true
     products:
@@ -58,10 +54,12 @@ repositories:
     products:
       mfw:
       efw:
+      velo:
   mfw_schema:
     products:
       mfw:
       efw:
+      velo:
   mfw_ui:
     private: true
     products:
@@ -91,16 +89,13 @@ repositories:
     products:
       mfw:
       efw:
-  reportd:
-    private: true
-    products:
-      mfw:
-      efw:
+      velo:
   restd:
     private: true
     products:
       mfw:
       efw:
+      velo:
   wan-utils:
     private: true
     products:
@@ -110,6 +105,7 @@ repositories:
     products:
       mfw:
       efw:
+      velo:
 
   # WAF only
   waf:
@@ -194,6 +190,7 @@ repositories:
       ngfw:
       waf:
       efw:
+      velo:
 
   # obsolete
   mfw_admin:
@@ -201,3 +198,15 @@ repositories:
     private: true
     products:
       mfw:
+  alertd:
+    private: true
+    obsolete: true
+    products:
+      mfw:
+      efw:
+  reportd:
+    private: true
+    obsolete: true
+    products:
+      mfw:
+      efw:
