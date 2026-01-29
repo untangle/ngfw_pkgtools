@@ -7,63 +7,14 @@ from typing import Optional, Tuple, Any
 
 # relative to cwd
 from lib import repoinfo
-from lib import gerrit_api
-from lib import github_api
 from lib.products import Product
+from lib.repo_api import get_api
 
 # constants
 HEADER1_TPL = "{branchFrom} vs. {branchTo}"
 HEADER2_TPL = "    {repository}"
 OUTPUT_COMPARE_TPL = "        {ahead:>02} ahead, {behind:>02} behind {extra}"
 OUTPUT_MERGE_TPL = "        merge {status}"
-
-
-# Unified interface functions that route to GitHub or Gerrit
-def merge(repository: str, branch_from: str, branch_to: str, repo_type: str = "github") -> Tuple[bool, str]:
-    """Merge branches - routes to GitHub or Gerrit based on repo_type."""
-    if repo_type == "gerrit":
-        return gerrit_api.merge_branches(repository, branch_from, branch_to)
-    else:
-        return github_api.merge_branches(repository, branch_from, branch_to)
-
-
-def compare(
-    repository: str, branch_from: str, branch_to: str, repo_type: str = "github"
-) -> Tuple[Optional[int], Optional[int], Any]:
-    """Compare branches - routes to GitHub or Gerrit based on repo_type."""
-    if repo_type == "gerrit":
-        return gerrit_api.compare_branches(repository, branch_from, branch_to)
-    else:
-        return github_api.compare_branches(repository, branch_from, branch_to)
-
-
-def create_pr(repository: str, branch_to: str, new_branch: str, branch_from: str, repo_type: str = "github") -> Tuple[int, str]:
-    """Create PR/Change - routes to GitHub or Gerrit based on repo_type."""
-    if repo_type == "gerrit":
-        sc, change_id = gerrit_api.create_change(repository, branch_to, branch_from)
-        return sc, change_id if change_id else ""
-    else:
-        return github_api.create_pr(repository, branch_to, new_branch, branch_from)
-
-
-def create_branch(repository: str, branch_from: str, branch_to: str, repo_type: str = "github"):
-    """Create branch - routes to GitHub or Gerrit based on repo_type."""
-    if repo_type == "gerrit":
-        # For Gerrit, we don't create temporary branches the same way
-        # Return a placeholder
-        logging.warning("Branch creation for Gerrit not implemented - using change workflow")
-        return None, None
-    else:
-        return github_api.create_branch(repository, branch_from, branch_to)
-
-
-def get_head_sha(repository: str, branch: str, repo_type: str = "github") -> str:
-    """Get HEAD SHA - routes to GitHub or Gerrit based on repo_type."""
-    if repo_type == "gerrit":
-        sha = gerrit_api.get_branch_revision(repository, branch)
-        return sha if sha else ""
-    else:
-        return github_api.get_branch_revision(repository, branch)
 
 
 # CL options
@@ -179,12 +130,15 @@ if __name__ == "__main__":
         repository = repo.name
         repo_type = getattr(repo, 'repo_type', 'github')
         
+        # Get the appropriate API implementation
+        api = get_api(repo_type)
+        
         s = [""]
         s.append(HEADER2_TPL.format(repository=repository))
         s.append(f"        type: {repo_type}")
 
         if args.merge:
-            success, status = merge(repository, branch_from, branch_to, repo_type)
+            success, status = api.merge_branches(repository, branch_from, branch_to)
             logging.debug("For {}: success={}, status={}".format(repository, success, status))
             s.append(OUTPUT_MERGE_TPL.format(status=status))
             if success:
@@ -193,7 +147,7 @@ if __name__ == "__main__":
             else:
                 rc = 1
 
-        ahead, behind, extra = compare(repository, branch_from, branch_to, repo_type)
+        ahead, behind, extra = api.compare_branches(repository, branch_from, branch_to)
         if ahead is None:
             continue
 
@@ -203,21 +157,21 @@ if __name__ == "__main__":
         if args.openpr:
             if repo_type == "gerrit":
                 # For Gerrit, create a change directly
-                success, change_id = create_pr(repository, branch_to, "", branch_from, repo_type)
-                if not success:
+                sc, change_id = api.create_pr(repository, branch_to, "", branch_from)
+                if not sc:
                     print("Unable to create Gerrit change - merge manually pls")
                     exit(1)
                 else:
                     print(f"Created Gerrit change: {change_id}")
             else:
                 # For GitHub, create branch then PR
-                success, new_branch = create_branch(repository, branch_from, branch_to, repo_type)
-                if success is False:
+                sc, new_branch = api.create_branch(repository, branch_from, branch_to)
+                if sc is False or sc is None:
                     print("Unable to create new branch - merge manually pls")
                     exit(1)
                 # Last, open a PR against the branch_to
-                success = create_pr(repository, branch_to, new_branch, branch_from, repo_type)
-                if success is False:
+                sc, _ = api.create_pr(repository, branch_to, new_branch, branch_from)
+                if sc is False or sc is None:
                     print("Unable to create PR - merge manually pls")
                     exit(1)
 
