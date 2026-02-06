@@ -58,12 +58,26 @@ def list_repositories(product, yaml_file=YAML_REPOSITORY_INFO, include_obsolete=
 
         # 2 extra records to match RepositoryInfo
         r['name'] = name
-        r['git_base_url'] = r.get('git_base_url', y['default_git_base_url'])
+        
+        # Determine git_base_url with priority:
+        # 1. Repository-level git_source (e.g., 'gerrit' or 'github')
+        # 2. Repository-level git_base_url
+        # 3. Default git_base_url
+        git_source = r.get('git_source')
+        if git_source and 'git_sources' in y:
+            r['git_base_url'] = y['git_sources'].get(git_source, y['default_git_base_url'])
+        else:
+            r['git_base_url'] = r.get('git_base_url', y['default_git_base_url'])
+        
         # get those product-specific attributes
         r['default_branch'] = p.get('default_branch', 'master')
         r['disable_branch_creation'] = p.get('disable_branch_creation', False)
         r['skip_versioning_entirely'] = p.get('skip_versioning_entirely', False)
+        
+        # Remove keys that are not part of RepositoryInfo dataclass
         r.pop('products')
+        r.pop('git_source', None)  # Remove git_source if it exists
+        r.pop('git_sources', None)  # Remove git_sources if it exists
 
         versioned_resources = []
         for vr in r.get('versioned_resources', []):

@@ -56,7 +56,7 @@ Once inside the container shell, you can run any script:
 
 ## Running Tests
 
-Run unit tests:
+Run unit tests with coverage:
 
 ```bash
 make test
@@ -64,8 +64,19 @@ make test
 
 Or manually:
 ```bash
-docker-compose -f docker-compose.dev.yml exec ngfw-pkgtools-dev pytest -v
+docker-compose -f docker-compose.dev.yml exec ngfw-pkgtools-dev pytest -v --cov=lib --cov-report=term-missing
 ```
+
+Run specific tests:
+```bash
+# Run specific test file
+docker-compose -f docker-compose.dev.yml exec ngfw-pkgtools-dev pytest tests/test_repoinfo.py -v
+
+# Run specific test
+docker-compose -f docker-compose.dev.yml exec ngfw-pkgtools-dev pytest tests/test_repoinfo.py::TestRepositoryInfo -v
+```
+
+See [`tests/README.md`](tests/README.md) for more details on testing.
 
 ## Code Quality
 
