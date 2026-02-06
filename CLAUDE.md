@@ -22,13 +22,13 @@ When creating a class, make sure it fits into a class hierarchy / relational dia
 
 Choose commonly re-usable pattern over less commonly re-usable pattern
 
-Avoid methods that is only one line (few exception are pass-through classes, data structure / architecture obfuscations, etc)
+Avoid methods that are only one line (few exception are pass-through classes, data structure / architecture obfuscations, etc)
 
 Do not leave commented out code in the code base - that is what Source Control is for. If you think some code may be useful in the future, remove it and add a comment that additional logic is available via version history.
 
 Default value for a string should be NULL not empty string.
 
-Avoid exception-driven programming. Throwing exceptions is costly. Catching and re-throwing doubles that cost. If you are relying on throwing custom exceptions to communicated errors, you likely have flaws on your design.
+Avoid exception-driven programming. Throwing exceptions is costly. Catching and re-throwing doubles that cost. If you are relying on throwing custom exceptions to communicate errors, you likely have flaws on your design.
 
 SQL queries must be parametrized - NEVER pass non-constant values directly into a SQL query, NEVER attempt to escape parameters manually
 
@@ -42,7 +42,7 @@ Code documentation is required! Self-documenting code may exist in the universe,
 
 Comment code you add, especially public methods. More commentary is generally better for public methods.
 
-Add new unit tests to for new functionality, or new test cases for new cases that arise.
+Add new unit tests for new functionality, or new test cases for new cases that arise.
 
 Deduplicate code when necessary. If something is repeated twice with different variables, go back and unify the code.
 
@@ -50,24 +50,25 @@ When finishing a task, run make format, then make lint and fix all lingering lin
 - Golang: go vet, gofmt
 - Python: ruff 
 - C/C++: clang-format
+- bash: shellcheck shfmt 
 
 
 ## Architectural Notes
-
-Any other arch notes we need to mention here
+N/A
 
 ## Wrapup Checklist
 The 'wrapup checklist' is a list of things to do as we finish a ticket:
-1.     Run make test and fix all errors in unit tests.
-2.     Run make test/libtest and check that this does not fail, if it does, stop, we need to figure out what went wrong.
-3.     Run make format then make lint and fix all linter issues.
-4.     Run git fetch origin and then git diff origin/master and examine the output -- check that we followed the basic ground rules, that the code we added makes sense and look for duplication or bugs.
+1. Run make test and fix all errors in unit tests.
+
+2. Run make format then make lint and fix all linter issues.
+
+3. Run git fetch origin and then git diff origin/master and examine the output -- check that we followed the basic ground rules, that the code we added makes sense and look for duplication or bugs.
 
 ## Common Commands
-
+N/A
 
 
 ## Notes
-
+N/A
 
 
