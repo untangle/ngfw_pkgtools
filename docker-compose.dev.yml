@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  ngfw-pkgtools-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: ngfw-pkgtools:dev
+    container_name: ngfw-pkgtools-dev
+    volumes:
+      # Mount the current directory to allow live code changes
+      - .:/opt/untangle/ngfw_pkgtools
+      # Mount git config for authentication (optional, uncomment if needed)
+      # - ~/.gitconfig:/root/.gitconfig:ro
+      # - ~/.ssh:/root/.ssh:ro
+    working_dir: /opt/untangle/ngfw_pkgtools
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Override default CMD to keep container running for interactive use
+    command: tail -f /dev/null
