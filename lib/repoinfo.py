@@ -65,7 +65,9 @@ def list_repositories(product, yaml_file=YAML_REPOSITORY_INFO, include_obsolete=
         # 3. Default git_base_url
         git_source = r.get('git_source')
         if git_source and 'git_sources' in y:
-            r['git_base_url'] = y['git_sources'].get(git_source, y['default_git_base_url'])
+            git_base_url = y['git_sources'].get(git_source, y['default_git_base_url'])
+            # Substitute {username} placeholder with GERRIT_USER
+            r['git_base_url'] = git_base_url.format(username=GERRIT_USER)
         else:
             r['git_base_url'] = r.get('git_base_url', y['default_git_base_url'])
         

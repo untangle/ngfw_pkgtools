@@ -94,6 +94,23 @@ make lint
 
 ## Git Configuration
 
+### Gerrit Username
+
+The Gerrit username is automatically configured from your environment:
+
+```bash
+# Set your Gerrit username (optional, defaults to $USER)
+export GERRIT_USER=jsommerville
+
+# Restart container to pick up the change
+make down
+make up
+```
+
+The username is used in Gerrit SSH URLs: `ssh://<username>@gerrit.corp.arista.io:29418/efw/<repo>`
+
+### SSH Keys for Git Operations
+
 If your scripts need to push to remote repositories, you may need to mount your git credentials:
 
 1. Uncomment the volume mounts in `docker-compose.dev.yml`:

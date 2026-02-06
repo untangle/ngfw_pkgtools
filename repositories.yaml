@@ -2,7 +2,7 @@ default_git_base_url: git@github.com:untangle
 
 git_sources:
   github: git@github.com:untangle
-  gerrit: https://code.arista.io/efw
+  gerrit: ssh://{username}@gerrit.corp.arista.io:29418/efw
 
 repositories:
   # NGFW only

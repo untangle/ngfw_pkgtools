@@ -16,5 +16,6 @@ services:
     working_dir: /opt/untangle/ngfw_pkgtools
     environment:
       - PYTHONUNBUFFERED=1
+      - GERRIT_USER=${GERRIT_USER:-${USER}}
     # Override default CMD to keep container running for interactive use
     command: tail -f /dev/null

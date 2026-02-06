@@ -48,7 +48,7 @@ class TestListRepositories:
             'default_git_base_url': 'git@github.com:untangle',
             'git_sources': {
                 'github': 'git@github.com:untangle',
-                'gerrit': 'https://code.arista.io/efw'
+                'gerrit': 'ssh://{username}@gerrit.corp.arista.io:29418/efw'
             },
             'repositories': {
                 'test-repo-1': {
@@ -97,8 +97,10 @@ class TestListRepositories:
         # Find test-repo-1
         repo = next((r for r in repos if r.name == 'test-repo-1'), None)
         assert repo is not None
-        assert repo.git_base_url == 'https://code.arista.io/efw'
-        assert repo.git_url == 'https://code.arista.io/efw/test-repo-1'
+        # Should have username substituted
+        assert repo.git_base_url.startswith('ssh://')
+        assert '@gerrit.corp.arista.io:29418/efw' in repo.git_base_url
+        assert repo.git_url.endswith('/test-repo-1')
 
     def test_default_git_base_url(self, sample_yaml_file):
         """Test that default git_base_url is used when no git_source is specified"""
@@ -201,7 +203,9 @@ class TestActualRepositoriesYaml:
         for repo_name in velo_repo_names:
             repo = next((r for r in repos if r.name == repo_name), None)
             assert repo is not None, f"Repository {repo_name} not found for velo"
-            assert repo.git_base_url == 'https://code.arista.io/efw', \
+            assert repo.git_base_url.startswith('ssh://'), \
+                f"Repository {repo_name} should use Gerrit SSH URL for velo"
+            assert '@gerrit.corp.arista.io:29418/efw' in repo.git_base_url, \
                 f"Repository {repo_name} should use Gerrit URL for velo"
 
     def test_gerrit_repositories_consistent_across_products(self, actual_yaml_file):
@@ -214,7 +218,9 @@ class TestActualRepositoriesYaml:
             for repo_name in gerrit_repo_names:
                 repo = next((r for r in repos if r.name == repo_name), None)
                 if repo:  # Repository might not be in all products
-                    assert repo.git_base_url == 'https://code.arista.io/efw', \
+                    assert repo.git_base_url.startswith('ssh://'), \
+                        f"Repository {repo_name} should use Gerrit SSH URL for {product}"
+                    assert '@gerrit.corp.arista.io:29418/efw' in repo.git_base_url, \
                         f"Repository {repo_name} should use Gerrit URL for {product}"
 
     def test_github_repositories_use_default(self, actual_yaml_file):
