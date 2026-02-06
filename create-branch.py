@@ -49,7 +49,7 @@ parser.add_argument(
     "--product",
     dest="product",
     action="store",
-    choices=("mfw", "ngfw", "waf", "efw"),
+    choices=("mfw", "ngfw", "waf", "efw", "velo"),
     required=True,
     default=None,
     metavar="PRODUCT",
