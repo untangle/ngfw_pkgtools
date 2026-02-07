@@ -1,0 +1,58 @@
+FROM debian:bullseye-slim
+
+USER root
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Configure APT to not install recommended/suggested packages
+RUN echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/no-recommends && \
+    echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf.d/no-recommends
+
+# Update package lists
+RUN apt update -q
+
+# Install core dependencies
+RUN apt install -y \
+    git \
+    ca-certificates \
+    openssh-client \
+    python3 \
+    python3-pip \
+    python3-setuptools \
+    python3-wheel
+
+# Install Python dependencies
+# GitPython for git operations
+# PyYAML for YAML parsing
+# requests for HTTP operations (used in compare-branches.py)
+RUN pip3 install --no-cache-dir \
+    GitPython>=3.1.0 \
+    PyYAML>=5.3 \
+    requests>=2.25.0
+
+# Install development/testing tools
+RUN pip3 install --no-cache-dir \
+    pytest>=6.0.0 \
+    pytest-cov>=2.10.0 \
+    ruff>=0.0.292
+
+# Cleanup
+RUN apt clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Base directory structure
+ENV UNTANGLE=/opt/untangle
+RUN mkdir -p ${UNTANGLE}
+
+# pkgtools directory
+ENV PKGTOOLS=${UNTANGLE}/ngfw_pkgtools
+COPY . ${PKGTOOLS}/
+
+WORKDIR ${PKGTOOLS}
+
+# Make scripts executable
+RUN chmod +x *.py
+
+VOLUME ${PKGTOOLS}
+
+# Default command runs tests
+CMD ["pytest", "-v", "--cov=lib", "--cov-report=term-missing"]

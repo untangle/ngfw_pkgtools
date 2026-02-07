@@ -1,5 +1,9 @@
 default_git_base_url: git@github.com:untangle
 
+git_sources:
+  github: git@github.com:untangle
+  gerrit: ssh://{username}@gerrit.corp.arista.io:29418/efw
+
 repositories:
   # NGFW only
   ngfw_upstream:
@@ -31,6 +35,8 @@ repositories:
       efw:
   golang-shared:
     private: true
+    git_source: gerrit
+    gerrit_name: protobufs
     products:
       mfw:
       efw:
@@ -51,11 +57,15 @@ repositories:
     products:
       mfw:
   mfw_feeds:
+    git_source: gerrit
+    gerrit_name: feeds
     products:
       mfw:
       efw:
       velo:
   mfw_schema:
+    git_source: gerrit
+    gerrit_name: schema
     products:
       mfw:
       efw:
@@ -86,12 +96,14 @@ repositories:
         disable_branch_creation: false
   packetd:
     private: true
+    git_source: gerrit
     products:
       mfw:
       efw:
       velo:
   restd:
     private: true
+    git_source: gerrit
     products:
       mfw:
       efw:
@@ -102,6 +114,7 @@ repositories:
       mfw:
   secret-manager:
     private: true
+    git_source: gerrit
     products:
       mfw:
       efw:
@@ -185,6 +198,7 @@ repositories:
       ngfw:
   sync-settings:
     private: true
+    git_source: gerrit
     products:
       mfw:
       ngfw:
