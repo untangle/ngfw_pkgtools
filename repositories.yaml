@@ -36,6 +36,7 @@ repositories:
   golang-shared:
     private: true
     git_source: gerrit
+    gerrit_name: protobufs
     products:
       mfw:
       efw:
@@ -57,12 +58,14 @@ repositories:
       mfw:
   mfw_feeds:
     git_source: gerrit
+    gerrit_name: feeds
     products:
       mfw:
       efw:
       velo:
   mfw_schema:
     git_source: gerrit
+    gerrit_name: schema
     products:
       mfw:
       efw:

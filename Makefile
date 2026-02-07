@@ -28,9 +28,13 @@ down:
 shell:
 	docker-compose -f docker-compose.dev.yml exec ngfw-pkgtools-dev /bin/bash
 
-# Run tests
+# Run tests (excludes remote tests by default)
 test:
-	docker-compose -f docker-compose.dev.yml exec ngfw-pkgtools-dev pytest -v --cov=lib --cov-report=term-missing
+	docker-compose -f docker-compose.dev.yml exec ngfw-pkgtools-dev pytest -v --cov=lib --cov-report=term-missing -m "not remote"
+
+# Run all tests including remote repository checks
+test-remote:
+	docker-compose -f docker-compose.dev.yml exec ngfw-pkgtools-dev pytest -v -m remote
 
 # Format code with ruff
 format:

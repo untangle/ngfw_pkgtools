@@ -7,7 +7,7 @@ This directory contains unit tests for the ngfw_pkgtools project.
 ### Using Make (Recommended)
 
 ```bash
-# Run all tests with coverage
+# Run all tests with coverage (excludes remote tests)
 make test
 
 # Format code before testing
@@ -15,6 +15,24 @@ make format
 
 # Run linter
 make lint
+```
+
+### Running Remote Repository Tests
+
+Remote tests verify that repositories in repositories.yaml actually exist and are accessible. These tests require:
+- Network access
+- SSH credentials configured
+- SSH agent running
+
+```bash
+# Run only remote tests
+docker-compose -f docker-compose.dev.yml exec ngfw-pkgtools-dev pytest -v -m remote
+
+# Run all tests including remote tests
+docker-compose -f docker-compose.dev.yml exec ngfw-pkgtools-dev pytest -v --run-remote
+
+# Run all tests except remote tests (default)
+docker-compose -f docker-compose.dev.yml exec ngfw-pkgtools-dev pytest -v -m "not remote"
 ```
 
 ### Using Docker Directly
@@ -72,7 +90,7 @@ Tests for the `lib.repoinfo` module, which handles repository configuration load
 
 ## Test Coverage
 
-Current coverage: **87% for lib/repoinfo.py**
+Current coverage: **88% for lib/repoinfo.py**
 
 The tests cover:
 - ✅ Product-specific git URL configuration
@@ -81,6 +99,8 @@ The tests cover:
 - ✅ Obsolete repository handling
 - ✅ Product-specific attributes
 - ✅ Git URL construction
+- ✅ Gerrit repository name mapping
+- ✅ Remote repository existence (optional, requires network)
 
 ## Adding New Tests
 

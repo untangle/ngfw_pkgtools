@@ -21,9 +21,12 @@ class RepositoryInfo:
     disable_forward_merge: bool = False
     skip_versioning_entirely: bool = False
     private: bool = False
+    gerrit_name: str = ''
 
     def __post_init__(self):
-        self.git_url = osp.join(self.git_base_url, self.name)
+        # Use gerrit_name if specified, otherwise use name
+        repo_name = self.gerrit_name if self.gerrit_name else self.name
+        self.git_url = osp.join(self.git_base_url, repo_name)
 
 
 def read_source_info(yaml_file=YAML_REPOSITORY_INFO):

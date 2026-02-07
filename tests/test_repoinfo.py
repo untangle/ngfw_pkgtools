@@ -244,5 +244,68 @@ class TestActualRepositoriesYaml:
             assert repo.git_url, f"Repository {repo.name} has empty git_url"
             assert repo.git_url.startswith(repo.git_base_url), \
                 f"Repository {repo.name} git_url doesn't start with git_base_url"
-            assert repo.git_url.endswith(repo.name), \
-                f"Repository {repo.name} git_url doesn't end with repo name"
+            # Check that git_url ends with either repo name or gerrit_name (if specified)
+            expected_name = repo.gerrit_name if repo.gerrit_name else repo.name
+            assert repo.git_url.endswith(expected_name), \
+                f"Repository {repo.name} git_url doesn't end with expected name {expected_name}"
+
+
+class TestRemoteRepositoryExistence:
+    """Test that remote repositories actually exist (requires network access)
+    
+    Run these tests with: pytest -v -m remote
+    Skip these tests with: pytest -v -m "not remote" (default)
+    """
+
+    @pytest.fixture
+    def actual_yaml_file(self):
+        """Get the path to the actual repositories.yaml file"""
+        import os.path as osp
+        # Get the path relative to the test file
+        test_dir = osp.dirname(__file__)
+        yaml_path = osp.join(test_dir, '..', 'repositories.yaml')
+        return osp.abspath(yaml_path)
+
+    @pytest.mark.remote
+    def test_velo_gerrit_repositories_exist(self, actual_yaml_file):
+        """Test that velo Gerrit repositories can be accessed"""
+        import subprocess
+        
+        repos = repoinfo.list_repositories('velo', yaml_file=actual_yaml_file)
+        gerrit_repos = [r for r in repos if 'gerrit' in r.git_base_url]
+        
+        failures = []
+        for repo in gerrit_repos:
+            # Use git ls-remote to check if repository exists without cloning
+            result = subprocess.run(
+                ['git', 'ls-remote', '--heads', repo.git_url],
+                capture_output=True,
+                timeout=10,
+                text=True
+            )
+            if result.returncode != 0:
+                failures.append(f"{repo.name} ({repo.git_url}): {result.stderr}")
+        
+        assert not failures, f"Failed to access repositories:\n" + "\n".join(failures)
+
+    @pytest.mark.remote
+    def test_github_repositories_exist(self, actual_yaml_file):
+        """Test that GitHub repositories can be accessed"""
+        import subprocess
+        
+        repos = repoinfo.list_repositories('ngfw', yaml_file=actual_yaml_file)
+        github_repos = [r for r in repos if 'github' in r.git_base_url][:5]  # Test first 5
+        
+        failures = []
+        for repo in github_repos:
+            # Use git ls-remote to check if repository exists without cloning
+            result = subprocess.run(
+                ['git', 'ls-remote', '--heads', repo.git_url],
+                capture_output=True,
+                timeout=10,
+                text=True
+            )
+            if result.returncode != 0:
+                failures.append(f"{repo.name} ({repo.git_url}): {result.stderr}")
+        
+        assert not failures, f"Failed to access repositories:\n" + "\n".join(failures)

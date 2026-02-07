@@ -10,12 +10,14 @@ services:
     volumes:
       # Mount the current directory to allow live code changes
       - .:/opt/untangle/ngfw_pkgtools
-      # Mount git config for authentication (optional, uncomment if needed)
-      # - ~/.gitconfig:/root/.gitconfig:ro
-      # - ~/.ssh:/root/.ssh:ro
+      # Mount git config for authentication
+      - ~/.gitconfig:/root/.gitconfig:ro
+      # Mount SSH agent socket
+      - ${SSH_AUTH_SOCK}:/ssh-agent
     working_dir: /opt/untangle/ngfw_pkgtools
     environment:
       - PYTHONUNBUFFERED=1
       - GERRIT_USER=${GERRIT_USER:-${USER}}
+      - SSH_AUTH_SOCK=/ssh-agent
     # Override default CMD to keep container running for interactive use
     command: tail -f /dev/null
