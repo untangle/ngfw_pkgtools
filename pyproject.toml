@@ -6,3 +6,8 @@ indent-width = 4
 
 unsafe-fixes = false
 target-version="py39"
+
+[tool.pytest.ini_options]
+markers = [
+    "remote: tests that require network access and remote repository access (deselect with '-m \"not remote\"')",
+]
