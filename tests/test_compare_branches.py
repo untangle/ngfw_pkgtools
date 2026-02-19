@@ -149,16 +149,18 @@ class TestGerritRepositoryAdapter:
         assert adapter.repo_info == repo_info
 
     @patch("compare_branches.gitutils.get_repo")
-    @patch("compare_branches.gitutils.list_commits_between")
-    def test_compare_success(self, mock_list_commits, mock_get_repo):
+    def test_compare_success(self, mock_get_repo):
         """Test successful branch comparison using git commands"""
         # Mock repository
         mock_repo = Mock()
         mock_origin = Mock()
         mock_get_repo.return_value = (mock_repo, mock_origin)
 
-        # Mock commits - 5 ahead, 3 behind
-        mock_list_commits.side_effect = [
+        # Mock git rev-parse to indicate branches exist
+        mock_repo.git.rev_parse.return_value = "abc123"
+
+        # Mock iter_commits - 5 ahead, 3 behind
+        mock_repo.iter_commits.side_effect = [
             [Mock() for _ in range(5)],  # ahead
             [Mock() for _ in range(3)],  # behind
         ]
@@ -177,15 +179,17 @@ class TestGerritRepositoryAdapter:
         mock_origin.fetch.assert_called_once()
 
     @patch("compare_branches.gitutils.get_repo")
-    @patch("compare_branches.gitutils.list_commits_between")
-    def test_compare_no_changes(self, mock_list_commits, mock_get_repo):
+    def test_compare_no_changes(self, mock_get_repo):
         """Test comparison when no changes ahead"""
         mock_repo = Mock()
         mock_origin = Mock()
         mock_get_repo.return_value = (mock_repo, mock_origin)
 
+        # Mock git rev-parse to indicate branches exist
+        mock_repo.git.rev_parse.return_value = "abc123"
+
         # No commits ahead, 2 behind
-        mock_list_commits.side_effect = [
+        mock_repo.iter_commits.side_effect = [
             [],  # ahead
             [Mock(), Mock()],  # behind
         ]
@@ -208,7 +212,16 @@ class TestGerritRepositoryAdapter:
         mock_repo = Mock()
         mock_origin = Mock()
         mock_branch = Mock()
-        mock_repo.heads = {"feature": mock_branch}
+        # Mock both branches in heads dict (now we checkout branchTo, not branchFrom)
+        mock_repo.heads = {"main": mock_branch, "feature": mock_branch}
+        mock_repo.working_dir = "/tmp/test-repo"
+        mock_repo.git.rev_parse.return_value = ".git"
+        
+        # Mock push_info to be iterable
+        mock_push_info = Mock()
+        mock_push_info.summary = "[new reference]"
+        mock_origin.push.return_value = [mock_push_info]
+        
         mock_get_repo.return_value = (mock_repo, mock_origin)
 
         repo_info = Mock(spec=repoinfo.RepositoryInfo)
@@ -229,7 +242,10 @@ class TestGerritRepositoryAdapter:
         mock_repo = Mock()
         mock_origin = Mock()
         mock_branch = Mock()
-        mock_repo.heads = {"feature": mock_branch}
+        # Mock both branches in heads dict
+        mock_repo.heads = {"main": mock_branch, "feature": mock_branch}
+        mock_repo.working_dir = "/tmp/test-repo"
+        mock_repo.git.rev_parse.return_value = ".git"
         mock_get_repo.return_value = (mock_repo, mock_origin)
 
         # Simulate merge conflict
@@ -275,6 +291,8 @@ class TestGerritRepositoryAdapter:
         """Test creating Gerrit WIP change (equivalent to PR)"""
         mock_repo = Mock()
         mock_origin = Mock()
+        mock_repo.working_dir = "/tmp/test-repo"
+        mock_repo.git.rev_parse.return_value = ".git"
         mock_get_repo.return_value = (mock_repo, mock_origin)
 
         repo_info = Mock(spec=repoinfo.RepositoryInfo)
