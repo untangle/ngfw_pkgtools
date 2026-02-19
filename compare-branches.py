@@ -341,13 +341,14 @@ class GerritRepositoryAdapter(RepositoryAdapter):
             logging.error(f"Error comparing Gerrit branches for {self.repo_info.name}: {e}")
             return None, None, None
 
-    def merge(self, branchFrom: str, branchTo: str) -> Tuple[bool, str]:
+    def merge(self, branchFrom: str, branchTo: str, push_conflicts: bool = False) -> Tuple[bool, str]:
         """
         Create a Gerrit WIP change to merge branchFrom into branchTo.
 
         Args:
             branchFrom: Source branch to merge from
             branchTo: Target branch to merge into
+            push_conflicts: If True, push WIP changes even with conflict markers (default: False)
 
         Returns:
             Tuple of (success, status_message)
@@ -370,6 +371,9 @@ class GerritRepositoryAdapter(RepositoryAdapter):
 
             # Try to merge branchFrom into branchTo
             logging.info(f"Attempting to merge origin/{branchFrom} into {branchTo}")
+            has_conflicts = False
+            conflicted_files = []
+            
             try:
                 repo.git.merge(
                     f"origin/{branchFrom}", "--no-ff", "-m", f"Merge {branchFrom} into {branchTo}"
@@ -377,32 +381,48 @@ class GerritRepositoryAdapter(RepositoryAdapter):
                 logging.info("Merge successful")
             except git.exc.GitCommandError as e:
                 if "conflict" in str(e).lower():
+                    has_conflicts = True
                     # Get list of conflicted files
                     try:
                         conflicted_files = repo.git.diff("--name-only", "--diff-filter=U").split("\n")
                         conflicted_files = [f for f in conflicted_files if f]  # Remove empty strings
                         conflict_list = ", ".join(conflicted_files) if conflicted_files else "unknown files"
                         
-                        logging.error(f"Merge conflicts in: {conflict_list}")
-                        logging.error(f"Repository path: {repo.working_dir}")
-                        logging.error("To resolve manually:")
-                        logging.error(f"  cd {repo.working_dir}")
-                        logging.error(f"  # Fix conflicts in: {conflict_list}")
-                        logging.error("  git add <resolved-files>")
-                        logging.error("  git commit")
-                        logging.error(f"  git push origin HEAD:refs/for/{branchTo}%wip")
+                        logging.warning(f"Merge conflicts detected in: {conflict_list}")
                         
-                        # Abort the merge to clean up
-                        try:
-                            repo.git.merge("--abort")
-                            logging.info("Merge aborted, repository cleaned up")
-                        except Exception:
-                            pass
-                        
-                        return False, f"FAILED: conflicts in {conflict_list}"
+                        if push_conflicts:
+                            # Add all files (including conflicted ones with markers)
+                            logging.info("Adding conflicted files with conflict markers for WIP review")
+                            repo.git.add("-A")
+                            
+                            # Commit with conflict markers
+                            commit_msg = f"WIP: Merge {branchFrom} into {branchTo} (HAS CONFLICTS)\n\nConflicted files:\n"
+                            for cf in conflicted_files:
+                                commit_msg += f"  - {cf}\n"
+                            
+                            repo.git.commit("-m", commit_msg)
+                            logging.info("Committed merge with conflict markers")
+                        else:
+                            # Provide manual resolution instructions
+                            logging.error(f"Repository path: {repo.working_dir}")
+                            logging.error("To resolve manually:")
+                            logging.error(f"  cd {repo.working_dir}")
+                            logging.error(f"  # Fix conflicts in: {conflict_list}")
+                            logging.error("  git add <resolved-files>")
+                            logging.error("  git commit")
+                            logging.error(f"  git push origin HEAD:refs/for/{branchTo}%wip")
+                            
+                            # Abort the merge to clean up
+                            try:
+                                repo.git.merge("--abort")
+                                logging.info("Merge aborted, repository cleaned up")
+                            except Exception:
+                                pass
+                            
+                            return False, f"FAILED: conflicts in {conflict_list}"
                     except Exception as conflict_err:
-                        logging.error(f"Error getting conflict details: {conflict_err}")
-                        return False, "FAILED: conflicts (unable to determine files)"
+                        logging.error(f"Error handling conflicts: {conflict_err}")
+                        return False, "FAILED: conflicts (unable to process)"
                 elif "Already up to date" in str(e) or "Already up-to-date" in str(e):
                     logging.info("Branches already up to date")
                     return True, "SKIPPED: no need to merge"
@@ -419,7 +439,12 @@ class GerritRepositoryAdapter(RepositoryAdapter):
                 logging.info(f"Push result: {push_info}")
                 for info in push_info:
                     logging.info(f"  - {info.summary}")
-                return True, "DONE: WIP change created for review"
+                
+                if has_conflicts:
+                    conflict_list = ", ".join(conflicted_files)
+                    return True, f"DONE: WIP change created WITH CONFLICTS in {conflict_list}"
+                else:
+                    return True, "DONE: WIP change created for review"
             except git.exc.GitCommandError as e:
                 logging.error(f"Failed to push Gerrit change: {e}")
                 logging.error(f"  stderr: {e.stderr if hasattr(e, 'stderr') else 'N/A'}")
@@ -539,6 +564,13 @@ parser.add_argument(
     help="try to merge first (default=False)",
 )
 parser.add_argument(
+    "--push-conflicts",
+    dest="pushConflicts",
+    action="store_true",
+    default=False,
+    help="push WIP changes with conflict markers to Gerrit for review (default=False)",
+)
+parser.add_argument(
     "--pull-request",
     dest="openpr",
     action="store_true",
@@ -616,8 +648,11 @@ if __name__ == "__main__":
         s.append(HEADER2_TPL.format(repository=repository))
 
         if args.merge:
-            # Use adapter pattern
-            success, status = adapter.merge(branchFrom, branchTo)
+            # Use adapter pattern - pass push_conflicts for Gerrit repos
+            if isinstance(adapter, GerritRepositoryAdapter):
+                success, status = adapter.merge(branchFrom, branchTo, push_conflicts=args.pushConflicts)
+            else:
+                success, status = adapter.merge(branchFrom, branchTo)
             logging.debug("For {}: success={}, status={}".format(repository, success, status))
             s.append(OUTPUT_MERGE_TPL.format(status=status))
             if success:
