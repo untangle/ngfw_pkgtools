@@ -377,8 +377,32 @@ class GerritRepositoryAdapter(RepositoryAdapter):
                 logging.info("Merge successful")
             except git.exc.GitCommandError as e:
                 if "conflict" in str(e).lower():
-                    logging.warning(f"Merge conflicts detected: {e}")
-                    return False, "FAILED: conflicts"
+                    # Get list of conflicted files
+                    try:
+                        conflicted_files = repo.git.diff("--name-only", "--diff-filter=U").split("\n")
+                        conflicted_files = [f for f in conflicted_files if f]  # Remove empty strings
+                        conflict_list = ", ".join(conflicted_files) if conflicted_files else "unknown files"
+                        
+                        logging.error(f"Merge conflicts in: {conflict_list}")
+                        logging.error(f"Repository path: {repo.working_dir}")
+                        logging.error("To resolve manually:")
+                        logging.error(f"  cd {repo.working_dir}")
+                        logging.error(f"  # Fix conflicts in: {conflict_list}")
+                        logging.error("  git add <resolved-files>")
+                        logging.error("  git commit")
+                        logging.error(f"  git push origin HEAD:refs/for/{branchTo}%wip")
+                        
+                        # Abort the merge to clean up
+                        try:
+                            repo.git.merge("--abort")
+                            logging.info("Merge aborted, repository cleaned up")
+                        except Exception:
+                            pass
+                        
+                        return False, f"FAILED: conflicts in {conflict_list}"
+                    except Exception as conflict_err:
+                        logging.error(f"Error getting conflict details: {conflict_err}")
+                        return False, "FAILED: conflicts (unable to determine files)"
                 elif "Already up to date" in str(e) or "Already up-to-date" in str(e):
                     logging.info("Branches already up to date")
                     return True, "SKIPPED: no need to merge"
