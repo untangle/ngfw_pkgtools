@@ -9,7 +9,7 @@ import os.path as osp
 from .constants import WORK_DIR
 
 
-def get_repo(repo_name, repo_url, base_dir=WORK_DIR, origin='origin', branch='master'):
+def get_repo(repo_name, repo_url, base_dir=WORK_DIR, origin="origin", branch="master"):
     # create base_dir if needed
     if not osp.isdir(base_dir):
         os.makedirs(base_dir)
@@ -37,12 +37,18 @@ def create_commit(repo, files, msg):
         repo.index.add(f)
 
     repo.index.commit(msg)
-    logging.info("on branch {}, commit files {} with message '{}'".format(repo.head.reference, list(files), msg))
+    logging.info(
+        "on branch {}, commit files {} with message '{}'".format(
+            repo.head.reference, list(files), msg
+        )
+    )
 
 
 def create_tag(repo, tag_name, msg):
     repo.create_tag(tag_name, message=msg)
-    logging.info("on branch {}, tag {} with message '{}'".format(repo.head.reference, tag_name, msg))
+    logging.info(
+        "on branch {}, tag {} with message '{}'".format(repo.head.reference, tag_name, msg)
+    )
 
 
 def push(origin, refspecs, simulate=True):
@@ -60,13 +66,13 @@ def list_commits_between(repo, old, new):
     try:
         yield from repo.iter_commits(sl)
     except git.exc.GitCommandError as e:
-        if e.stderr.find('bad revision') >= 0:
+        if e.stderr.find("bad revision") >= 0:
             logging.warning("... could not diff revisions")
             return
         else:
             raise
 
 
-def archive_repo_lz(repo, dst, treeish='master'):
+def archive_repo_lz(repo, dst, treeish="master"):
     logging.info("creating archive {} from {}".format(dst, treeish))
-    repo.archive(lzma.open(dst, 'w'), treeish=treeish)
+    repo.archive(lzma.open(dst, "w"), treeish=treeish)

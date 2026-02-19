@@ -18,24 +18,26 @@ from lib import NETBOOT_BASE_DIR, NETBOOT_HOST, NETBOOT_USER
 
 
 # constants
-SUBARCHIVE_TPL = '{}_{}.tar.xz'
+SUBARCHIVE_TPL = "{}_{}.tar.xz"
 REMOTE_ARCHIVE_TPL = "{}_{}_{}.tar.xz"
 
 
 # functions
 def get_remote_archive_name(product, branch):
-    ts = datetime.datetime.now().strftime('%Y%m%dT%H%M')
+    ts = datetime.datetime.now().strftime("%Y%m%dT%H%M")
     return REMOTE_ARCHIVE_TPL.format(product.lower(), branch, ts)
 
 
 def get_remote_archive_directory(product, branch, directory=NETBOOT_BASE_DIR):
-    return osp.join(directory, '{}-images-buster'.format(product), branch)
+    return osp.join(directory, "{}-images-buster".format(product), branch)
 
 
-def get_remote_archive_scp_path(archive_name, product, branch, user=NETBOOT_USER, host=NETBOOT_HOST):
+def get_remote_archive_scp_path(
+    archive_name, product, branch, user=NETBOOT_USER, host=NETBOOT_HOST
+):
     dst_dir = get_remote_archive_directory(product, branch)
 
-    return '{}@{}:{}/{}'.format(user, host, dst_dir, archive_name)
+    return "{}@{}:{}/{}".format(user, host, dst_dir, archive_name)
 
 
 def get_remote_archive_url(archive_name, product, branch, host=NETBOOT_HOST):
@@ -63,46 +65,62 @@ def upload(archive, branch, user=NETBOOT_USER, host=NETBOOT_HOST):
 
 
 # CL options
-parser = argparse.ArgumentParser(description='Create full source archive for product')
+parser = argparse.ArgumentParser(description="Create full source archive for product")
 
-parser.add_argument('--log-level', dest='logLevel',
-                    choices=['debug', 'info', 'warning'],
-                    default='info',
-                    help='level at which to log')
-parser.add_argument('--archive', dest='archive',
-                    action='store',
-                    required=True,
-                    default=None,
-                    metavar="ARCHIVE",
-                    help='the destination file')
-parser.add_argument('--upload', dest='upload',
-                    action='store_true',
-                    default=False,
-                    help='upload to package-server (default=no)')
-parser.add_argument('--product', dest='product', action='store',
-                    choices=('ngfw', 'waf'),
-                    required=True,
-                    default=None,
-                    metavar="PRODUCT",
-                    help='product name')
-parser.add_argument('--branch', dest='branch',
-                    action='store',
-                    required=True,
-                    default=None,
-                    metavar="branch",
-                    help='the branch on which to base the archive')
+parser.add_argument(
+    "--log-level",
+    dest="logLevel",
+    choices=["debug", "info", "warning"],
+    default="info",
+    help="level at which to log",
+)
+parser.add_argument(
+    "--archive",
+    dest="archive",
+    action="store",
+    required=True,
+    default=None,
+    metavar="ARCHIVE",
+    help="the destination file",
+)
+parser.add_argument(
+    "--upload",
+    dest="upload",
+    action="store_true",
+    default=False,
+    help="upload to package-server (default=no)",
+)
+parser.add_argument(
+    "--product",
+    dest="product",
+    action="store",
+    choices=("ngfw", "waf"),
+    required=True,
+    default=None,
+    metavar="PRODUCT",
+    help="product name",
+)
+parser.add_argument(
+    "--branch",
+    dest="branch",
+    action="store",
+    required=True,
+    default=None,
+    metavar="branch",
+    help="the branch on which to base the archive",
+)
 
 
 # main
-if __name__ == '__main__':
+if __name__ == "__main__":
     args = parser.parse_args()
 
     # logging
     logging.getLogger().setLevel(getattr(logging, args.logLevel.upper()))
     console = logging.StreamHandler(sys.stderr)
-    formatter = logging.Formatter('[%(asctime)s] archive: %(levelname)-7s %(message)s')
+    formatter = logging.Formatter("[%(asctime)s] archive: %(levelname)-7s %(message)s")
     console.setFormatter(formatter)
-    logging.getLogger('').addHandler(console)
+    logging.getLogger("").addHandler(console)
 
     # go
     logging.info("started with {}".format(" ".join(sys.argv[1:])))
@@ -113,7 +131,7 @@ if __name__ == '__main__':
 
     # open main uncompressed archive
     archive = args.archive
-    tar = tarfile.open(archive, 'w')
+    tar = tarfile.open(archive, "w")
 
     subarchives = {}
     # iterate over repositories

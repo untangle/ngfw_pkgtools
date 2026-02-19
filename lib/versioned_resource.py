@@ -16,6 +16,7 @@ class VersionedResource:
 @dataclass
 class VersionedResourceFile(VersionedResource):
     """Versioned resource for a file"""
+
     path: str
     regex: str
     replacement: str
@@ -24,10 +25,10 @@ class VersionedResourceFile(VersionedResource):
         file_name = self.path
         path = osp.join(repo.working_dir, file_name)
         value = self.replacement.format(**locals_dict)
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             lines = f.readlines()
 
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             for line in lines:
                 line = re.sub(self.regex, value, line)
                 f.write(line)
@@ -42,6 +43,7 @@ class VersionedResourceFile(VersionedResource):
 @dataclass
 class VersionedResourceTag(VersionedResource):
     """Versioned resource for a tag"""
+
     value: str
 
     def set_versioning_value(self, repo, locals_dict):
@@ -54,7 +56,8 @@ class VersionedResourceTag(VersionedResource):
 
         gitutils.create_tag(repo, tag_name, msg)
 
-        refspecs = ("{}:{}".format(repo.head.reference, repo.head.reference),
-                    "{}:{}".format(tag_name, tag_name))
+        refspecs = (
+            "{}:{}".format(repo.head.reference, repo.head.reference),
+            "{}:{}".format(tag_name, tag_name),
+        )
         return refspecs
-
