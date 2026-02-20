@@ -9,7 +9,7 @@ import os.path as osp
 from .constants import WORK_DIR
 
 
-def get_repo(repo_name, repo_url, base_dir=WORK_DIR, origin="origin", branch="master"):
+def get_repo(repo_name, repo_url, base_dir=WORK_DIR, origin="origin", branch="master") -> tuple[git.Repo, git.Remote]:
     # create base_dir if needed
     if not osp.isdir(base_dir):
         os.makedirs(base_dir)

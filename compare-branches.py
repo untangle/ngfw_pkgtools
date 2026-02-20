@@ -247,7 +247,7 @@ class GerritRepositoryAdapter(RepositoryAdapter):
         """
         self.repo_info = repo_info
 
-    def _install_commit_msg_hook(self, repo, origin):
+    def _install_commit_msg_hook(self, repo: git.Repo, origin: git.Remote):
         """
         Install Gerrit commit-msg hook if not already present.
 
