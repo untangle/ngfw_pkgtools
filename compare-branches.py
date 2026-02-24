@@ -343,7 +343,13 @@ class GerritRepositoryAdapter(RepositoryAdapter):
 
     def merge(self, branchFrom: str, branchTo: str, push_conflicts: bool = False) -> Tuple[bool, str]:
         """
-        Create a Gerrit WIP change to merge branchFrom into branchTo.
+        Push commits from branchFrom to branchTo as WIP changes in Gerrit.
+        
+        Strategy:
+        1. Try to push all commits at once (fast path)
+        2. If that fails, cherry-pick commits one by one
+        3. Push non-conflicting commits individually (preserving Change-IDs)
+        4. Create merge commit for conflicting changes (if push_conflicts=True)
 
         Args:
             branchFrom: Source branch to merge from
@@ -369,87 +375,138 @@ class GerritRepositoryAdapter(RepositoryAdapter):
             repo.heads[branchTo].checkout()
             origin.fetch()
 
-            # Try to merge branchFrom into branchTo
-            logging.info(f"Attempting to merge origin/{branchFrom} into {branchTo}")
-            has_conflicts = False
-            conflicted_files = []
+            # Get list of commits to merge
+            commits_to_merge = list(repo.iter_commits(f"origin/{branchTo}..origin/{branchFrom}"))
+            commits_to_merge.reverse()  # Process oldest first
+            
+            if not commits_to_merge:
+                logging.info("No commits to merge")
+                return True, "SKIPPED: no commits to merge"
+            
+            logging.info(f"Found {len(commits_to_merge)} commit(s) to merge")
+            
+            # Try to push all commits at once first (fast path)
+            logging.info(f"Attempting batch push of all commits to refs/for/{branchTo}%wip")
+            refspec = f"origin/{branchFrom}:refs/for/{branchTo}%wip"
             
             try:
-                repo.git.merge(
-                    f"origin/{branchFrom}", "--no-ff", "-m", f"Merge {branchFrom} into {branchTo}"
-                )
-                logging.info("Merge successful")
-            except git.exc.GitCommandError as e:
-                if "conflict" in str(e).lower():
-                    has_conflicts = True
-                    # Get list of conflicted files
-                    try:
-                        conflicted_files = repo.git.diff("--name-only", "--diff-filter=U").split("\n")
-                        conflicted_files = [f for f in conflicted_files if f]  # Remove empty strings
-                        conflict_list = ", ".join(conflicted_files) if conflicted_files else "unknown files"
-                        
-                        logging.warning(f"Merge conflicts detected in: {conflict_list}")
-                        
-                        if push_conflicts:
-                            # Add all files (including conflicted ones with markers)
-                            logging.info("Adding conflicted files with conflict markers for WIP review")
-                            repo.git.add("-A")
-                            
-                            # Commit with conflict markers
-                            commit_msg = f"WIP: Merge {branchFrom} into {branchTo} (HAS CONFLICTS)\n\nConflicted files:\n"
-                            for cf in conflicted_files:
-                                commit_msg += f"  - {cf}\n"
-                            
-                            repo.git.commit("-m", commit_msg)
-                            logging.info("Committed merge with conflict markers")
-                        else:
-                            # Provide manual resolution instructions
-                            logging.error(f"Repository path: {repo.working_dir}")
-                            logging.error("To resolve manually:")
-                            logging.error(f"  cd {repo.working_dir}")
-                            logging.error(f"  # Fix conflicts in: {conflict_list}")
-                            logging.error("  git add <resolved-files>")
-                            logging.error("  git commit")
-                            logging.error(f"  git push origin HEAD:refs/for/{branchTo}%wip")
-                            
-                            # Abort the merge to clean up
-                            try:
-                                repo.git.merge("--abort")
-                                logging.info("Merge aborted, repository cleaned up")
-                            except Exception:
-                                pass
-                            
-                            return False, f"FAILED: conflicts in {conflict_list}"
-                    except Exception as conflict_err:
-                        logging.error(f"Error handling conflicts: {conflict_err}")
-                        return False, "FAILED: conflicts (unable to process)"
-                elif "Already up to date" in str(e) or "Already up-to-date" in str(e):
-                    logging.info("Branches already up to date")
-                    return True, "SKIPPED: no need to merge"
-                else:
-                    logging.error(f"Unexpected merge error: {e}")
-                    raise
-
-            # Push to Gerrit as WIP change for review
-            refspec = f"HEAD:refs/for/{branchTo}%wip"
-            logging.info(f"Pushing to Gerrit with refspec: {refspec}")
-            logging.info(f"Remote URL: {origin.url}")
-            try:
                 push_info = origin.push(refspec)
-                logging.info(f"Push result: {push_info}")
+                logging.info("Batch push successful")
+                commit_count = len(commits_to_merge)
                 for info in push_info:
                     logging.info(f"  - {info.summary}")
                 
-                if has_conflicts:
-                    conflict_list = ", ".join(conflicted_files)
-                    return True, f"DONE: WIP change created WITH CONFLICTS in {conflict_list}"
-                else:
-                    return True, "DONE: WIP change created for review"
+                return True, f"DONE: {commit_count} WIP change(s) created for review"
             except git.exc.GitCommandError as e:
-                logging.error(f"Failed to push Gerrit change: {e}")
-                logging.error(f"  stderr: {e.stderr if hasattr(e, 'stderr') else 'N/A'}")
-                logging.error(f"  stdout: {e.stdout if hasattr(e, 'stdout') else 'N/A'}")
-                return False, f"FAILED: could not push change - {e}"
+                # Batch push failed - fall back to cherry-picking individual commits
+                logging.warning(f"Batch push failed, trying cherry-pick approach: {e}")
+            
+            # Cherry-pick commits one by one
+            pushed_count = 0
+            failed_commits = []
+            
+            for commit in commits_to_merge:
+                commit_sha = commit.hexsha[:8]
+                commit_msg = commit.message.split('\n')[0][:50]
+                logging.info(f"Cherry-picking commit {commit_sha}: {commit_msg}")
+                
+                try:
+                    # Cherry-pick the commit
+                    repo.git.cherry_pick(commit.hexsha)
+                    
+                    # Push this individual commit
+                    refspec = f"HEAD:refs/for/{branchTo}%wip"
+                    push_info = origin.push(refspec)
+                    logging.info(f"  Pushed {commit_sha} successfully")
+                    for info in push_info:
+                        logging.info(f"    - {info.summary}")
+                    pushed_count += 1
+                    
+                except git.exc.GitCommandError as cherry_err:
+                    if "conflict" in str(cherry_err).lower():
+                        logging.warning(f"  Conflict in commit {commit_sha}")
+                        failed_commits.append((commit, cherry_err))
+                        
+                        # Abort cherry-pick
+                        try:
+                            repo.git.cherry_pick("--abort")
+                        except Exception:
+                            pass
+                    else:
+                        logging.error(f"  Unexpected error cherry-picking {commit_sha}: {cherry_err}")
+                        failed_commits.append((commit, cherry_err))
+                        try:
+                            repo.git.cherry_pick("--abort")
+                        except Exception:
+                            pass
+            
+            # Handle failed commits
+            if failed_commits:
+                conflict_info = f"{len(failed_commits)} commit(s) with conflicts"
+                logging.warning(f"{conflict_info}")
+                
+                if push_conflicts:
+                    # Create a merge commit with all remaining changes
+                    logging.info("Creating merge commit for conflicting changes")
+                    
+                    try:
+                        # Do a merge to get all remaining changes
+                        repo.git.merge(f"origin/{branchFrom}", "--no-ff", "--no-commit")
+                        
+                        # Get conflicted files
+                        conflicted_files = []
+                        try:
+                            conflicted_files = repo.git.diff("--name-only", "--diff-filter=U").split("\n")
+                            conflicted_files = [f for f in conflicted_files if f]
+                        except Exception:
+                            pass
+                        
+                        # Add all files (including conflicts)
+                        repo.git.add("-A")
+                        
+                        # Create commit message listing conflicts
+                        commit_msg = f"WIP: Merge remaining changes from {branchFrom} (HAS CONFLICTS)\n\n"
+                        commit_msg += f"Successfully merged: {pushed_count} commit(s)\n"
+                        commit_msg += f"Conflicting commits: {len(failed_commits)}\n\n"
+                        if conflicted_files:
+                            commit_msg += "Conflicted files:\n"
+                            for cf in conflicted_files:
+                                commit_msg += f"  - {cf}\n"
+                        commit_msg += "\nFailed commits:\n"
+                        for commit, _ in failed_commits:
+                            commit_msg += f"  - {commit.hexsha[:8]}: {commit.message.split(chr(10))[0][:60]}\n"
+                        
+                        repo.git.commit("-m", commit_msg)
+                        
+                        # Push merge commit
+                        refspec = f"HEAD:refs/for/{branchTo}%wip"
+                        push_info = origin.push(refspec)
+                        logging.info("Pushed merge commit with conflicts")
+                        
+                        return True, f"DONE: {pushed_count} clean commit(s) + 1 merge commit WITH CONFLICTS"
+                    except Exception as merge_err:
+                        logging.error(f"Failed to create merge commit: {merge_err}")
+                        try:
+                            repo.git.merge("--abort")
+                        except Exception:
+                            pass
+                        return False, f"PARTIAL: {pushed_count} commit(s) pushed, {len(failed_commits)} failed"
+                else:
+                    # Report conflicts without pushing
+                    logging.error(f"Repository path: {repo.working_dir}")
+                    logging.error(f"Successfully pushed: {pushed_count} commit(s)")
+                    logging.error(f"Failed commits: {len(failed_commits)}")
+                    for commit, err in failed_commits:
+                        logging.error(f"  - {commit.hexsha[:8]}: {commit.message.split(chr(10))[0][:50]}")
+                    logging.error("To resolve manually:")
+                    logging.error(f"  cd {repo.working_dir}")
+                    logging.error("  # Cherry-pick remaining commits and resolve conflicts")
+                    logging.error(f"  git push origin HEAD:refs/for/{branchTo}%wip")
+                    
+                    return False, f"PARTIAL: {pushed_count} commit(s) pushed, {len(failed_commits)} with conflicts"
+            
+            # All commits pushed successfully
+            return True, f"DONE: {pushed_count} WIP change(s) created for review"
 
         except Exception as e:
             logging.error(f"Error merging Gerrit branches for {self.repo_info.name}: {e}")
@@ -457,7 +514,6 @@ class GerritRepositoryAdapter(RepositoryAdapter):
 
             logging.error(traceback.format_exc())
             return False, f"FAILED: {e}"
-
     def create_branch(self, branchFrom: str, branchTo: str) -> Tuple[int, str]:
         """
         Create a new branch in a Gerrit repository.
