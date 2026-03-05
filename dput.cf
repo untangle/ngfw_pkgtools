@@ -58,6 +58,36 @@ run_dinstall = 0
 run_lintian = 0
 check_version = 0
 
+[package-server_bookworm_ftp]
+fqdn = package-server
+method = ftp
+login = anonymous
+incoming = /bookworm/incoming
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+
+[package-server_bookworm_scp]
+fqdn = package-server
+method = scp
+login = buildbot
+incoming = /var/www/public/bookworm/incoming
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+
+[package-server-dev_bookworm_scp]
+fqdn = package-server
+method = scp
+login = buildbot
+incoming = /srv/ngfw_dev-repository/incoming/bookworm
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+
 [local]
 method = local
 incoming = .
