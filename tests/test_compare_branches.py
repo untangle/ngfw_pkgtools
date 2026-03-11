@@ -232,9 +232,9 @@ class TestGerritRepositoryAdapter:
         success, status = adapter.merge("feature", "main")
 
         assert success is True
-        assert "WIP change created" in status
-        # Verify WIP refspec was used
-        mock_origin.push.assert_called_once_with("HEAD:refs/for/main%wip")
+        assert "WIP change(s) created" in status
+        # Verify individual commits were pushed (new behavior)
+        mock_origin.push.assert_called_once_with("origin/feature:refs/for/main%wip")
 
     @patch("compare_branches.gitutils.get_repo")
     def test_merge_conflicts(self, mock_get_repo):
