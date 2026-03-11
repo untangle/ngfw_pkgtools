@@ -375,56 +375,50 @@ class GerritRepositoryAdapter(RepositoryAdapter):
             repo.heads[branchTo].checkout()
             origin.fetch()
 
-            # Get list of commits to merge
-            commits_to_merge = list(repo.iter_commits(f"origin/{branchTo}..origin/{branchFrom}"))
-            commits_to_merge.reverse()  # Process oldest first
+            # Get list of commits to merge using rev-list with exclusion filter
+            # This gets commit SHAs, excluding any commits that touch barney.context
+            commit_shas = repo.git.rev_list(
+                f"origin/{branchTo}..origin/{branchFrom}",
+                "--",
+                ".",
+                ":(exclude)barney.context"
+            ).split('\n')
+            commit_shas = [sha.strip() for sha in commit_shas if sha.strip()]
+            commit_shas.reverse()  # Process oldest first
             
-            if not commits_to_merge:
+            if not commit_shas:
                 logging.info("No commits to merge")
                 return True, "SKIPPED: no commits to merge"
             
-            logging.info(f"Found {len(commits_to_merge)} commit(s) to merge")
-            
-            # Try to push all commits at once first (fast path)
-            logging.info(f"Attempting batch push of all commits to refs/for/{branchTo}%wip")
-            refspec = f"origin/{branchFrom}:refs/for/{branchTo}%wip"
-            
-            try:
-                push_info = origin.push(refspec)
-                logging.info("Batch push successful")
-                commit_count = len(commits_to_merge)
-                for info in push_info:
-                    logging.info(f"  - {info.summary}")
-                
-                return True, f"DONE: {commit_count} WIP change(s) created for review"
-            except git.exc.GitCommandError as e:
-                # Batch push failed - fall back to cherry-picking individual commits
-                logging.warning(f"Batch push failed, trying cherry-pick approach: {e}")
+            logging.info(f"Found {len(commit_shas)} commit(s) to merge: {commit_shas}")
             
             # Cherry-pick commits one by one
             pushed_count = 0
             failed_commits = []
             
-            for commit in commits_to_merge:
-                commit_sha = commit.hexsha[:8]
+            for commit_sha in commit_shas:
+                # Get commit object for metadata
+                commit = repo.commit(commit_sha)
+                commit_sha_short = commit_sha[:8]
                 commit_msg = commit.message.split('\n')[0][:50]
-                logging.info(f"Cherry-picking commit {commit_sha}: {commit_msg}")
+
+                logging.info(f"Cherry-picking commit {commit_sha_short}: {commit_msg}")
                 
                 try:
                     # Cherry-pick the commit
-                    repo.git.cherry_pick(commit.hexsha)
+                    repo.git.cherry_pick(commit_sha)
                     
                     # Push this individual commit
-                    refspec = f"HEAD:refs/for/{branchTo}%wip"
+                    refspec = f"HEAD:refs/for/{branchTo}"
                     push_info = origin.push(refspec)
-                    logging.info(f"  Pushed {commit_sha} successfully")
+                    logging.info(f"  Pushed {commit_sha_short} successfully")
                     for info in push_info:
                         logging.info(f"    - {info.summary}")
                     pushed_count += 1
                     
                 except git.exc.GitCommandError as cherry_err:
                     if "conflict" in str(cherry_err).lower():
-                        logging.warning(f"  Conflict in commit {commit_sha}")
+                        logging.warning(f"  Conflict in commit {commit_sha_short}")
                         failed_commits.append((commit, cherry_err))
                         
                         # Abort cherry-pick
@@ -433,14 +427,14 @@ class GerritRepositoryAdapter(RepositoryAdapter):
                         except Exception:
                             pass
                     else:
-                        logging.error(f"  Unexpected error cherry-picking {commit_sha}: {cherry_err}")
+                        logging.error(f"  Unexpected error cherry-picking {commit_sha_short}: {cherry_err}")
                         failed_commits.append((commit, cherry_err))
                         try:
                             repo.git.cherry_pick("--abort")
                         except Exception:
                             pass
             
-            # Handle failed commits
+            # Handle failed commits - this contains conflicts and also things that cherry picking failed on, for whatever reason.
             if failed_commits:
                 conflict_info = f"{len(failed_commits)} commit(s) with conflicts"
                 logging.warning(f"{conflict_info}")
