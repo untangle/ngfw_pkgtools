@@ -34,7 +34,7 @@ def get_repo(repo_name, repo_url, base_dir=WORK_DIR, origin='origin', branch='ma
 
 def create_commit(repo, files, msg):
     for f in files:
-        repo.index.add(f)
+        repo.index.add([f])
 
     repo.index.commit(msg)
     logging.info("on branch {}, commit files {} with message '{}'".format(repo.head.reference, list(files), msg))
