@@ -49,7 +49,10 @@ def push(origin, refspecs, simulate=True):
     if not simulate:
         logging.info("pushing refspecs {}".format(refspecs))
         for refspec in refspecs:
-            origin.push(refspec)
+            try:
+                origin.push(refspec)
+            except git.exc.GitCommandError as e:
+                logging.warning("Error pushing refspec {}: {}".format(refspec, e.stderr))
     else:
         logging.info("would push refspecs {}".format(refspecs))
 
