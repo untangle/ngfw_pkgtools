@@ -204,6 +204,12 @@ fi
 # set base distribution if none was passed
 if [[ -z "$DISTRIBUTION" ]] ; then
   DISTRIBUTION=$(cat $PKGTOOLS/resources/DISTRIBUTION)
+  # For Zuul builds where pkgtools is fetched at a fixed commit,
+  # DISTRIBUTION may be "current" even on a release branch. Override
+  # using TRAVIS_BRANCH if it matches a release branch pattern.
+  if [[ "$DISTRIBUTION" == "current" && "$TRAVIS_BRANCH" =~ ^ngfw-release- ]] ; then
+    DISTRIBUTION="$TRAVIS_BRANCH"
+  fi
 fi
 
 # set target distribution for PRs
