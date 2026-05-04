@@ -88,6 +88,36 @@ run_dinstall = 0
 run_lintian = 0
 check_version = 0
 
+[package-server_trixie_ftp]
+fqdn = package-server
+method = ftp
+login = anonymous
+incoming = /trixie/incoming
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+
+[package-server_trixie_scp]
+fqdn = package-server
+method = scp
+login = buildbot
+incoming = /var/www/public/trixie/incoming
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+
+[package-server-dev_trixie_scp]
+fqdn = package-server
+method = scp
+login = buildbot
+incoming = /srv/ngfw_dev-repository/incoming/trixie
+allow_unsigned_uploads = 1
+run_dinstall = 0
+run_lintian = 0
+check_version = 0
+
 [local]
 method = local
 incoming = .
