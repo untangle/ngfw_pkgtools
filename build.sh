@@ -7,6 +7,13 @@
 
 ## constants
 PKGTOOLS=$(dirname $(readlink -f $0))
+
+# Git 2.39+ (Bookworm) and 2.45+ (Trixie) reject operations on
+# directories owned by other users; in CI the source is mounted
+# from the host into a container running as root, so we must trust
+# all paths.  This is safe because the container is disposable.
+git config --global --add safe.directory '*'
+
 PKGTOOLS_VERSION=$(pushd $PKGTOOLS > /dev/null ; git describe --tags --always --long --dirty ; popd > /dev/null)
 VERSION_FILE=debian/version
 
