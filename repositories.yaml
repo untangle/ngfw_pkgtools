@@ -143,6 +143,7 @@ repositories:
       efw:
   bctid:
     private: true
+    disable_forward_merge: true
     products:
       mfw:
       ngfw:
@@ -199,6 +200,7 @@ repositories:
   sync-settings:
     private: true
     git_source: gerrit
+    disable_forward_merge: true
     products:
       mfw:
       ngfw:
