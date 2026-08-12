@@ -113,7 +113,8 @@ def merge(repository: str, branchFrom: str, branchTo: str) -> Tuple[bool, str]:
         status = "DONE: commitId=" + jsonData["sha"]
     else:
         success = False
-        status = "FAILED: conflicts"
+        error_msg = jsonData.get("message", "unknown error") if jsonData else "no response body"
+        status = f"FAILED (HTTP {sc}): {error_msg}"
 
     return success, status
 
