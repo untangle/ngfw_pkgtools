@@ -77,6 +77,9 @@ def generate_distributions(dist):
 
     archs_without_i386 = [a for a in architectures if a != "i386"]
 
+    has_nff = version >= 12
+    debian_components = "main contrib non-free non-free-firmware" if has_nff else "main contrib non-free"
+
     lines = []
 
     # --- Static Debian distributions ---
@@ -93,7 +96,7 @@ def generate_distributions(dist):
     lines.append(f"SignWith: {gpg_key}")
     lines.append(f"Architectures: {' '.join(architectures)} source")
     lines.append(f"Update: debian-official debian-official-udeb")
-    lines.append("Components: main contrib non-free")
+    lines.append(f"Components: {debian_components}")
     lines.append("UDebComponents: main")
     lines.append("Description: Debian")
     lines.append("Log: debian.log")
@@ -108,7 +111,7 @@ def generate_distributions(dist):
     lines.append(f"SignWith: {gpg_key}")
     lines.append(f"Architectures: {' '.join(architectures)}")
     lines.append("Update: debian-backports debian-backports-armhf")
-    lines.append("Components: main contrib non-free")
+    lines.append(f"Components: {debian_components}")
     lines.append("UDebComponents: main")
     lines.append("Description: Debian")
     lines.append("Log: debian-backports.log")
@@ -137,7 +140,7 @@ def generate_distributions(dist):
     lines.append(f"Codename: {codename}-manual")
     lines.append(f"SignWith: {gpg_key}")
     lines.append(f"Architectures: {' '.join(architectures)}")
-    lines.append("Components: main contrib non-free")
+    lines.append(f"Components: {debian_components}")
     lines.append("UDebComponents: main")
     lines.append("Description: Debian")
     lines.append("Log: debian-manual.log")
@@ -158,20 +161,21 @@ def generate_distributions(dist):
     lines.append("Log: influxdb.log")
     lines.append("")
 
-    # --- commented-out empty distributions block ---
-    lines.append("# ########################################################################")
-    lines.append("# # Empty distributions, to accomodate building d-i & ISO images")
-    lines.append("# # main packages")
-    lines.append("# Origin: Untangle")
-    lines.append(f"# SignWith: {gpg_key}")
-    lines.append("# Label: Untangle")
-    lines.append(f"# Version: {version}")
-    lines.append(f"# Codename: {codename}")
-    lines.append(f"# Architectures: {' '.join(architectures)}")
-    lines.append("# Components: main contrib non-free")
-    lines.append("# Description: Debian")
-    lines.append(f"# Log: {codename}.log")
-    lines.append("")
+    # --- commented-out empty distributions block (bullseye/buster only) ---
+    if version < 12:
+        lines.append("# ########################################################################")
+        lines.append("# # Empty distributions, to accomodate building d-i & ISO images")
+        lines.append("# # main packages")
+        lines.append("# Origin: Untangle")
+        lines.append(f"# SignWith: {gpg_key}")
+        lines.append("# Label: Untangle")
+        lines.append(f"# Version: {version}")
+        lines.append(f"# Codename: {codename}")
+        lines.append(f"# Architectures: {' '.join(architectures)}")
+        lines.append(f"# Components: {debian_components}")
+        lines.append("# Description: Debian")
+        lines.append(f"# Log: {codename}.log")
+        lines.append("")
 
     # --- NGFW distributions ---
     lines.append("########################################################################")
@@ -232,8 +236,10 @@ def generate_distributions(dist):
     if hostname == "aws-build-03":
         current_update = (
             f"update-debian-{codename} update-debian-{codename}-backports "
-            f"update-debian-{codename}-security update-debian-{codename}-manual"
+            f"update-debian-{codename}-security"
         )
+        if version < 12:
+            current_update += f" update-debian-{codename}-manual"
     else:
         current_update = "current-normal current-binary"
 
@@ -248,16 +254,15 @@ def generate_distributions(dist):
     lines.append(f"Update: {current_update}")
     lines.append(f"Architectures: {' '.join(current_archs)} source")
     lines.append(f"Components: {' '.join(components)}")
-    lines.append("#Contents: .gz .bz2")
     lines.append("UDebComponents: main")
     lines.append("Description: Untangle")
     lines.append("Log: current.log")
-    lines.append("")
 
-    # --- WAF distributions ---
-    lines.append("########################################################################")
-    lines.append("# Untangle WAF distributions")
-    lines.append("")
+    # --- WAF distributions (only if WAF entries exist) ---
+    if waf_releases or waf_branches:
+        lines.append("########################################################################")
+        lines.append("# Untangle WAF distributions")
+        lines.append("")
 
     for waf_release in waf_releases:
         if waf_release == "waf-current":
@@ -299,30 +304,31 @@ def generate_distributions(dist):
         lines.append(f"Log: {branch_codename}.log")
         lines.append("")
 
-    # waf-current distribution
-    if hostname == "build-03":
-        waf_current_update = (
-            f"update-debian-{codename} update-debian-{codename}-backports "
-            f"update-debian-{codename}-security update-debian-{codename}-manual "
-            f"update-influxdb-{codename}"
-        )
-    else:
-        waf_current_update = "waf-current-normal waf-current-binary"
+    # waf-current distribution (only if WAF entries exist)
+    if waf_releases or waf_branches:
+        if hostname == "build-03":
+            waf_current_update = (
+                f"update-debian-{codename} update-debian-{codename}-backports "
+                f"update-debian-{codename}-security update-debian-{codename}-manual "
+                f"update-influxdb-{codename}"
+            )
+        else:
+            waf_current_update = "waf-current-normal waf-current-binary"
 
-    lines.append("Origin: Untangle")
-    lines.append(f"SignWith: {gpg_key}")
-    lines.append("Label: Untangle")
-    lines.append("Codename: waf-current")
-    lines.append("Suite: waf-current")
-    lines.append("Version: waf-current")
-    lines.append(f"Update: {waf_current_update}")
-    lines.append("Pull: from-ngfw-current")
-    lines.append(f"Architectures: {' '.join(archs_without_i386)} source")
-    lines.append(f"Components: {' '.join(components)}")
-    lines.append("#Contents: .gz .bz2")
-    lines.append("UDebComponents: main")
-    lines.append("Description: Untangle")
-    lines.append("Log: waf-current.log")
+        lines.append("Origin: Untangle")
+        lines.append(f"SignWith: {gpg_key}")
+        lines.append("Label: Untangle")
+        lines.append("Codename: waf-current")
+        lines.append("Suite: waf-current")
+        lines.append("Version: waf-current")
+        lines.append(f"Update: {waf_current_update}")
+        lines.append("Pull: from-ngfw-current")
+        lines.append(f"Architectures: {' '.join(archs_without_i386)} source")
+        lines.append(f"Components: {' '.join(components)}")
+        lines.append("#Contents: .gz .bz2")
+        lines.append("UDebComponents: main")
+        lines.append("Description: Untangle")
+        lines.append("Log: waf-current.log")
 
     return "\n".join(lines) + "\n"
 
@@ -335,6 +341,11 @@ def generate_updates(dist):
     ngfw_releases = dist.get("ngfw_releases", [])
     waf_releases = dist.get("waf_releases", [])
     method = dist["_method"]
+    influxdb_suite = dist.get("influxdb_suite", codename)
+
+    has_nff = version >= 12
+    debian_components = "main contrib non-free non-free-firmware" if has_nff else "main contrib non-free"
+    debian_components_mapped = "main>main contrib>main non-free>main non-free-firmware>main" if has_nff else "main>main contrib>main non-free>main"
 
     lines = []
 
@@ -344,6 +355,8 @@ def generate_updates(dist):
     lines.append("# updates.u.c")
 
     for release in ngfw_releases:
+        if release == "current":
+            continue
         major, minor = parse_release_version(release)
         greater_than_16_1 = (major >= 16 and minor >= 1) or major > 16
         archs = [a for a in architectures if not (greater_than_16_1 and a == "i386")]
@@ -398,7 +411,7 @@ def generate_updates(dist):
     lines.append("Method: http://ftp.us.debian.org/debian")
     lines.append("VerifyRelease: blindtrust")
     lines.append(f"Suite: {codename}")
-    lines.append("Components: main contrib non-free")
+    lines.append(f"Components: {debian_components}")
     lines.append(f"Architectures: {' '.join(architectures)} source")
     lines.append("FilterList: purge packages/debian.txt")
     lines.append("")
@@ -421,7 +434,7 @@ def generate_updates(dist):
     lines.append("Method: http://ftp.us.debian.org/debian")
     lines.append("VerifyRelease: blindtrust")
     lines.append(f"Suite: {codename}-backports")
-    lines.append("Components: main contrib non-free")
+    lines.append(f"Components: {debian_components}")
     lines.append("UDebComponents: main")
     lines.append(f"Architectures: {' '.join(architectures)}")
     lines.append("FilterList: purge packages/debian-backports.txt")
@@ -433,7 +446,7 @@ def generate_updates(dist):
     lines.append("Method: http://ftp.us.debian.org/debian")
     lines.append("VerifyRelease: blindtrust")
     lines.append(f"Suite: {codename}-backports")
-    lines.append("Components: main contrib non-free")
+    lines.append(f"Components: {debian_components}")
     lines.append("UDebComponents: main")
     lines.append("Architectures: armhf")
     lines.append("FilterList: purge packages/debian-backports-armhf.txt")
@@ -449,7 +462,7 @@ def generate_updates(dist):
         lines.append("Method: http://security.debian.org")
         lines.append(f"Suite: {codename}/updates")
     lines.append("VerifyRelease: blindtrust")
-    lines.append("Components: main contrib non-free")
+    lines.append(f"Components: {debian_components}")
     lines.append(f"Architectures: {' '.join(architectures)} source")
     lines.append("FilterList: purge packages/debian.txt")
     lines.append("")
@@ -478,7 +491,7 @@ def generate_updates(dist):
     lines.append("Name: influxdb-stable")
     lines.append("Method: https://repos.influxdata.com/debian")
     lines.append("VerifyRelease: blindtrust")
-    lines.append(f"Suite: {codename}")
+    lines.append(f"Suite: {influxdb_suite}")
     lines.append("Components: stable")
     lines.append(f"Architectures: {' '.join(architectures)}")
     lines.append("FilterList: purge packages/influxdb.txt")
@@ -497,7 +510,7 @@ def generate_updates(dist):
     lines.append(f"Method: http://package-server/public/{codename}")
     lines.append("VerifyRelease: blindtrust")
     lines.append(f"Suite: {codename}-official")
-    lines.append("Components: main>main contrib>main non-free>main")
+    lines.append(f"Components: {debian_components_mapped}")
     lines.append(f"Architectures: {' '.join(architectures)}")
     lines.append("")
 
@@ -507,7 +520,7 @@ def generate_updates(dist):
     lines.append(f"Method: http://package-server/public/{codename}")
     lines.append("VerifyRelease: blindtrust")
     lines.append(f"Suite: {codename}-backports")
-    lines.append("Components: main>main contrib>main non-free>main")
+    lines.append(f"Components: {debian_components_mapped}")
     lines.append(f"Architectures: {' '.join(architectures)}")
     lines.append("")
 
@@ -527,7 +540,7 @@ def generate_updates(dist):
     lines.append(f"Method: http://package-server/public/{codename}")
     lines.append("VerifyRelease: blindtrust")
     lines.append(f"Suite: {codename}-manual")
-    lines.append("Components: main>main contrib>main non-free>main # updates/main>main")
+    lines.append(f"Components: {debian_components_mapped} # updates/main>main")
     lines.append(f"Architectures: {' '.join(architectures)}")
     lines.append("")
 
@@ -658,12 +671,13 @@ def main():
     dist["_method"] = method
     dist["_hostname"] = args.hostname
 
-    # Generate all three config files
+    # Generate config files (pulls only needed when WAF entries exist)
     configs = {
         "distributions": generate_distributions(dist),
         "updates": generate_updates(dist),
-        "pulls": generate_pulls(),
     }
+    if dist.get("waf_releases") or dist.get("waf_branches"):
+        configs["pulls"] = generate_pulls()
 
     if args.dry_run:
         print("=== DRY RUN — no files will be written ===\n")
