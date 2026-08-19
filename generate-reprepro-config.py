@@ -254,15 +254,16 @@ def generate_distributions(dist):
     lines.append(f"Update: {current_update}")
     lines.append(f"Architectures: {' '.join(current_archs)} source")
     lines.append(f"Components: {' '.join(components)}")
+    lines.append("#Contents: .gz .bz2")
     lines.append("UDebComponents: main")
     lines.append("Description: Untangle")
     lines.append("Log: current.log")
+    lines.append("")
 
-    # --- WAF distributions (only if WAF entries exist) ---
-    if waf_releases or waf_branches:
-        lines.append("########################################################################")
-        lines.append("# Untangle WAF distributions")
-        lines.append("")
+    # --- WAF distributions ---
+    lines.append("########################################################################")
+    lines.append("# Untangle WAF distributions")
+    lines.append("")
 
     for waf_release in waf_releases:
         if waf_release == "waf-current":
@@ -304,31 +305,30 @@ def generate_distributions(dist):
         lines.append(f"Log: {branch_codename}.log")
         lines.append("")
 
-    # waf-current distribution (only if WAF entries exist)
-    if waf_releases or waf_branches:
-        if hostname == "build-03":
-            waf_current_update = (
-                f"update-debian-{codename} update-debian-{codename}-backports "
-                f"update-debian-{codename}-security update-debian-{codename}-manual "
-                f"update-influxdb-{codename}"
-            )
-        else:
-            waf_current_update = "waf-current-normal waf-current-binary"
+    # waf-current distribution
+    if hostname == "build-03":
+        waf_current_update = (
+            f"update-debian-{codename} update-debian-{codename}-backports "
+            f"update-debian-{codename}-security update-debian-{codename}-manual "
+            f"update-influxdb-{codename}"
+        )
+    else:
+        waf_current_update = "waf-current-normal waf-current-binary"
 
-        lines.append("Origin: Untangle")
-        lines.append(f"SignWith: {gpg_key}")
-        lines.append("Label: Untangle")
-        lines.append("Codename: waf-current")
-        lines.append("Suite: waf-current")
-        lines.append("Version: waf-current")
-        lines.append(f"Update: {waf_current_update}")
-        lines.append("Pull: from-ngfw-current")
-        lines.append(f"Architectures: {' '.join(archs_without_i386)} source")
-        lines.append(f"Components: {' '.join(components)}")
-        lines.append("#Contents: .gz .bz2")
-        lines.append("UDebComponents: main")
-        lines.append("Description: Untangle")
-        lines.append("Log: waf-current.log")
+    lines.append("Origin: Untangle")
+    lines.append(f"SignWith: {gpg_key}")
+    lines.append("Label: Untangle")
+    lines.append("Codename: waf-current")
+    lines.append("Suite: waf-current")
+    lines.append("Version: waf-current")
+    lines.append(f"Update: {waf_current_update}")
+    lines.append("Pull: from-ngfw-current")
+    lines.append(f"Architectures: {' '.join(archs_without_i386)} source")
+    lines.append(f"Components: {' '.join(components)}")
+    lines.append("#Contents: .gz .bz2")
+    lines.append("UDebComponents: main")
+    lines.append("Description: Untangle")
+    lines.append("Log: waf-current.log")
 
     return "\n".join(lines) + "\n"
 
@@ -669,13 +669,12 @@ def main():
     dist["_method"] = method
     dist["_hostname"] = args.hostname
 
-    # Generate config files (pulls only needed when WAF entries exist)
+    # Generate all three config files
     configs = {
         "distributions": generate_distributions(dist),
         "updates": generate_updates(dist),
+        "pulls": generate_pulls(),
     }
-    if dist.get("waf_releases") or dist.get("waf_branches"):
-        configs["pulls"] = generate_pulls()
 
     if args.dry_run:
         print("=== DRY RUN — no files will be written ===\n")
