@@ -355,8 +355,6 @@ def generate_updates(dist):
     lines.append("# updates.u.c")
 
     for release in ngfw_releases:
-        if release == "current":
-            continue
         major, minor = parse_release_version(release)
         greater_than_16_1 = (major >= 16 and minor >= 1) or major > 16
         archs = [a for a in architectures if not (greater_than_16_1 and a == "i386")]
