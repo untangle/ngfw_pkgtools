@@ -48,10 +48,14 @@ Once inside the container shell, you can run any script:
 
 ```bash
 # Example: Run create-branch.py
-./create-branch.py --help
+python3 ./create-branch.py --help
 
 # Example: Run with specific parameters
-./create-branch.py --branch ngfw-1.0 --product ngfw --simulate
+python3 ./create-branch.py --branch ngfw-1.0 --product ngfw --simulate
+
+# From outside the container, you can also do something like:
+docker-compose -f docker-compose.dev.yml exec ngfw-pkgtools-dev python3 ./create-branch.py --log-level info --product velo --branch velo-release-1.0 --new-version 1.0 --simulate
+
 ```
 
 ## Running Tests
