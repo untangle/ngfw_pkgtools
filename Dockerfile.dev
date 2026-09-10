@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:trixie-slim
 
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
@@ -18,12 +18,17 @@ RUN apt install -y \
     python3 \
     python3-pip \
     python3-setuptools \
-    python3-wheel
+    python3-wheel \
+    python3-venv
 
 # Install Python dependencies
 # GitPython for git operations
 # PyYAML for YAML parsing
 # requests for HTTP operations (used in compare-branches.py)
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 RUN pip3 install --no-cache-dir \
     GitPython>=3.1.0 \
     PyYAML>=5.3 \
